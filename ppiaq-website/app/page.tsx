@@ -13,15 +13,14 @@ export default function HomePage() {
       <section className="bg-[#B64847] text-white py-20 px-6 min-h-[70vh] flex items-center">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
           {/* Cendrawasih Image */}
-          <div className="relative w-64 h-64 md:w-80 md:h-80 shrink-0 rounded-2xl overflow-hidden">
-            <Image
-              src="/images/Cendrawasih_Up.png"
-              alt="Cendrawasih Bird Decoration"
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
+          <Image
+            src="/images/Cendrawasih_Up.png"
+            alt="Cendrawasih Bird Decoration"
+            width={300}
+            height={400}
+            priority
+            className="shrink-0"
+          />
 
           <div className="text-center md:text-left">
             <h1 className="font-tan-angleton font-bold text-5xl md:text-7xl mb-6 text-[#FEB602]">
@@ -48,14 +47,13 @@ export default function HomePage() {
       <section className="py-24 px-6 text-center">
         <div className="max-w-5xl mx-auto">
           {/* Logo PPIAQ */}
-          <div className="mx-auto mb-8 w-24 h-24 relative">
-            <Image
-              src="/images/PPIAQ_logo.png"
-              alt="PPIA Queensland Logo"
-              fill
-              className="object-contain"
-            />
-          </div>
+          <Image
+            src="/images/PPIAQ_logo.png"
+            alt="PPIA Queensland Logo"
+            width={96}
+            height={96}
+            className="mx-auto mb-8"
+          />
           
           <h2 className="font-tan-angleton font-bold text-3xl md:text-5xl text-[#B64847] mb-8">
             {language === 'id' ? 'Kami ada untuk pelajar Indonesia di Queensland' : "We're here for Indonesian students in Queensland"}

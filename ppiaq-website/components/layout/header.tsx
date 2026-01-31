@@ -43,14 +43,14 @@ export default function Header() {
           <div className="flex justify-between items-center h-12">
             
             {/* --- LOGO --- */}
-            <Link href="/" className="flex items-center justify-center shrink-0 group/logo h-12">
+            <Link href="/" className="flex items-center justify-center shrink-0 group/logo">
               <Image
                 src="/images/PPIAQ_Logofornavbar.png"
                 alt="PPIA Queensland Logo"
-                width={120}
-                height={48}
+                width={140}
+                height={50}
                 priority
-                className="h-full w-auto transition-opacity duration-300 group-hover/nav:opacity-80"
+                className="transition-opacity duration-300 group-hover/nav:opacity-80"
               />
             </Link>
 
