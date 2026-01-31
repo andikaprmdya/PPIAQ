@@ -1,0 +1,31 @@
+button: npx mvpblocks add animated-btn1
+loaders: npx mvpblocks add bouncing-loader
+modals terms & condition: npx mvpblocks add toc-dialog
+modals Delete Project: npx mvpblocks add delete-project
+modals Sign Up: npx mvpblocks add signup-modal
+modals Sign In: npx mvpblocks add signin-modal
+pagination: npx mvpblocks add basic-pagination
+footer: npx mvpblocks add footer-glow
+Headers: npx mvpblocks add header-1
+Logo Cloud: npx mvpblocks add sparkles-logo
+Page About Us(Need Framer Motion): npx mvpblocks add about-us-2
+Page Contact Us: npx mvpblocks add contact-us-1
+CTA: npx mvpblocks add cta-2
+FAQ: npx mvpblocks add faq-2
+features: npx mvpblocks add feature-2
+App Hero: npx mvpblocks add app-hero
+Spline Hero: npx mvpblocks add 3dglobe
+Geometric Hero: npx mvpblocks add geometric-hero
+Pricing: npx mvpblocks add designer-pricing
+Team: npx mvpblocks add team-4
+waitlist/if need user to input email: npx mvpblocks add waitlist
+Authentication: npx mvpblocks add login-form-2
+cards: npx mvpblocks add meshy-cards
+Flipcard(Need lucide react): npx mvpblocks add flip-card
+expandable cards(need lucide react): npx mvpblocks add expandable-product-card
+Bento grids: npx mvpblocks add bento-grid-1
+Masonry Grids: npx mvpblocks add masonry-grid-1
+Text animation blur in for title: npx mvpblocks add blur-in-text-demo
+Text animation to hover above the text usually used in title or subtitle: npx mvpblocks add variable-proximity-demo
+Gradient Bars:npx mvpblocks add gradient-bars-preview
+Skeletons shimmer cards for loading state of cards: npx mvpblocks add skeleton-card-one

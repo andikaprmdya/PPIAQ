@@ -1,0 +1,229 @@
+# Personal Finance
+URL: /docs/dashboards/personal-finance
+
+Personal Finance Dashboard with budget tracking, expense analytics, savings goals, and transaction management micro UI components.
+
+***
+
+title: Personal Finance
+description: Personal Finance Dashboard with budget tracking, expense analytics, savings goals, and transaction management micro UI components.
+root: dashboards
+full: true
+new: true
+---------
+
+import { ComponentPreview } from '@/components/preview/component-preview';
+import { extractSourceCode } from '@/lib/code';
+import { ComponentSource } from '@/components/preview/component-source';
+import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { TypeTable } from 'fumadocs-ui/components/type-table';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
+<ComponentPreview name="personal-finance-dashboard-1" classNameComponentContainer="h-[100vh]" code={(await extractSourceCode('personal-finance-dashboard-1')).code} lang="tsx" fromDocs={true} />
+
+## Folder Structure
+
+<Files className="bg-fd-secondary/50">
+  <Folder name="components" defaultOpen>
+    <Folder name="mvpblocks" defaultOpen>
+      <Folder name="personal-finance-dashboard-1" defaultOpen>
+        <Folder name="ui" defaultOpen>
+          <File name="budget-progress.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+
+          <File name="dashboard-layout.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+
+          <File name="Header.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+
+          <File name="IncomeExpenseChart.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+
+          <File name="MonthlySpendingChart.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+
+          <File name="RecentTransactions.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+
+          <File name="SavingsGoals.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+
+          <File name="Footer.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+
+          <File name="StatsCards.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+        </Folder>
+
+        <File name="index.tsx" className="hover:bg-secondary/50 cursor-pointer" />
+      </Folder>
+    </Folder>
+
+    <Folder name="ui">
+      <File name="badge.tsx" className="hover:bg-secondary/50" />
+
+      <File name="button.tsx" className="hover:bg-secondary/50" />
+
+      <File name="card.tsx" className="hover:bg-secondary/50" />
+
+      <File name="chart.tsx" className="hover:bg-secondary/50" />
+
+      <File name="dropdown-menu.tsx" className="hover:bg-secondary/50" />
+
+      <File name="input.tsx" className="hover:bg-secondary/50" />
+
+      <File name="progress.tsx" className="hover:bg-secondary/50" />
+    </Folder>
+  </Folder>
+</Files>
+
+## Installation and Setup
+
+To set up the Personal Finance Dashboard, follow these steps
+
+<Steps>
+  <Step>
+    Install the necessary components for the dashboard
+
+    <Tabs items={['CLI', 'Manual']}>
+      <Tab>
+        Run the following command to install all finance dashboard components
+
+        ```bash
+        npx mvpblocks add personal-finance-dashboard-1
+        ```
+      </Tab>
+
+      <Tab>
+        <Steps>
+          {/* 1️⃣ Basic setup */}
+
+          <Step>
+            Install required dependencies
+
+            ```bash
+            npm install recharts lucide-react next-theme
+            ```
+
+            or
+
+            ```bash
+            yarn add recharts lucide-react next-theme
+            ```
+          </Step>
+
+          {/* 2️⃣ Base structure setup */}
+
+          <Step>
+            Copy the following components and paste them into your project
+          </Step>
+
+          <Step>
+            Add index.tsx => Copy the code from the above on clicking the "Code" tab which is present corresponding to "Preview tab" after the component title.
+          </Step>
+
+          <Step>
+            Add dashboard-layout.tsx
+
+            <ComponentSource code={(await extractSourceCode('dashboard-layout')).code} className="bg-fd-secondary/50" />
+          </Step>
+
+          <Step>
+            Add personal-sidebar.tsx
+
+            <ComponentSource code={(await extractSourceCode('personal-sidebar')).code} className="bg-fd-secondary/50" />
+          </Step>
+
+          <Step>
+            Add personal-header.tsx
+
+            <ComponentSource code={(await extractSourceCode('personal-header')).code} className="bg-fd-secondary/50" />
+          </Step>
+
+          <Step>
+            Add personal-footer.tsx
+
+            <ComponentSource code={(await extractSourceCode('personal-footer')).code} className="bg-fd-secondary/50" />
+          </Step>
+
+          {/* 3️⃣ Dashboard content components */}
+
+          <Step>
+            Add stats-cards.tsx
+
+            <ComponentSource code={(await extractSourceCode('stats-cards')).code} className="bg-fd-secondary/50" />
+          </Step>
+
+          <Step>
+            Add budget-progress.tsx
+
+            <ComponentSource code={(await extractSourceCode('budget-progress')).code} className="bg-fd-secondary/50" />
+          </Step>
+
+          <Step>
+            Add income-expense-chart.tsx
+
+            <ComponentSource code={(await extractSourceCode('income-expense-chart')).code} className="bg-fd-secondary/50" />
+          </Step>
+
+          <Step>
+            Add monthly-spending-chart.tsx
+
+            <ComponentSource code={(await extractSourceCode('monthly-spending-chart')).code} className="bg-fd-secondary/50" />
+          </Step>
+
+          <Step>
+            Add recent-transactions.tsx
+
+            <ComponentSource code={(await extractSourceCode('recent-transactions')).code} className="bg-fd-secondary/50" />
+          </Step>
+
+          <Step>
+            Add savings-goals.tsx
+
+            <ComponentSource code={(await extractSourceCode('savings-goals')).code} className="bg-fd-secondary/50" />
+          </Step>
+        </Steps>
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step>
+    Import and use the dashboard in your application
+
+    ```tsx
+    import PersonalFinanceDashboard from '@/components/dashboards/personal-finance-dashboard-1/index';
+
+    export default function FinancePage() {
+      return <PersonalFinanceDashboard />;
+    }
+    ```
+  </Step>
+</Steps>
+
+## Customization
+
+### Adding New Categories
+
+Update the categories array in `BudgetProgress.tsx`:
+
+```tsx
+const categories = [
+  {
+    name: 'Food & Dining',
+    spent: 320,
+    budget: 500,
+    color: 'bg-blue-500',
+    icon: '🍔',
+  },
+  // ...add more like this
+];
+```
+
+### Adding New Monthly Spending Data
+
+Update the data array in `MonthlySpendingChart.tsx`:
+
+```tsx
+const data = [
+  { name: 'Food & Dining', value: 320, color: '#3b82f6' },
+  { name: 'Transportation', value: 180, color: '#10b981' },
+  { name: 'Entertainment', value: 120, color: '#8b5cf6' },
+  // ...add more like this
+];
+```
+
+Like this do changes in the data or add new data in particular files.

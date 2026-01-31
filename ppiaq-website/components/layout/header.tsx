@@ -43,7 +43,7 @@ export default function Header() {
             
             {/* --- LOGO --- */}
             <Link href="/" className="flex flex-col justify-center shrink-0 group/logo">
-              <span className="font-tan-angleton text-2xl md:text-3xl font-bold text-[#B64847] transition-colors duration-300 group-hover/nav:text-white group-hover/logo:!text-[#FEB602]">
+              <span className="font-tan-angleton text-2xl md:text-3xl font-bold text-[#B64847] transition-colors duration-300 group-hover/nav:text-white group-hover/logo:text-[#FEB602]!">
                 PPIA Queensland
               </span>
               <span className="text-[10px] uppercase tracking-[0.3em] text-[#FEB602] font-bold mt-1 transition-colors duration-300 group-hover/nav:text-white/60">
@@ -57,7 +57,7 @@ export default function Header() {
                 <Link
                   key={getTranslation(item.label, language)}
                   href={item.href}
-                  className="relative text-[13px] font-bold uppercase tracking-widest text-[#303030] transition-all duration-300 py-2 group-hover/nav:text-white/90 hover:!text-[#FEB602] hover:scale-110 active:scale-95 group/item"
+                  className="relative text-[13px] font-bold uppercase tracking-widest text-[#303030] transition-all duration-300 py-2 group-hover/nav:text-white/90 hover:text-[#FEB602]! hover:scale-110 active:scale-95 group/item"
                 >
                   {getTranslation(item.label, language)}
                   
@@ -71,10 +71,10 @@ export default function Header() {
             <div className="flex gap-6 items-center h-full">
               
               {/* Language Switcher */}
-              <div className="hidden sm:flex relative bg-[#E4DBCA]/40 rounded-full p-1 w-[80px] h-9 items-center overflow-hidden border border-[#E4DBCA] transition-colors duration-500 group-hover/nav:border-white/20 group-hover/nav:bg-white/10">
-                <div 
-                  className={`absolute h-7 w-[36px] bg-[#B64847] rounded-full transition-all duration-300 ease-in-out ${
-                    language === 'en' ? 'translate-x-0' : 'translate-x-[36px]'
+              <div className="hidden sm:flex relative bg-[#E4DBCA]/40 rounded-full p-1 w-20 h-9 items-center overflow-hidden border border-[#E4DBCA] transition-colors duration-500 group-hover/nav:border-white/20 group-hover/nav:bg-white/10">
+                <div
+                  className={`absolute h-7 w-9 bg-[#B64847] rounded-full transition-all duration-300 ease-in-out ${
+                    language === 'en' ? 'translate-x-0' : 'translate-x-9'
                   } group-hover/nav:bg-[#FEB602]`}
                 />
                 <button
@@ -95,13 +95,13 @@ export default function Header() {
               <div className="hidden md:flex items-center gap-5">
                 <Link
                   href="/auth/login"
-                  className="text-[12px] font-bold uppercase tracking-widest text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:!text-[#FEB602] hover:scale-110"
+                  className="text-[12px] font-bold uppercase tracking-widest text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:text-[#FEB602]! hover:scale-110"
                 >
                   {getTranslation(translations.navigation.login, language)}
                 </Link>
                 <Link
                   href="/auth/register"
-                  className="bg-[#B64847] text-white px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95 group-hover/nav:bg-white group-hover/nav:text-[#B64847] hover:!bg-[#FEB602] hover:!text-[#B64847] hover:scale-105"
+                  className="bg-[#B64847] text-white px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95 group-hover/nav:bg-white group-hover/nav:text-[#B64847] hover:bg-[#FEB602]! hover:text-[#B64847]! hover:scale-105"
                 >
                   {getTranslation(translations.navigation.register, language)}
                 </Link>
@@ -126,7 +126,7 @@ export default function Header() {
                 <Link
                   key={getTranslation(item.label, language)}
                   href={item.href}
-                  className="text-lg font-bold uppercase tracking-[0.2em] text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:!text-[#FEB602]"
+                  className="text-lg font-bold uppercase tracking-[0.2em] text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:text-[#FEB602]!"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {getTranslation(item.label, language)}

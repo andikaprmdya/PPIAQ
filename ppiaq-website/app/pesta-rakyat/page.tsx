@@ -12,8 +12,8 @@ export default function PestaRakyatPage() {
       {/* Reduced py-20/16 to py-16/12. Reduced font size of main title slightly. Reduced margins. */}
       <section className="relative pt-16 pb-12 px-6 bg-[#FEB602]">
         <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <div className="absolute top-0 left-0 w-64 h-64 border-[32px] border-[#B64847] rounded-full -ml-32 -mt-32"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 border-[48px] border-[#B64847] rounded-full -mr-48 -mb-48"></div>
+          <div className="absolute top-0 left-0 w-64 h-64 border-32 border-[#B64847] rounded-full -ml-32 -mt-32"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 border-48 border-[#B64847] rounded-full -mr-48 -mb-48"></div>
         </div>
 
         <div className="max-w-6xl mx-auto relative z-10">
@@ -29,9 +29,9 @@ export default function PestaRakyatPage() {
               PESTA <br className="md:hidden" /> RAKYAT
             </h1>
             <div className="flex items-center gap-4 w-full max-w-lg">
-              <div className="h-px bg-[#B64847]/40 flex-grow"></div>
+              <div className="h-px bg-[#B64847]/40 grow"></div>
               <span className="font-tan-angleton text-xl md:text-2xl text-[#B64847] whitespace-nowrap">Brisbane 2026</span>
-              <div className="h-px bg-[#B64847]/40 flex-grow"></div>
+              <div className="h-px bg-[#B64847]/40 grow"></div>
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@ export default function PestaRakyatPage() {
           <p className="font-nickainley text-xl text-[#886644] italic">Captured moments from previous years</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-3 h-auto md:h-[450px]">
+        <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-3 h-auto md:h-112.5">
           <div className="md:col-span-2 md:row-span-2 bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-3xl flex items-center justify-center text-[#886644]/40 font-bold italic text-xs hover:bg-[#E4DBCA]/40 transition-all shadow-sm overflow-hidden group">
             <span className="group-hover:scale-105 transition-transform duration-500">[FEATURED_01]</span>
           </div>

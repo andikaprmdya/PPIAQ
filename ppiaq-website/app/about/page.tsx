@@ -144,7 +144,7 @@ export default function AboutPage() {
                     {getTranslation(member.role, language)}
                   </p>
                   <div className="w-8 h-px bg-[#E4DBCA] mx-auto mb-3"></div>
-                  <p className="text-[9px] text-gray-400 font-bold mb-4 flex-grow flex items-center justify-center italic">
+                  <p className="text-[9px] text-gray-400 font-bold mb-4 grow flex items-center justify-center italic">
                     {member.university}
                   </p>
                   <a 

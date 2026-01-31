@@ -25,7 +25,7 @@ export default function ContactPage() {
       </section>
 
       {/* --- MAIN CONTENT GRID --- */}
-      <section className="max-w-6xl mx-auto px-6 pb-16 w-full relative z-10 flex-grow">
+      <section className="max-w-6xl mx-auto px-6 pb-16 w-full relative z-10 grow">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           
           {/* --- LEFT: SEND US A MESSAGE --- */}
@@ -72,7 +72,7 @@ export default function ContactPage() {
             
             {/* Email and Social Media Card */}
             <div className="bg-[#B64847] text-white p-8 rounded-[3rem] shadow-xl relative overflow-hidden flex justify-between items-center group shrink-0">
-               <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]"></div>
+               <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[20px_20px]"></div>
 
                <div className="relative z-10 space-y-5 flex-1">
                   <div>
@@ -115,7 +115,7 @@ export default function ContactPage() {
             <div className="bg-white p-8 md:p-10 rounded-[3rem] border border-[#E4DBCA] shadow-sm relative overflow-hidden flex-1 flex flex-col justify-center">
                <div className="relative z-10">
                  <h3 className="font-tan-angleton font-bold text-2xl text-[#B64847] mb-2 tracking-wide">Stay informed</h3>
-                 <p className="text-[11px] text-gray-500 mb-6 italic leading-relaxed max-w-[240px]">
+                 <p className="text-[11px] text-gray-500 mb-6 italic leading-relaxed max-w-60">
                    Subscribe to receive community updates and opportunities.
                  </p>
                  
