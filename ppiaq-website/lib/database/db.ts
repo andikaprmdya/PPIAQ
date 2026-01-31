@@ -25,6 +25,24 @@ interface ContactMessage {
   submittedAt: Date;
 }
 
+interface Event {
+  id: string;
+  day: string;
+  month: string;
+  title: string;
+  date: string;
+  location: string;
+  image?: string;
+}
+
+interface TeamMember {
+  id: string;
+  name: string;
+  role: { id: string; en: string };
+  university: string;
+  instagram: string;
+}
+
 // Dummy data storage
 let users: User[] = [
   {
@@ -49,6 +67,41 @@ let newsletterSubscribers: NewsletterSubscriber[] = [
 ];
 
 let contactMessages: ContactMessage[] = [];
+
+let events: Event[] = [
+  {
+    id: '1',
+    day: '5',
+    month: 'FEB',
+    title: 'Pre-Departure Briefing - Semester 1, 2026',
+    date: 'Thursday, February 5, 2026',
+    location: 'Zoom',
+  },
+  {
+    id: '2',
+    day: '16',
+    month: 'FEB',
+    title: 'QUT Market Day - Join ISAQ / PPIA QUT',
+    date: 'Monday, February 16, 2026',
+    location: 'QUT',
+  },
+  {
+    id: '3',
+    day: '18',
+    month: 'FEB',
+    title: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ',
+    date: 'Wednesday, February 18, 2026',
+    location: 'UQ St. Lucia',
+  },
+];
+
+let teamMembers: TeamMember[] = [
+  { id: '1', name: 'Ahmad Wijaya', role: { id: 'Ketua', en: 'President' }, university: 'University of Queensland', instagram: '@ahmadwijaya' },
+  { id: '2', name: 'Siti Nurhaliza', role: { id: 'Sekretaris', en: 'Secretary' }, university: 'Griffith University', instagram: '@sitihaliza' },
+  { id: '3', name: 'Budi Santoso', role: { id: 'Bendahara', en: 'Treasurer' }, university: 'James Cook University', instagram: '@budisantoso' },
+  { id: '4', name: 'Lisa Rahmawati', role: { id: 'Kepala Acara', en: 'Events Head' }, university: 'QUT', instagram: '@lisarahmawati' },
+  { id: '5', name: 'Rina Kartika', role: { id: 'Humas', en: 'Public Relations' }, university: 'University of Queensland', instagram: '@rinakartika' },
+];
 
 // User functions
 export function registerUser(
@@ -128,4 +181,22 @@ export function submitContactMessage(
 
 export function getAllContactMessages(): ContactMessage[] {
   return contactMessages;
+}
+
+// Event functions
+export function getAllEvents(): Event[] {
+  return events;
+}
+
+export function getEventById(id: string): Event | null {
+  return events.find((e) => e.id === id) || null;
+}
+
+// Team functions
+export function getAllTeamMembers(): TeamMember[] {
+  return teamMembers;
+}
+
+export function getTeamMemberById(id: string): TeamMember | null {
+  return teamMembers.find((m) => m.id === id) || null;
 }
