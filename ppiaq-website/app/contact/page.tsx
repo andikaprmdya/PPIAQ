@@ -72,7 +72,7 @@ export default function ContactPage() {
             
             {/* Email and Social Media Card */}
             <div className="bg-[#B64847] text-white p-8 rounded-[3rem] shadow-xl relative overflow-hidden flex justify-between items-center group shrink-0">
-               <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] bg-[20px_20px]"></div>
+               <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] bg-size-[20px_20px]"></div>
 
                <div className="relative z-10 space-y-5 flex-1">
                   <div>
