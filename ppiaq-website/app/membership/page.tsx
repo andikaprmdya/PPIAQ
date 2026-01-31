@@ -16,118 +16,151 @@ export default function MembershipPage() {
     { id: 'discounts', label: language === 'id' ? 'Diskon Mitra' : 'Partner Discounts' },
   ];
 
+  const faqs = [
+    {
+      q: language === 'id' ? 'Berapa lama keanggotaan saya berlaku?' : 'How long is my membership valid?',
+      a: language === 'id' ? 'Keanggotaan berlaku selama satu tahun akademik (12 bulan) sejak tanggal pendaftaran Anda.' : 'Membership is valid for one academic year (12 months) from your registration date.'
+    },
+    {
+      q: language === 'id' ? 'Apakah saya akan mendapatkan kartu anggota fisik?' : 'Will I get a physical membership card?',
+      a: language === 'id' ? 'Saat ini kami menyediakan kartu anggota digital yang bisa Anda akses melalui profil akun Anda setelah login.' : 'Currently, we provide a digital membership card that you can access through your account profile after logging in.'
+    },
+    {
+      q: language === 'id' ? 'Bagaimana cara memperbarui keanggotaan saya?' : 'How do I renew my membership?',
+      a: language === 'id' ? 'Anda akan menerima notifikasi email sebulan sebelum masa berlaku habis untuk melakukan pembaruan melalui dashboard anggota.' : 'You will receive an email notification a month before expiry to renew through the member dashboard.'
+    },
+    {
+      q: language === 'id' ? 'Apakah non-mahasiswa boleh mendaftar?' : 'Can non-students join?',
+      a: language === 'id' ? 'Boleh! Anda bisa mendaftar sebagai Associate Member jika Anda bukan mahasiswa aktif namun ingin mendukung komunitas kami.' : 'Yes! You can join as an Associate Member if you are not an active student but wish to support our community.'
+    },
+    {
+      q: language === 'id' ? 'Saya lupa password akun saya, apa yang harus dilakukan?' : 'I forgot my password, what should I do?',
+      a: language === 'id' ? 'Gunakan fitur "Forgot Password" di halaman login untuk mengatur ulang kata sandi melalui email Anda.' : 'Use the "Forgot Password" feature on the login page to reset your password via email.'
+    }
+  ];
+
   return (
-    <>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-purple-600 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">
-            {getTranslation(translations.membership.title, language)}
+    <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen">
+      
+      {/* --- HERO SECTION (SLIMMER & SMALLER FONT) --- */}
+      <section className="bg-[#B64847] text-white pt-16 pb-12 px-6 flex flex-col justify-center relative overflow-hidden min-h-[45vh]">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#FEB602] opacity-10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
+        
+        <div className="max-w-6xl mx-auto text-center relative z-10 w-full">
+          {/* Main Title (Smaller & Slimmer) */}
+          <h1 className="font-tan-angleton font-bold text-3xl md:text-5xl text-[#FEB602] mb-6 tracking-wide">
+            {language === 'id' ? "Gabung Keanggotaan Kami" : "Join Our Membership"}
           </h1>
-          <p className="text-xl text-blue-100">
-            {getTranslation(translations.membership.description, language)}
+          
+          <div className="space-y-6">
+            {/* Welcome Greeting (Smaller & Centered) */}
+            <h2 className="font-tan-angleton font-bold text-xl md:text-3xl text-white">
+              {language === 'id' ? "Selamat Datang, Kami sangat senang Anda ada di sini." : "Welcome, We are so glad you are here."}
+            </h2>
+            
+            {/* Centered Description (Refined font size) */}
+            <p className="text-sm md:text-lg leading-relaxed opacity-90 italic max-w-3xl mx-auto">
+              {language === 'id' ? (
+                "Anggota PPIAQ menerima harga eksklusif untuk acara berbayar, akses awal ke kalender program, dan akses penuh ke papan komunitas. Dapatkan juga newsletter khusus serta diskon spesial dari mitra kami."
+              ) : (
+                "PPIAQ members receive exclusive prices to our ticketed events, early access to our program calendar, and all-access to our community board. Plus, you will receive a special members-only newsletter on top of special discounts."
+              )}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* --- IMPORTANT NOTICE --- */}
+      <section className="py-12 px-6">
+        <div className="max-w-4xl mx-auto bg-white border border-[#E4DBCA] rounded-4xl p-8 shadow-sm">
+          <h3 className="font-tan-angleton font-bold text-xl text-[#B64847] mb-3">
+            {language === 'id' ? 'Penting bagi Mahasiswa Universitas' : 'Important for University Students'}
+          </h3>
+          <p className="text-[#303030] leading-relaxed text-base opacity-80">
+            {language === 'id' ? (
+              "Jika Anda mahasiswa di UQ, QUT, Griffith, atau JCU, hubungi asosiasi universitas Anda untuk pendaftaran. Anda otomatis menjadi anggota PPIAQ dan menikmati fasilitas yang sama."
+            ) : (
+              "If you are a student at UQ, QUT, Griffith University or JCU, please approach the Indonesian association at your university. You will receive automatic membership to PPIAQ."
+            )}
           </p>
         </div>
       </section>
 
-      {/* Membership Types */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
+      {/* --- MEMBERSHIP PLANS --- */}
+      <section className="py-8 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {/* Ordinary Membership */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-500 p-8 text-white">
-                <h2 className="text-3xl font-bold mb-2">
-                  {getTranslation(translations.membership.ordinary.title, language)}
-                </h2>
-                <p className="text-blue-100 mb-4">
-                  {getTranslation(translations.membership.ordinary.description, language)}
-                </p>
-                <div className="text-4xl font-bold">$10 AUD</div>
-                <p className="text-sm text-blue-100">{language === 'id' ? 'per tahun' : 'per year'}</p>
-              </div>
-              <div className="p-8">
-                <div className="space-y-4 mb-8">
-                  {benefits.map((benefit) => (
-                    <div key={benefit.id} className="flex items-center gap-3">
-                      <span className="text-green-600 text-xl">✓</span>
-                      <span className="text-gray-700">{benefit.label}</span>
-                    </div>
-                  ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+            {/* Ordinary Member Card */}
+            <div className="group">
+              <div className="bg-white rounded-4xl border border-[#E4DBCA] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.25 transition-all duration-500">
+                <div className="bg-[#B64847] p-8 text-white text-center">
+                  <h2 className="font-tan-angleton font-bold text-2xl mb-2">Ordinary Member</h2>
+                  <div className="flex items-center justify-center gap-1 font-tan-angleton">
+                    <span className="text-3xl font-bold">$10</span>
+                    <span className="text-lg font-bold tracking-tighter">AUD</span>
+                  </div>
                 </div>
-                <Link
-                  href="/auth/register"
-                  className="block w-full text-center bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition font-semibold"
-                >
-                  {language === 'id' ? 'Daftar Sekarang' : 'Sign Up Now'}
-                </Link>
+                <div className="p-8">
+                  <div className="space-y-3 mb-8">
+                    {benefits.map((benefit) => (
+                      <div key={benefit.id} className="flex items-center gap-3">
+                        <span className="w-5 h-5 flex items-center justify-center bg-[#FEB602]/20 text-[#B64847] rounded-full text-[10px] font-bold">✓</span>
+                        <span className="text-sm text-gray-700 font-medium">{benefit.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Link href="/auth/register" className="block w-full text-center bg-[#B64847] text-white py-3 rounded-xl hover:bg-[#303030] transition-colors font-bold uppercase tracking-widest text-xs">
+                    Sign Up Now
+                  </Link>
+                </div>
               </div>
             </div>
 
-            {/* Associate Membership */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
-              <div className="bg-gradient-to-r from-purple-600 to-purple-500 p-8 text-white">
-                <h2 className="text-3xl font-bold mb-2">
-                  {getTranslation(translations.membership.associate.title, language)}
-                </h2>
-                <p className="text-purple-100 mb-4">
-                  {getTranslation(translations.membership.associate.description, language)}
-                </p>
-                <div className="text-4xl font-bold">$10 AUD</div>
-                <p className="text-sm text-purple-100">{language === 'id' ? 'per tahun' : 'per year'}</p>
-              </div>
-              <div className="p-8">
-                <div className="space-y-4 mb-8">
-                  {benefits.map((benefit) => (
-                    <div key={benefit.id} className="flex items-center gap-3">
-                      <span className="text-green-600 text-xl">✓</span>
-                      <span className="text-gray-700">{benefit.label}</span>
-                    </div>
-                  ))}
+            {/* Associate Member Card */}
+            <div className="group">
+              <div className="bg-white rounded-4xl border border-[#E4DBCA] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.25 transition-all duration-500">
+                <div className="bg-[#FEB602] p-8 text-[#303030] text-center">
+                  <h2 className="font-tan-angleton font-bold text-2xl mb-2">Associate Member</h2>
+                  <div className="flex items-center justify-center gap-1 font-tan-angleton">
+                    <span className="text-3xl font-bold">$10</span>
+                    <span className="text-lg font-bold tracking-tighter">AUD</span>
+                  </div>
                 </div>
-                <Link
-                  href="/auth/register"
-                  className="block w-full text-center bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition font-semibold"
-                >
-                  {language === 'id' ? 'Daftar Sekarang' : 'Sign Up Now'}
-                </Link>
+                <div className="p-8">
+                  <div className="space-y-3 mb-8">
+                    {benefits.map((benefit) => (
+                      <div key={benefit.id} className="flex items-center gap-3">
+                        <span className="w-5 h-5 flex items-center justify-center bg-[#B64847]/10 text-[#B64847] rounded-full text-[10px] font-bold">✓</span>
+                        <span className="text-sm text-gray-700 font-medium">{benefit.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <Link href="/auth/register" className="block w-full text-center border-2 border-[#303030] text-[#303030] py-3 rounded-xl hover:bg-[#303030] hover:text-white transition-all font-bold uppercase tracking-widest text-xs">
+                    Sign Up Now
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Benefits Table */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-              {language === 'id' ? 'Apa yang Anda Dapatkan' : 'What You Get'}
-            </h2>
+          {/* --- WHAT YOU GET TABLE --- */}
+          <div className="bg-white rounded-4xl border border-[#E4DBCA] p-6 md:p-10 shadow-sm mb-20">
+            <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] text-center mb-8">What You Get</h2>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-gray-300">
-                    <th className="text-left py-4 px-6 text-gray-900 font-semibold">
-                      {language === 'id' ? 'Benefit' : 'Benefit'}
-                    </th>
-                    <th className="text-center py-4 px-6 text-gray-900 font-semibold">
-                      {language === 'id' ? 'Biasa' : 'Ordinary'}
-                    </th>
-                    <th className="text-center py-4 px-6 text-gray-900 font-semibold">
-                      {language === 'id' ? 'Asosiasi' : 'Associate'}
-                    </th>
+                  <tr className="border-b border-[#E4DBCA]">
+                    <th className="text-left py-4 px-4 text-[#886644] font-bold uppercase tracking-widest text-[10px]">Benefit</th>
+                    <th className="text-center py-4 px-4 text-[#B64847] font-bold uppercase tracking-widest text-[10px]">Ordinary</th>
+                    <th className="text-center py-4 px-4 text-[#B64847] font-bold uppercase tracking-widest text-[10px]">Associate</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {[
-                    { name: language === 'id' ? 'Harga Event' : 'Event Pricing', ordinary: '✓', associate: '✓' },
-                    { name: language === 'id' ? 'Akses Awal Program' : 'Early Program Access', ordinary: '✓', associate: '✓' },
-                    { name: language === 'id' ? 'Papan Komunitas' : 'Community Board', ordinary: '✓', associate: '✓' },
-                    { name: language === 'id' ? 'Newsletter Mingguan' : 'Weekly Newsletter', ordinary: '✓', associate: '✓' },
-                    { name: language === 'id' ? 'Acara Networking' : 'Networking Events', ordinary: '✓', associate: '✓' },
-                    { name: language === 'id' ? 'Diskon Mitra' : 'Partner Discounts', ordinary: '✓', associate: '✓' },
-                  ].map((benefit, i) => (
-                    <tr key={i} className="border-b border-gray-200">
-                      <td className="py-4 px-6 text-gray-700">{benefit.name}</td>
-                      <td className="py-4 px-6 text-center text-green-600 font-bold">{benefit.ordinary}</td>
-                      <td className="py-4 px-6 text-center text-green-600 font-bold">{benefit.associate}</td>
+                <tbody className="divide-y divide-[#E4DBCA]/20">
+                  {[{ n: 'Event Pricing', v: '✓' }, { n: 'Early Access', v: '✓' }, { n: 'Community Board', v: '✓' }, { n: 'Newsletter', v: '✓' }, { n: 'Partner Discounts', v: '✓' }].map((r, i) => (
+                    <tr key={i} className="group hover:bg-[#FFFAF5] transition-colors italic">
+                      <td className="py-4 px-4 text-xs font-medium text-gray-600">{r.n}</td>
+                      <td className="py-4 px-4 text-center text-[#B64847] font-bold text-lg">{r.v}</td>
+                      <td className="py-4 px-4 text-center text-[#B64847] font-bold text-lg">{r.v}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -135,48 +168,24 @@ export default function MembershipPage() {
             </div>
           </div>
 
-          {/* FAQ for Membership */}
-          <div className="mt-12">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-lg">
-              {language === 'id' ? 'Pertanyaan tentang Keanggotaan' : 'Membership Questions'}
-            </h2>
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8 border-l-4 border-blue-600">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {language === 'id' ? 'Bagaimana cara menjadi anggota?' : 'How do I become a member?'}
+          {/* --- FAQ SECTION (5 Questions) --- */}
+          <div className="max-w-4xl mx-auto pb-20">
+            <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] text-center mb-10 italic">Membership FAQ</h2>
+            <div className="space-y-4">
+              {faqs.map((faq, i) => (
+                <div key={i} className="bg-white border border-[#E4DBCA] rounded-2xl p-6 hover:shadow-md transition-shadow">
+                  <h3 className="text-base font-bold text-[#B64847] mb-2 flex items-center gap-3">
+                    <span className="text-[#FEB602]">Q:</span> {faq.q}
                   </h3>
-                  <p className="text-gray-800">
-                    {language === 'id'
-                      ? 'Klik tombol "Daftar Sekarang" dan ikuti proses pendaftaran multi-langkah kami. Anda akan memilih jenis keanggotaan dan universitas Anda selama pendaftaran.'
-                      : 'Click the "Sign Up Now" button and follow our multi-step registration process. You will select your membership type and university during registration.'}
+                  <p className="text-sm text-gray-600 leading-relaxed pl-7">
+                    {faq.a}
                   </p>
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {language === 'id' ? 'Apakah ada perbedaan antara kedua jenis keanggotaan?' : 'Is there a difference between the two membership types?'}
-                  </h3>
-                  <p className="text-gray-800">
-                    {language === 'id'
-                      ? 'Kedua jenis keanggotaan mendapatkan manfaat yang sama. Jenis anggota biasa untuk warga negara Indonesia, dan asosiasi untuk mereka dengan warisan Indonesia.'
-                      : 'Both membership types receive the same benefits. Ordinary membership is for Indonesian citizens, and Associate membership is for those with Indonesian heritage.'}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    {language === 'id' ? 'Berapa lama keanggotaan berlaku?' : 'How long is the membership valid?'}
-                  </h3>
-                  <p className="text-gray-800">
-                    {language === 'id'
-                      ? 'Keanggotaan berlaku selama 12 bulan dari tanggal pendaftaran Anda.'
-                      : 'Membership is valid for 12 months from your registration date.'}
-                  </p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
-    </>
+    </main>
   );
 }

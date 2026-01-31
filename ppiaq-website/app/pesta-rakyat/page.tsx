@@ -1,183 +1,173 @@
 'use client';
 
-import Link from 'next/link';
 import { useLanguage } from '@/lib/language-context';
-import { getTranslation, translations } from '@/lib/translations';
 
 export default function PestaRakyatPage() {
   const { language } = useLanguage();
 
-  const events = [
-    {
-      title: language === 'id' ? 'Konser Musik' : 'Live Concert',
-      description: language === 'id'
-        ? 'Nikmati pertunjukan musik dari artis Indonesia terbaik'
-        : 'Enjoy performances from top Indonesian artists',
-      date: '2026-08-17',
-      time: '17:00',
-      icon: '🎵'
-    },
-    {
-      title: language === 'id' ? 'Festival Kuliner' : 'Food Festival',
-      description: language === 'id'
-        ? 'Cicipi masakan tradisional Indonesia yang lezat'
-        : 'Taste delicious traditional Indonesian cuisine',
-      date: '2026-08-17',
-      time: '12:00',
-      icon: '🍜'
-    },
-    {
-      title: language === 'id' ? 'Pameran Budaya' : 'Cultural Showcase',
-      description: language === 'id'
-        ? 'Saksikan kesenian dan budaya Indonesia langsung'
-        : 'Witness Indonesian arts and culture firsthand',
-      date: '2026-08-17',
-      time: '13:00',
-      icon: '🎭'
-    },
-    {
-      title: language === 'id' ? 'Parade & Kostum' : 'Parade & Costumes',
-      description: language === 'id'
-        ? 'Ikuti parade meriah dengan kostum tradisional Indonesia'
-        : 'Join the festive parade with traditional Indonesian costumes',
-      date: '2026-08-17',
-      time: '15:00',
-      icon: '🎪'
-    },
-    {
-      title: language === 'id' ? 'Pertandingan Olahraga' : 'Sports Competition',
-      description: language === 'id'
-        ? 'Ikut serta dalam berbagai kompetisi olahraga seru'
-        : 'Participate in exciting sports competitions',
-      date: '2026-08-17',
-      time: '10:00',
-      icon: '⚽'
-    },
-    {
-      title: language === 'id' ? 'Fireworks' : 'Fireworks Display',
-      description: language === 'id'
-        ? 'Saksikan pertunjukan kembang api spektakuler'
-        : 'Watch the spectacular fireworks display',
-      date: '2026-08-17',
-      time: '20:00',
-      icon: '🎆'
-    }
-  ];
-
   return (
-    <>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-red-600 via-yellow-500 to-green-600 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">
-            {getTranslation(translations.pestaRakyat.title, language)}
-          </h1>
-          <p className="text-2xl text-white font-semibold mb-4">
-            {getTranslation(translations.pestaRakyat.subtitle, language)}
-          </p>
-          <p className="text-lg text-gray-100">
-            {getTranslation(translations.pestaRakyat.description, language)}
-          </p>
+    <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen overflow-x-hidden">
+      
+      {/* --- HERO SECTION (COMPACTED) --- */}
+      {/* Reduced py-20/16 to py-16/12. Reduced font size of main title slightly. Reduced margins. */}
+      <section className="relative pt-16 pb-12 px-6 bg-[#FEB602]">
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <div className="absolute top-0 left-0 w-64 h-64 border-[32px] border-[#B64847] rounded-full -ml-32 -mt-32"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 border-[48px] border-[#B64847] rounded-full -mr-48 -mb-48"></div>
         </div>
-      </section>
 
-      {/* Event Info */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-12 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              {language === 'id' ? '17 Agustus 2026' : 'August 17, 2026'}
-            </h2>
-            <p className="text-lg text-gray-700 mb-4">
-              {language === 'id'
-                ? 'Perayaan Hari Kemerdekaan Indonesia terbesar di Queensland'
-                : "Queensland's Largest Indonesian Independence Day Celebration"}
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="flex flex-col items-center text-center">
+            <span className="bg-[#B64847] text-white px-5 py-1.5 rounded-full text-[9px] font-bold uppercase tracking-[0.3em] mb-6 shadow-lg">
+              Est. 1988 • Queensland
+            </span>
+            <p className="font-nickainley text-2xl md:text-4xl text-[#B64847] mb-2 leading-none">
+              Indonesian Student Association presents
             </p>
-            <p className="text-gray-600">
-              {language === 'id'
-                ? 'Bergabunglah dengan ribuan pelajar Indonesia dan keluarga diaspora untuk perayaan budaya yang tak terlupakan!'
-                : 'Join thousands of Indonesian students and diaspora families for an unforgettable cultural celebration!'}
-            </p>
-          </div>
-
-          {/* Events Timeline */}
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            {language === 'id' ? 'Jadwal Acara' : 'Event Schedule'}
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {events.map((event, i) => (
-              <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg hover:scale-105 transition border-t-4 border-red-500">
-                <div className="text-4xl mb-4">{event.icon}</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{event.title}</h3>
-                <p className="text-gray-600 mb-4">{event.description}</p>
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <span>⏰ {event.time}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Volunteer Section */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-8 text-center">
-            <h2 className="text-3xl font-bold mb-4">
-              {getTranslation(translations.pestaRakyat.volunteer.title, language)}
-            </h2>
-            <p className="text-lg text-blue-100 mb-6">
-              {getTranslation(translations.pestaRakyat.volunteer.description, language)}
-            </p>
-            <p className="text-gray-100 mb-6">
-              {language === 'id'
-                ? 'Kami membutuhkan tim acara untuk membantu mengorganisir Pesta Rakyat 2026. Berbagai peran tersedia!'
-                : 'We need an events team to help organize Pesta Rakyat 2026. Various roles are available!'}
-            </p>
-            <Link
-              href="/contact"
-              className="inline-block px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition"
-            >
-              {getTranslation(translations.pestaRakyat.volunteer.button, language)}
-            </Link>
-          </div>
-
-          {/* Location & Details */}
-          <div className="mt-12 bg-gradient-to-r from-red-50 via-yellow-50 to-green-50 rounded-lg p-8 border-t-4 border-red-600">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              {language === 'id' ? 'Lebih Banyak Informasi' : 'More Information'}
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {language === 'id' ? 'Lokasi' : 'Location'}
-                </h3>
-                <p className="text-gray-800">
-                  {language === 'id'
-                    ? 'Lokasi akan diumumkan segera. Ikuti media sosial kami untuk update.'
-                    : 'Location to be announced soon. Follow our social media for updates.'}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {language === 'id' ? 'Tiket' : 'Tickets'}
-                </h3>
-                <p className="text-gray-800">
-                  {language === 'id'
-                    ? 'Akses gratis untuk semua! Daftar online untuk mengamankan tempat Anda.'
-                    : 'Free admission for all! Register online to secure your spot.'}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {language === 'id' ? 'Pertanyaan?' : 'Questions?'}
-                </h3>
-                <p className="text-gray-800">
-                  {language === 'id'
-                    ? 'Hubungi kami melalui Instagram @ppiaqueensland atau email info@ppiaq.org'
-                    : 'Contact us via Instagram @ppiaqueensland or email info@ppiaq.org'}
-                </p>
-              </div>
+            {/* Font size reduced from 9xl to 8xl max */}
+            <h1 className="font-tan-angleton font-bold text-5xl md:text-8xl text-[#B64847] leading-none uppercase tracking-tighter mb-6">
+              PESTA <br className="md:hidden" /> RAKYAT
+            </h1>
+            <div className="flex items-center gap-4 w-full max-w-lg">
+              <div className="h-px bg-[#B64847]/40 flex-grow"></div>
+              <span className="font-tan-angleton text-xl md:text-2xl text-[#B64847] whitespace-nowrap">Brisbane 2026</span>
+              <div className="h-px bg-[#B64847]/40 flex-grow"></div>
             </div>
           </div>
         </div>
       </section>
-    </>
+
+      {/* --- INTRO SECTION (COMPACTED) --- */}
+      {/* Reduced py-24 to py-16. Tightened gaps and vertical spacing. Reduced heading size. */}
+      <section className="py-16 px-6 relative">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="hidden lg:block lg:col-span-1">
+             <p className="font-tan-angleton text-6xl text-[#E4DBCA] origin-left -rotate-90 whitespace-nowrap opacity-40 select-none">
+               CULTURAL HERITAGE
+             </p>
+          </div>
+
+          <div className="lg:col-span-6 space-y-6">
+            <h2 className="font-tan-angleton text-3xl md:text-4xl text-[#B64847] leading-tight">
+              {language === 'id' ? "Perayaan Budaya Terbesar di Queensland" : "Queensland's Premier Indonesian Cultural Showcase"}
+            </h2>
+            <div className="w-16 h-1 bg-[#FEB602]"></div>
+            <div className="space-y-4 text-gray-600 leading-relaxed text-base md:text-lg italic border-l-4 border-[#E4DBCA] pl-6">
+              <p>
+                Pesta Rakyat (PesRa) is Queensland's largest annual celebration of Indonesian Independence Day, uniting thousands of Indonesian students, diaspora families and the wider Australian community in a spectacular showcase of culture, music, food and national pride.
+              </p>
+            </div>
+          </div>
+
+          <div className="lg:col-span-5 bg-white p-6 rounded-4xl border border-[#E4DBCA] shadow-2xl shadow-[#B64847]/5 relative">
+            <p className="text-gray-700 leading-relaxed text-sm md:text-base font-medium">
+               Pesta Rakyat serves as a platform for the Indonesian diaspora in Queensland to strengthen community ties while introducing Indonesia’s culture, arts, and culinary heritage to the international community.
+            </p>
+            <div className="mt-6 flex justify-end opacity-20">
+               <div className="w-12 h-12 border-2 border-dashed border-[#886644] rounded-full flex items-center justify-center text-[6px] font-bold">[LOGO]</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- THE HEART OF PESRA (COMPACTED) --- */}
+      {/* Reduced py-20 to py-16. Reduced mb-16 to mb-10. Reduced card padding from p-10 to p-8. Reduced number size. */}
+      <section className="py-16 bg-[#B64847] relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5 pointer-events-none flex flex-wrap gap-10 p-10">
+           {[...Array(20)].map((_, i) => <div key={i} className="w-20 h-20 border border-white rounded-full"></div>)}
+        </div>
+
+        <div className="max-w-6xl mx-auto px-6 relative z-10">
+          <div className="text-center mb-10">
+            <h2 className="font-tan-angleton text-3xl md:text-4xl text-[#FEB602] mb-2">The Heart of Pesra</h2>
+            <p className="font-nickainley text-2xl text-white opacity-80 italic">What makes the celebration alive</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { num: '01', title: 'Cultural Immersion', desc: 'Introducing the deep-rooted arts, traditional dances, and visual heritage of the archipelago.' },
+              { num: '02', title: 'Gastronomic Journey', desc: 'A curated selection of Indonesia’s culinary heritage, from street-food to royal delicacies.' },
+              { num: '03', title: 'Community Unity', desc: 'Strengthening ties between the Indonesian diaspora and the local Australian community.' }
+            ].map((item, i) => (
+              <div key={i} className="group bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-4xl hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+                <span className="font-tan-angleton text-5xl text-[#FEB602] mb-4 block group-hover:scale-105 transition-transform">{item.num}</span>
+                <h4 className="font-bold text-white group-hover:text-[#B64847] text-lg mb-3 tracking-widest uppercase">{item.title}</h4>
+                <p className="text-xs md:text-sm text-white/70 group-hover:text-gray-600 leading-relaxed">
+                  {item.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* --- GALLERY SECTION (ALREADY COMPACTED) --- */}
+      <section className="py-12 px-6 max-w-6xl mx-auto">
+        <div className="text-center mb-10">
+          <h2 className="font-tan-angleton text-2xl md:text-3xl text-[#B64847] uppercase tracking-widest mb-1">Glimpses of Celebration</h2>
+          <div className="h-1 w-16 bg-[#FEB602] mx-auto mb-3 rounded-full"></div>
+          <p className="font-nickainley text-xl text-[#886644] italic">Captured moments from previous years</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-3 h-auto md:h-[450px]">
+          <div className="md:col-span-2 md:row-span-2 bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-3xl flex items-center justify-center text-[#886644]/40 font-bold italic text-xs hover:bg-[#E4DBCA]/40 transition-all shadow-sm overflow-hidden group">
+            <span className="group-hover:scale-105 transition-transform duration-500">[FEATURED_01]</span>
+          </div>
+          
+          <div className="aspect-square md:aspect-auto bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+            <span className="group-hover:scale-105 transition-transform duration-500">[IMAGE_02]</span>
+          </div>
+          <div className="aspect-square md:aspect-auto bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+            <span className="group-hover:scale-105 transition-transform duration-500">[IMAGE_03]</span>
+          </div>
+          <div className="aspect-square md:aspect-auto bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+            <span className="group-hover:scale-105 transition-transform duration-500">[IMAGE_04]</span>
+          </div>
+          <div className="aspect-square md:aspect-auto bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+            <span className="group-hover:scale-105 transition-transform duration-500">[IMAGE_05]</span>
+          </div>
+        </div>
+        
+        <div className="mt-3 w-full h-24 bg-[#E4DBCA]/10 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all">
+          [IMAGE_06_PANORAMIC]
+        </div>
+      </section>
+
+      {/* --- COLLABORATION & RECRUITMENT (ALREADY COMPACTED) --- */}
+      <section className="py-12 px-6 relative">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white border-2 border-[#B64847] rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-xl">
+            <div className="bg-[#B64847] p-8 md:w-1/2 text-white flex flex-col justify-center">
+              <span className="font-nickainley text-2xl text-[#FEB602] mb-2">We are back!</span>
+              <h2 className="font-tan-angleton text-3xl text-white mb-6">Pesra is returning <br /> in 2026</h2>
+              <p className="text-xs md:text-sm opacity-80 leading-relaxed italic">
+                Pesra provides a space for collaboration among students, the Indonesian community, and local partners, contributing to the promotion of a positive image of Indonesia abroad.
+              </p>
+            </div>
+            <div className="p-8 md:w-1/2 flex flex-col justify-center bg-white border-l border-[#B64847]/10">
+              <h3 className="font-tan-angleton text-2xl text-[#B64847] mb-4">Join the Committee</h3>
+              <p className="text-gray-600 text-xs md:text-sm mb-8 leading-relaxed font-medium">
+                PPIA Queensland is looking for an events team to run Pesra in 2026. Express your interest to be part of Pesta Rakyat events committee across many different functions.
+              </p>
+              <a 
+                href="mailto:qld@ppi-australia.org" 
+                className="inline-block text-center bg-[#FEB602] text-[#B64847] px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-[9px] hover:bg-[#B64847] hover:text-white transition-all shadow-md active:scale-95"
+              >
+                Send Expression of Interest
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER DECORATION (ALREADY COMPACTED) --- */}
+      <div className="py-8 flex flex-col items-center opacity-20">
+         <div className="w-px h-12 bg-[#B64847] mb-6"></div>
+         <div className="w-16 h-16 border border-dashed border-[#886644] rounded-full flex items-center justify-center text-[8px] font-bold text-[#886644] rotate-12">
+            [BIRD]
+         </div>
+      </div>
+
+    </main>
   );
 }

@@ -4,152 +4,208 @@ import { useLanguage } from '@/lib/language-context';
 import { getTranslation, translations } from '@/lib/translations';
 
 const UNIVERSITIES = [
-  {
-    name: 'PPIA Griffith University (ISAGU)',
-    email: 'isagu@griffith.edu.au',
-    instagram: '@isagu_official',
-  },
-  {
-    name: 'PPIA James Cook University (JCU ISA)',
-    email: 'jcuisa@jcu.edu.au',
-    instagram: '@jcu_isa',
-  },
-  {
-    name: 'PPIA University of Queensland (UQISA)',
-    email: 'uqisa@uq.edu.au',
-    instagram: '@uq_isa',
-  },
-  {
-    name: 'PPIA Queensland University of Technology (ISAQ)',
-    email: 'isaq@qut.edu.au',
-    instagram: '@isaq_official',
-  },
+  { name: 'PPIA Griffith University - ISAGU', email: 'griffith@ppi-australia.org', instagram: '@ppiagriffith.isagu' },
+  { name: 'PPIA James Cook University - JCU ISA', email: 'jcu.isa@yahoo.com', instagram: '@jcuisa,tsv' },
+  { name: 'PPIA University of Queensland - UQISA', email: 'uqisa.info@gmail.com', instagram: '@uqisa' },
+  { name: 'PPIA Queensland University of Technology - ISAQ', email: 'isaq.qut@gmail.com', instagram: '@ppiaqut' },
 ];
 
 const TEAM_MEMBERS = [
-  {
-    name: 'Ahmad Wijaya',
-    role: { id: 'Ketua', en: 'President' },
-    university: 'University of Queensland',
-    instagram: '@ahmadwijaya',
-  },
-  {
-    name: 'Siti Nurhaliza',
-    role: { id: 'Sekretaris', en: 'Secretary' },
-    university: 'Griffith University',
-    instagram: '@sitihaliza',
-  },
-  {
-    name: 'Budi Santoso',
-    role: { id: 'Bendahara', en: 'Treasurer' },
-    university: 'James Cook University',
-    instagram: '@budisantoso',
-  },
-  {
-    name: 'Lisa Rahmawati',
-    role: { id: 'Kepala Acara', en: 'Events Head' },
-    university: 'QUT',
-    instagram: '@lisarahmawati',
-  },
+  { name: 'Ahmad Wijaya', role: { id: 'Ketua', en: 'President' }, university: 'University of Queensland', instagram: '@ahmadwijaya' },
+  { name: 'Siti Nurhaliza', role: { id: 'Sekretaris', en: 'Secretary' }, university: 'Griffith University', instagram: '@sitihaliza' },
+  { name: 'Budi Santoso', role: { id: 'Bendahara', en: 'Treasurer' }, university: 'James Cook University', instagram: '@budisantoso' },
+  { name: 'Lisa Rahmawati', role: { id: 'Kepala Acara', en: 'Events Head' }, university: 'QUT', instagram: '@lisarahmawati' },
+  { name: 'Rina Kartika', role: { id: 'Humas', en: 'Public Relations' }, university: 'University of Queensland', instagram: '@rinakartika' },
 ];
 
 export default function AboutPage() {
   const { language } = useLanguage();
 
   return (
-    <>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 to-purple-600 text-white py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">
-            {getTranslation(translations.about.title, language)}
+    <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen overflow-x-hidden">
+      
+      {/* --- HERO SECTION --- */}
+      <section className="pt-16 pb-10 px-6 text-center relative">
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="mx-auto mb-8 w-32 h-32 flex items-center justify-center border-2 border-dashed border-[#886644] text-[#886644] rounded-full bg-white/50 backdrop-blur-sm shadow-inner">
+            [LOGO PPIAQ]
+          </div>
+
+          <h1 className="font-tan-angleton font-bold text-3xl md:text-5xl text-[#B64847] leading-tight mb-4">
+            Perhimpunan Pelajar Indonesia di Australia, <br className="hidden md:block" />
+            Queensland (PPIA Queensland)
           </h1>
-          <p className="text-xl text-blue-100">
-            Perhimpunan Pelajar Indonesia di Australia -- Queensland
+
+          <p className="font-nickainley font-bold text-2xl md:text-3xl text-[#886644] mb-8 opacity-90">
+            {language === 'id' ? 'Menyatukan Pelajar Indonesia di Sunshine State' : 'Uniting Indonesian Students in the Sunshine State'}
           </p>
+
+          <div className="max-w-3xl mx-auto text-base md:text-lg leading-relaxed text-[#303030]">
+            <p>
+              {language === 'id' ? (
+                <>
+                  Juga dikenal sebagai <span className="italic">Indonesian Student Association in Australia - Queensland Chapter</span>. 
+                  Kami adalah satu dari delapan cabang resmi di bawah{' '}
+                  <a href="#" className="text-[#B64847] underline font-bold decoration-[#FEB602] hover:text-[#886644] transition-colors">PPI Australia (PPIA)</a>. 
+                  PPIA telah melayani komunitas pelajar Indonesia di Australia sejak 1981, dan PPIA Queensland sejak 1988.
+                </>
+              ) : (
+                <>
+                  Also known as the <span className="italic">Indonesian Student Association in Australia - Queensland Chapter</span>. 
+                  We are one of eight official branches under{' '}
+                  <a href="#" className="text-[#B64847] underline font-bold decoration-[#FEB602] hover:text-[#886644] transition-colors">PPI Australia (PPIA)</a>. 
+                  PPIA have served the Indonesian students community in Australia since 1981, and PPIA Queensland since 1988.
+                </>
+              )}
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* About Content */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">
-              {language === 'id' ? 'Tentang PPIA Queensland' : 'About PPIA Queensland'}
+      {/* --- CENDRAWASIH DECORATION --- */}
+      <div className="max-w-4xl mx-auto px-6 mb-12">
+        <div className="w-full h-20 border-2 border-dashed border-[#E4DBCA] flex items-center justify-center text-[#886644] rounded-2xl bg-[#E4DBCA]/10 text-xs font-bold tracking-widest uppercase">
+          [HIASAN BURUNG CENDRAWASIH]
+        </div>
+      </div>
+
+      {/* --- BRANCHES SECTION --- */}
+      <section className="py-16 px-6 bg-white shadow-sm rounded-t-[3rem]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="font-tan-angleton font-bold text-3xl md:text-4xl text-[#B64847] mb-4 uppercase tracking-tighter">
+              {language === 'id' ? 'Asosiasi Cabang Kami' : 'Our branch associations'}
             </h2>
-            <p className="text-lg text-gray-700 leading-relaxed mb-4">
-              {language === 'id'
-                ? 'Perhimpunan Pelajar Indonesia di Australia -- Queensland (PPIA Queensland) adalah organisasi siswa Indonesia yang dinamis dan nirlaba yang dibangun atas semangat kesatuan dan kolaborasi. Kami adalah satu dari delapan cabang resmi PPI Australia, didirikan pada tahun 1988.'
-                : 'The Indonesian Student Association in Australia - Queensland Chapter (PPIA Queensland) is a dynamic non-profit organization built on the spirit of unity and collaboration. We are one of eight official branches under PPI Australia, established in 1988.'}
-            </p>
-            <p className="text-lg text-gray-700 leading-relaxed">
-              {language === 'id'
-                ? 'Misi kami adalah menghubungkan pelajar Indonesia di Queensland dengan peluang dan satu sama lain, sambil mendukung pengembangan profesional, keterampilan akademis, dan pembangunan komunitas.'
-                : 'Our mission is to connect Indonesian students across Queensland with opportunities and each other, while supporting professional development, academic skills, and community building.'}
+            <p className="max-w-3xl mx-auto text-base text-gray-600 leading-relaxed font-medium">
+              {language === 'id' 
+                ? 'Terdapat empat cabang resmi yang berafiliasi dengan PPIA dan PPIA Queensland. Mereka adalah perhimpunan pelajar Indonesia dari empat universitas di seluruh Queensland. Jika Anda berasal dari salah satu universitas ini, silakan jadikan organisasi cabang kami sebagai kontak pertama Anda.'
+                : 'There are four official branches that are associated with PPIA and PPIA Queensland. They are Indonesian student association from four universities across Queensland. If you belong to any of these universities, please have our branch organisations as your first point of contact,'}
             </p>
           </div>
 
-          {/* University Branches */}
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-lg">
-              {getTranslation(translations.about.branches.title, language)}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {UNIVERSITIES.map((uni, i) => (
-                <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{uni.name}</h3>
-                  <div className="space-y-2 text-gray-600">
-                    <p>📧 {uni.email}</p>
-                    <p>📱 {uni.instagram}</p>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            {UNIVERSITIES.map((uni, i) => (
+              <div key={i} className="group bg-[#FFFAF5] border border-[#E4DBCA] rounded-2xl p-6 hover:bg-white hover:shadow-xl transition-all duration-300">
+                <h3 className="font-bold text-lg text-[#B64847] mb-3 group-hover:translate-x-1 transition-transform">{uni.name}</h3>
+                <div className="space-y-2 text-[#886644] font-bold text-sm">
+                  <p className="flex items-center gap-3 tracking-tight">
+                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">📧</span> 
+                    {uni.email}
+                  </p>
+                  <p className="flex items-center gap-3 tracking-tight">
+                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">📱</span> 
+                    {uni.instagram}
+                  </p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
-          {/* Team Section */}
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center bg-gradient-to-r from-purple-600 to-purple-700 p-6 rounded-lg">
+          <div className="bg-[#B64847] text-white rounded-r-4xl rounded-l-none p-10 border-l-8 border-[#FEB602] max-w-5xl ml-0 mr-auto shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+            <p className="relative z-10 text-sm md:text-base leading-relaxed italic font-medium">
+              {language === 'id'
+                ? 'Jika Anda bukan mahasiswa di Griffith University, JCU, UQ, atau QUT, jangan ragu untuk menghubungi PPIAQ secara langsung untuk keanggotaan dan dukungan lainnya yang Anda butuhkan. Jika Anda ingin memulai asosiasi cabang resmi di institusi Anda, silakan hubungi kami. Kebijakan PPIA mewajibkan minimal delapan anggota individu untuk memulai cabang PPIA.'
+                : 'If you are not a student at Griffith University, JCU, UQ, or QUT, please feel free to reach out to PPIAQ directly for membership and other support you need. If you would like to start an official branch association in your institution, please contact us. PPIA policy requires a minimum of eight individual members to start a PPIA branch.'}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* --- THE TEAM SECTION (5 Members in 1 Row) --- */}
+      <section className="py-16 px-6 relative bg-[#FFFAF5]">
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none overflow-hidden">
+            <div className="absolute -top-24 -left-24 w-80 h-80 border-40 border-[#FEB602] rounded-full"></div>
+            <div className="absolute -bottom-24 -right-24 w-80 h-80 border-40 border-[#B64847] rounded-full"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="text-center mb-12">
+            <p className="font-nickainley font-bold text-2xl text-[#886644] mb-1 tracking-wider">Dedicated & Passionate</p>
+            <h2 className="font-tan-angleton font-bold text-4xl text-[#B64847]">
               {getTranslation(translations.about.team.title, language)}
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {TEAM_MEMBERS.map((member, i) => (
-                <div key={i} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg hover:scale-105 transition text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-400 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold">
-                    {member.name.charAt(0)}
+            <div className="h-1.5 w-20 bg-[#FEB602] mx-auto mt-4 rounded-full"></div>
+          </div>
+
+          {/* Grid updated to lg:grid-cols-5 for 1 row on desktop */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {TEAM_MEMBERS.map((member, i) => (
+              <div key={i} className="group relative">
+                <div className="bg-white rounded-3xl p-5 text-center border border-[#E4DBCA] shadow-sm group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
+                  <div className="relative w-16 h-16 mx-auto mb-5">
+                    <div className="absolute inset-0 bg-linear-to-tr from-[#B64847] to-[#FEB602] rounded-2xl rotate-3 group-hover:rotate-6 transition-transform"></div>
+                    <div className="relative w-full h-full bg-[#303030] rounded-2xl flex items-center justify-center text-lg font-bold text-white shadow-md border border-white/20 overflow-hidden">
+                      {member.name.charAt(0)}
+                    </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{member.name}</h3>
-                  <p className="text-sm text-blue-600 font-medium mb-1">{getTranslation(member.role, language)}</p>
-                  <p className="text-xs text-gray-600 mb-3">{member.university}</p>
-                  <a href={`https://instagram.com/${member.instagram.replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="text-sm text-gray-600 hover:text-blue-600">
+                  <h3 className="font-bold text-sm text-[#303030] mb-0.5 group-hover:text-[#B64847] transition-colors leading-tight">{member.name}</h3>
+                  <p className="text-[#886644] font-bold text-[9px] uppercase tracking-widest mb-3">
+                    {getTranslation(member.role, language)}
+                  </p>
+                  <div className="w-8 h-px bg-[#E4DBCA] mx-auto mb-3"></div>
+                  <p className="text-[9px] text-gray-400 font-bold mb-4 flex-grow flex items-center justify-center italic">
+                    {member.university}
+                  </p>
+                  <a 
+                    href={`https://instagram.com/${member.instagram.replace('@', '')}`}
+                    className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-[9px] font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-all shadow-sm"
+                  >
                     {member.instagram}
                   </a>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
 
-          {/* Contact Info */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-8 text-center text-white">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              {language === 'id' ? 'Hubungi Kami' : 'Get in Touch'}
-            </h3>
-            <p className="text-blue-100 mb-4 text-lg">
-              {language === 'id'
-                ? 'Untuk informasi lebih lanjut, hubungi kami melalui:'
-                : 'For more information, contact us via:'}
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <a href="mailto:info@ppiaq.org" className="text-white hover:text-yellow-300 font-bold text-lg transition">
-                📧 info@ppiaq.org
-              </a>
-              <a href="https://instagram.com/ppiaqueensland" target="_blank" rel="noopener noreferrer" className="text-white hover:text-yellow-300 font-bold text-lg transition">
-                📱 @ppiaqueensland
-              </a>
+          {/* View More Button */}
+          <div className="mt-12 flex justify-center">
+            <button className="px-8 py-3 bg-[#B64847] text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#303030] transition-all shadow-lg active:scale-95">
+              View More Members
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* --- CONTACT US SECTION (LOGO PLACEHOLDER REMOVED) --- */}
+      <section className="py-16 px-6 mb-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white border-2 border-[#B64847] rounded-4xl overflow-hidden flex flex-col md:flex-row shadow-2xl">
+            {/* Info Side */}
+            <div className="bg-[#B64847] text-white p-10 md:w-1/2 flex flex-col justify-center relative">
+               <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#FEB602]/20 rounded-full blur-2xl"></div>
+               <p className="font-nickainley font-bold text-3xl text-[#FEB602] mb-2 tracking-wide">Let&apos;s talk!</p>
+               <h3 className="font-tan-angleton font-bold text-4xl mb-6">
+                  {language === 'id' ? 'Ada Pertanyaan?' : 'Have Questions?'}
+               </h3>
+               <p className="text-white/80 text-sm leading-relaxed mb-0 font-medium italic">
+                  {language === 'id' 
+                    ? 'Tim kami selalu siap membantu. Jangan ragu untuk menyapa atau menanyakan apa pun tentang kehidupan pelajar di Queensland.'
+                    : 'Our team is always ready to help. Feel free to say hi or ask anything about student life in Queensland.'}
+               </p>
+            </div>
+            
+            {/* Action Side (Logo Placeholder Deleted) */}
+            <div className="p-10 md:w-1/2 flex flex-col justify-center gap-6 bg-white relative">
+               <a href="mailto:info@ppiaq.org" className="group flex items-center gap-5 p-4 rounded-3xl border border-[#E4DBCA] hover:border-[#FEB602] hover:bg-[#FFFAF5] transition-all duration-300 shadow-sm">
+                  <div className="w-12 h-12 bg-[#B64847] text-[#FEB602] rounded-2xl flex items-center justify-center text-2xl shadow-lg group-hover:rotate-6 transition-transform">📧</div>
+                  <div>
+                    <p className="text-[10px] font-bold text-[#886644] uppercase tracking-widest">Email Us</p>
+                    <p className="text-lg font-bold text-[#303030]">info@ppiaq.org</p>
+                  </div>
+               </a>
+
+               <a href="https://instagram.com/ppiaqueensland" className="group flex items-center gap-5 p-4 rounded-3xl border border-[#E4DBCA] hover:border-[#FEB602] hover:bg-[#FFFAF5] transition-all duration-300 shadow-sm">
+                  <div className="w-12 h-12 bg-[#FEB602] text-[#B64847] rounded-2xl flex items-center justify-center text-2xl shadow-lg group-hover:rotate-6 transition-transform">📱</div>
+                  <div>
+                    <p className="text-[10px] font-bold text-[#886644] uppercase tracking-widest">Follow Us</p>
+                    <p className="text-lg font-bold text-[#303030]">@ppiaqueensland</p>
+                  </div>
+               </a>
             </div>
           </div>
         </div>
       </section>
-    </>
+    </main>
   );
 }
