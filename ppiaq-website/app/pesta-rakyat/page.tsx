@@ -54,14 +54,18 @@ export default function PestaRakyatPage() {
             <div className="w-16 h-1 bg-[#FEB602]"></div>
             <div className="space-y-4 text-gray-600 leading-relaxed text-base md:text-lg italic border-l-4 border-[#E4DBCA] pl-6">
               <p>
-                Pesta Rakyat (PesRa) is Queensland's largest annual celebration of Indonesian Independence Day, uniting thousands of Indonesian students, diaspora families and the wider Australian community in a spectacular showcase of culture, music, food and national pride.
+                {language === 'id'
+                  ? 'Pesta Rakyat (PesRa) adalah perayaan terbesar tahunan Hari Kemerdekaan Indonesia di Queensland, menyatukan ribuan mahasiswa Indonesia, keluarga diaspora, dan komunitas Australia yang lebih luas dalam pameran budaya, musik, makanan, dan kebanggaan nasional yang spektakuler.'
+                  : 'Pesta Rakyat (PesRa) is Queensland\'s largest annual celebration of Indonesian Independence Day, uniting thousands of Indonesian students, diaspora families and the wider Australian community in a spectacular showcase of culture, music, food and national pride.'}
               </p>
             </div>
           </div>
 
           <div className="lg:col-span-5 bg-white p-6 rounded-4xl border border-[#E4DBCA] shadow-2xl shadow-[#B64847]/5 relative">
             <p className="text-gray-700 leading-relaxed text-sm md:text-base font-medium">
-               Pesta Rakyat serves as a platform for the Indonesian diaspora in Queensland to strengthen community ties while introducing Indonesia’s culture, arts, and culinary heritage to the international community.
+               {language === 'id'
+                 ? 'Pesta Rakyat berfungsi sebagai platform bagi diaspora Indonesia di Queensland untuk memperkuat ikatan komunitas sambil memperkenalkan budaya, seni, dan warisan kuliner Indonesia kepada komunitas internasional.'
+                 : 'Pesta Rakyat serves as a platform for the Indonesian diaspora in Queensland to strengthen community ties while introducing Indonesia\'s culture, arts, and culinary heritage to the international community.'}
             </p>
             <div className="mt-6 flex justify-end opacity-20">
                <div className="w-12 h-12 border-2 border-dashed border-[#886644] rounded-full flex items-center justify-center text-[6px] font-bold">[LOGO]</div>
@@ -79,16 +83,20 @@ export default function PestaRakyatPage() {
 
         <div className="max-w-6xl mx-auto px-6 relative z-10">
           <div className="text-center mb-10">
-            <h2 className="font-tan-angleton text-3xl md:text-4xl text-[#FEB602] mb-2">The Heart of Pesra</h2>
-            <p className="font-nickainley text-2xl text-white opacity-80 italic">What makes the celebration alive</p>
+            <h2 className="font-tan-angleton text-3xl md:text-4xl text-[#FEB602] mb-2">{language === 'id' ? 'Jantung Pesra' : 'The Heart of Pesra'}</h2>
+            <p className="font-nickainley text-2xl text-white opacity-80 italic">{language === 'id' ? 'Apa yang membuat perayaan hidup' : 'What makes the celebration alive'}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
+            {(language === 'id' ? [
+              { num: '01', title: 'Imersif Budaya', desc: 'Memperkenalkan seni yang berakar dalam, tarian tradisional, dan warisan visual kepulauan.' },
+              { num: '02', title: 'Perjalanan Gastronomi', desc: 'Pilihan pilihan warisan kuliner Indonesia, dari makanan jalanan hingga kelezatan kerajaan.' },
+              { num: '03', title: 'Persatuan Komunitas', desc: 'Memperkuat ikatan antara diaspora Indonesia dan komunitas Australia lokal.' }
+            ] : [
               { num: '01', title: 'Cultural Immersion', desc: 'Introducing the deep-rooted arts, traditional dances, and visual heritage of the archipelago.' },
-              { num: '02', title: 'Gastronomic Journey', desc: 'A curated selection of Indonesia’s culinary heritage, from street-food to royal delicacies.' },
+              { num: '02', title: 'Gastronomic Journey', desc: 'A curated selection of Indonesia\'s culinary heritage, from street-food to royal delicacies.' },
               { num: '03', title: 'Community Unity', desc: 'Strengthening ties between the Indonesian diaspora and the local Australian community.' }
-            ].map((item, i) => (
+            ]).map((item, i) => (
               <div key={i} className="group bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-4xl hover:bg-white hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
                 <span className="font-tan-angleton text-5xl text-[#FEB602] mb-4 block group-hover:scale-105 transition-transform">{item.num}</span>
                 <h4 className="font-bold text-white group-hover:text-[#B64847] text-lg mb-3 tracking-widest uppercase">{item.title}</h4>
@@ -104,9 +112,9 @@ export default function PestaRakyatPage() {
       {/* --- GALLERY SECTION (ALREADY COMPACTED) --- */}
       <section className="py-12 px-6 max-w-6xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="font-tan-angleton text-2xl md:text-3xl text-[#B64847] uppercase tracking-widest mb-1">Glimpses of Celebration</h2>
+          <h2 className="font-tan-angleton text-2xl md:text-3xl text-[#B64847] uppercase tracking-widest mb-1">{language === 'id' ? 'Penglihatan Perayaan' : 'Glimpses of Celebration'}</h2>
           <div className="h-1 w-16 bg-[#FEB602] mx-auto mb-3 rounded-full"></div>
-          <p className="font-nickainley text-xl text-[#886644] italic">Captured moments from previous years</p>
+          <p className="font-nickainley text-xl text-[#886644] italic">{language === 'id' ? 'Momen tertangkap dari tahun-tahun sebelumnya' : 'Captured moments from previous years'}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-3 h-auto md:h-112.5">
@@ -138,16 +146,20 @@ export default function PestaRakyatPage() {
         <div className="max-w-6xl mx-auto">
           <div className="bg-white border-2 border-[#B64847] rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-xl">
             <div className="bg-[#B64847] p-8 md:w-1/2 text-white flex flex-col justify-center">
-              <span className="font-nickainley text-2xl text-[#FEB602] mb-2">We are back!</span>
-              <h2 className="font-tan-angleton text-3xl text-white mb-6">Pesra is returning <br /> in 2026</h2>
+              <span className="font-nickainley text-2xl text-[#FEB602] mb-2">{language === 'id' ? 'Kami kembali!' : 'We are back!'}</span>
+              <h2 className="font-tan-angleton text-3xl text-white mb-6">{language === 'id' ? 'Pesra Kembali di 2026' : 'Pesra is returning in 2026'}</h2>
               <p className="text-xs md:text-sm opacity-80 leading-relaxed italic">
-                Pesra provides a space for collaboration among students, the Indonesian community, and local partners, contributing to the promotion of a positive image of Indonesia abroad.
+                {language === 'id'
+                  ? 'Pesra menyediakan ruang untuk kolaborasi antara siswa, komunitas Indonesia, dan mitra lokal, berkontribusi pada promosi citra Indonesia yang positif di luar negeri.'
+                  : 'Pesra provides a space for collaboration among students, the Indonesian community, and local partners, contributing to the promotion of a positive image of Indonesia abroad.'}
               </p>
             </div>
             <div className="p-8 md:w-1/2 flex flex-col justify-center bg-white border-l border-[#B64847]/10">
-              <h3 className="font-tan-angleton text-2xl text-[#B64847] mb-4">Join the Committee</h3>
+              <h3 className="font-tan-angleton text-2xl text-[#B64847] mb-4">{language === 'id' ? 'Bergabung dengan Komite' : 'Join the Committee'}</h3>
               <p className="text-gray-600 text-xs md:text-sm mb-8 leading-relaxed font-medium">
-                PPIA Queensland is looking for an events team to run Pesra in 2026. Express your interest to be part of Pesta Rakyat events committee across many different functions.
+                {language === 'id'
+                  ? 'PPIA Queensland mencari tim acara untuk menjalankan Pesra di 2026. Ekspresikan minat Anda untuk menjadi bagian dari komite acara Pesta Rakyat di berbagai fungsi.'
+                  : 'PPIA Queensland is looking for an events team to run Pesra in 2026. Express your interest to be part of Pesta Rakyat events committee across many different functions.'}
               </p>
               <a 
                 href="mailto:qld@ppi-australia.org" 

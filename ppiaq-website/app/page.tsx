@@ -1,10 +1,24 @@
 'use client';
 
 import Image from 'next/image';
+import { useState } from 'react';
 import { useLanguage } from '@/lib/language-context';
+import { useFormSubmit } from '@/lib/hooks/useFormSubmit';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 export default function HomePage() {
   const { language } = useLanguage();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitNewsletter({
+      endpoint: API_ENDPOINTS.NEWSLETTER_SUBSCRIBE,
+      data: { email: newsletterEmail },
+      onSuccess: () => setNewsletterEmail(''),
+    });
+  };
 
   return (
     <main className="font-montserrat text-[#303030] bg-[#FFFAF5] overflow-x-hidden">
@@ -148,20 +162,24 @@ export default function HomePage() {
             <h3 className="font-tan-angleton font-bold text-5xl text-[#B64847] mb-8">
               {language === 'id' ? 'Tetap Terhubung' : 'Stay in touch'}
             </h3>
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-6 italic">* Indicates required field</p>
-            <form className="space-y-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-6 italic">* {language === 'id' ? 'Menunjukkan field yang diperlukan' : 'Indicates required field'}</p>
+            <form className="space-y-6" onSubmit={handleNewsletterSubmit}>
               <div>
                 <label className="block text-xs font-bold uppercase tracking-widest mb-2">Email <span className="text-[#B64847]">*</span></label>
-                <input type="email" className="w-full p-3 border border-gray-300 focus:border-[#B64847] outline-none transition-all rounded-sm" />
+                <input type="email" value={newsletterEmail} onChange={(e) => setNewsletterEmail(e.target.value)} required className="w-full p-3 border border-gray-300 focus:border-[#B64847] outline-none transition-all rounded-sm" />
               </div>
               <div className="flex items-start gap-3">
-                <input type="checkbox" className="mt-1 accent-[#B64847]" id="marketing" />
+                <input type="checkbox" className="mt-1 accent-[#B64847]" id="marketing" required />
                 <label htmlFor="marketing" className="text-xs font-medium leading-relaxed text-gray-600">
-                  I agree to receiving marketing and promotional materials <span className="text-[#B64847]">*</span>
+                  {language === 'id'
+                    ? 'Saya setuju menerima materi pemasaran dan promosi'
+                    : 'I agree to receiving marketing and promotional materials'} <span className="text-[#B64847]">*</span>
                 </label>
               </div>
-              <button className="px-10 py-4 border border-black text-black font-bold uppercase tracking-widest text-sm hover:bg-black hover:text-white transition-all">
-                Subscribe to Newsletter
+              {newsletterSuccess && <p className="text-green-600 text-xs font-bold">✓ {language === 'id' ? 'Berhasil berlangganan!' : 'Successfully subscribed!'}</p>}
+              {newsletterError && <p className="text-red-600 text-xs font-bold">✗ {newsletterError}</p>}
+              <button type="submit" disabled={newsletterLoading} className="px-10 py-4 border border-black text-black font-bold uppercase tracking-widest text-sm hover:bg-black hover:text-white transition-all disabled:opacity-50">
+                {newsletterLoading ? (language === 'id' ? 'Mengirim...' : 'Sending...') : (language === 'id' ? 'Berlangganan Newsletter' : 'Subscribe to Newsletter')}
               </button>
             </form>
           </div>

@@ -1,9 +1,36 @@
 'use client';
 
+import { useState } from 'react';
 import { useLanguage } from '@/lib/language-context';
+import { useFormSubmit } from '@/lib/hooks/useFormSubmit';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 export default function ContactPage() {
   const { language } = useLanguage();
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const { submit, loading, success, error } = useFormSubmit();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    await submit({
+      endpoint: API_ENDPOINTS.CONTACT_SUBMIT,
+      data: {
+        name: `${firstName} ${lastName}`.trim(),
+        email,
+        message,
+      },
+      onSuccess: () => {
+        setFirstName('');
+        setLastName('');
+        setEmail('');
+        setMessage('');
+      },
+    });
+  };
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen relative overflow-hidden flex flex-col">
@@ -19,7 +46,7 @@ export default function ContactPage() {
           {language === 'id' ? 'Mari Terhubung' : 'Get in touch'}
         </p>
         <h1 className="font-tan-angleton font-bold text-4xl md:text-6xl text-[#B64847] uppercase tracking-tighter leading-none">
-          Contact Us
+          {language === 'id' ? 'Hubungi Kami' : 'Contact Us'}
         </h1>
         <div className="w-10 h-1 bg-[#FEB602] mx-auto rounded-full mt-2"></div>
       </section>
@@ -32,36 +59,39 @@ export default function ContactPage() {
           <div className="lg:col-span-7 bg-white p-8 md:p-12 rounded-[3rem] border border-[#E4DBCA] shadow-2xl shadow-[#B64847]/5 flex flex-col justify-center">
             <div className="mb-8 md:mb-10">
               <h2 className="font-tan-angleton font-bold text-3xl md:text-4xl text-[#B64847] leading-tight mb-2">
-                Send us a message
+                {language === 'id' ? 'Kirim Pesan' : 'Send us a message'}
               </h2>
               <div className="h-1 w-16 bg-[#FEB602] rounded-full"></div>
             </div>
             
-            <form className="space-y-6 md:space-y-8">
+            <form className="space-y-6 md:space-y-8" onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                 <div className="group">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">First Name *</label>
-                  <input type="text" className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium" />
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">{language === 'id' ? 'Nama Depan' : 'First Name'} *</label>
+                  <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} required className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium" />
                 </div>
                 <div className="group">
-                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">Last Name</label>
-                  <input type="text" className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium" />
+                  <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">{language === 'id' ? 'Nama Belakang' : 'Last Name'}</label>
+                  <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium" />
                 </div>
               </div>
 
               <div className="group">
-                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">Email Address *</label>
-                <input type="email" className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium" />
+                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">{language === 'id' ? 'Alamat Email' : 'Email Address'} *</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium" />
               </div>
 
               <div className="group">
-                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">Message *</label>
-                <textarea rows={2} className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all resize-none text-sm font-medium"></textarea>
+                <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">{language === 'id' ? 'Pesan' : 'Message'} *</label>
+                <textarea rows={2} value={message} onChange={(e) => setMessage(e.target.value)} required className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all resize-none text-sm font-medium"></textarea>
               </div>
 
+              {success && <p className="text-green-600 text-sm font-bold">✓ Message sent successfully!</p>}
+              {error && <p className="text-red-600 text-sm font-bold">✗ {error}</p>}
+
               <div className="pt-2">
-                <button className="bg-[#B64847] text-white px-10 py-4 rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] shadow-xl hover:bg-[#303030] transition-all active:scale-95 shadow-[#B64847]/10">
-                  Submit Message
+                <button type="submit" disabled={loading} className="bg-[#B64847] text-white px-10 py-4 rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] shadow-xl hover:bg-[#303030] transition-all active:scale-95 shadow-[#B64847]/10 disabled:opacity-50">
+                  {loading ? 'Sending...' : 'Submit Message'}
                 </button>
               </div>
             </form>
@@ -76,18 +106,18 @@ export default function ContactPage() {
 
                <div className="relative z-10 space-y-5 flex-1">
                   <div>
-                    <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-[#FEB602] mb-1 block">Direct Reach</span>
-                    <h3 className="font-tan-angleton font-bold text-2xl mb-1 leading-tight text-white">Email and <br/>Social Media</h3>
+                    <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-[#FEB602] mb-1 block">{language === 'id' ? 'Hubungi Langsung' : 'Direct Reach'}</span>
+                    <h3 className="font-tan-angleton font-bold text-2xl mb-1 leading-tight text-white">{language === 'id' ? 'Email & Media Sosial' : 'Email and Social Media'}</h3>
                     <div className="w-10 h-0.5 bg-[#FEB602]/40 mt-2"></div>
                   </div>
                   
                   <div className="space-y-3">
                     <div className="flex flex-col">
-                       <p className="text-[8px] font-bold uppercase tracking-widest text-[#FEB602]/80">Official Inquiry</p>
+                       <p className="text-[8px] font-bold uppercase tracking-widest text-[#FEB602]/80">{language === 'id' ? 'Pertanyaan Resmi' : 'Official Inquiry'}</p>
                        <p className="text-sm font-medium">info@ppiaq.org</p>
                     </div>
                     <div className="flex flex-col">
-                       <p className="text-[8px] font-bold uppercase tracking-widest text-[#FEB602]/80">Current Base</p>
+                       <p className="text-[8px] font-bold uppercase tracking-widest text-[#FEB602]/80">{language === 'id' ? 'Lokasi Saat Ini' : 'Current Base'}</p>
                        <p className="text-sm font-medium uppercase tracking-tighter">Queensland, Australia</p>
                     </div>
                   </div>
@@ -114,19 +144,19 @@ export default function ContactPage() {
             {/* Stay Informed Card */}
             <div className="bg-white p-8 md:p-10 rounded-[3rem] border border-[#E4DBCA] shadow-sm relative overflow-hidden flex-1 flex flex-col justify-center">
                <div className="relative z-10">
-                 <h3 className="font-tan-angleton font-bold text-2xl text-[#B64847] mb-2 tracking-wide">Stay informed</h3>
+                 <h3 className="font-tan-angleton font-bold text-2xl text-[#B64847] mb-2 tracking-wide">{language === 'id' ? 'Tetap Tahu' : 'Stay informed'}</h3>
                  <p className="text-[11px] text-gray-500 mb-6 italic leading-relaxed max-w-60">
-                   Subscribe to receive community updates and opportunities.
+                   {language === 'id' ? 'Berlangganan untuk menerima update komunitas dan peluang.' : 'Subscribe to receive community updates and opportunities.'}
                  </p>
                  
                  <form className="space-y-4">
-                   <input 
-                     type="email" 
-                     placeholder="Professional Email" 
-                     className="w-full bg-[#FFFAF5] border border-[#E4DBCA] px-5 py-4 rounded-2xl focus:outline-none focus:border-[#B64847] transition-all text-xs font-medium" 
+                   <input
+                     type="email"
+                     placeholder={language === 'id' ? 'Email Profesional' : 'Professional Email'}
+                     className="w-full bg-[#FFFAF5] border border-[#E4DBCA] px-5 py-4 rounded-2xl focus:outline-none focus:border-[#B64847] transition-all text-xs font-medium"
                    />
                    <button className="w-full bg-[#303030] text-white py-4 rounded-2xl font-bold uppercase tracking-[0.2em] text-[9px] hover:bg-[#B64847] transition-all active:scale-95 shadow-lg">
-                     Join Newsletter
+                     {language === 'id' ? 'Bergabung Newsletter' : 'Join Newsletter'}
                    </button>
                  </form>
                </div>
