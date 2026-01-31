@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useLanguage } from '@/lib/language-context';
 import { getTranslation, translations } from '@/lib/translations';
 import { useState, useEffect } from 'react';
@@ -42,13 +43,15 @@ export default function Header() {
           <div className="flex justify-between items-center h-12">
             
             {/* --- LOGO --- */}
-            <Link href="/" className="flex flex-col justify-center shrink-0 group/logo">
-              <span className="font-tan-angleton text-2xl md:text-3xl font-bold text-[#B64847] transition-colors duration-300 group-hover/nav:text-white group-hover/logo:text-[#FEB602]!">
-                PPIA Queensland
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-[#FEB602] font-bold mt-1 transition-colors duration-300 group-hover/nav:text-white/60">
-                Brisbane Chapter
-              </span>
+            <Link href="/" className="flex items-center justify-center shrink-0 group/logo h-12">
+              <Image
+                src="/images/PPIAQ_Logofornavbar.png"
+                alt="PPIA Queensland Logo"
+                width={120}
+                height={48}
+                priority
+                className="h-full w-auto transition-opacity duration-300 group-hover/nav:opacity-80"
+              />
             </Link>
 
             {/* --- DESKTOP NAVIGATION --- */}

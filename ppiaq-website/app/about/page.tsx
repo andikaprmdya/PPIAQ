@@ -1,13 +1,14 @@
 'use client';
 
+import Image from 'next/image';
 import { useLanguage } from '@/lib/language-context';
 import { getTranslation, translations } from '@/lib/translations';
 
 const UNIVERSITIES = [
-  { name: 'PPIA Griffith University - ISAGU', email: 'griffith@ppi-australia.org', instagram: '@ppiagriffith.isagu' },
-  { name: 'PPIA James Cook University - JCU ISA', email: 'jcu.isa@yahoo.com', instagram: '@jcuisa,tsv' },
-  { name: 'PPIA University of Queensland - UQISA', email: 'uqisa.info@gmail.com', instagram: '@uqisa' },
-  { name: 'PPIA Queensland University of Technology - ISAQ', email: 'isaq.qut@gmail.com', instagram: '@ppiaqut' },
+  { name: 'PPIA Griffith University - ISAGU', email: 'griffith@ppi-australia.org', instagram: '@ppiagriffith.isagu', logo: '/images/Isagu_Logo.jpg' },
+  { name: 'PPIA James Cook University - JCU ISA', email: 'jcu.isa@yahoo.com', instagram: '@jcuisa,tsv', logo: '/images/jcuisa_logo.jpg' },
+  { name: 'PPIA University of Queensland - UQISA', email: 'uqisa.info@gmail.com', instagram: '@uqisa', logo: '/images/uqisa_logo.png' },
+  { name: 'PPIA Queensland University of Technology - ISAQ', email: 'isaq.qut@gmail.com', instagram: '@ppiaqut', logo: '/images/ISAQ_Logo.jpg' },
 ];
 
 const TEAM_MEMBERS = [
@@ -27,8 +28,13 @@ export default function AboutPage() {
       {/* --- HERO SECTION --- */}
       <section className="pt-16 pb-10 px-6 text-center relative">
         <div className="max-w-5xl mx-auto relative z-10">
-          <div className="mx-auto mb-8 w-32 h-32 flex items-center justify-center border-2 border-dashed border-[#886644] text-[#886644] rounded-full bg-white/50 backdrop-blur-sm shadow-inner">
-            [LOGO PPIAQ]
+          <div className="mx-auto mb-8 w-32 h-32 relative">
+            <Image
+              src="/images/PPIAQ_logo.png"
+              alt="PPIA Queensland Logo"
+              fill
+              className="object-contain"
+            />
           </div>
 
           <h1 className="font-tan-angleton font-bold text-3xl md:text-5xl text-[#B64847] leading-tight mb-4">
@@ -63,10 +69,13 @@ export default function AboutPage() {
       </section>
 
       {/* --- CENDRAWASIH DECORATION --- */}
-      <div className="max-w-4xl mx-auto px-6 mb-12">
-        <div className="w-full h-20 border-2 border-dashed border-[#E4DBCA] flex items-center justify-center text-[#886644] rounded-2xl bg-[#E4DBCA]/10 text-xs font-bold tracking-widest uppercase">
-          [HIASAN BURUNG CENDRAWASIH]
-        </div>
+      <div className="max-w-4xl mx-auto px-6 mb-12 h-24 relative">
+        <Image
+          src="/images/Cendrawasih_Down.png"
+          alt="Cendrawasih Bird Decoration"
+          fill
+          className="object-contain"
+        />
       </div>
 
       {/* --- BRANCHES SECTION --- */}
@@ -85,15 +94,27 @@ export default function AboutPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
             {UNIVERSITIES.map((uni, i) => (
-              <div key={i} className="group bg-[#FFFAF5] border border-[#E4DBCA] rounded-2xl p-6 hover:bg-white hover:shadow-xl transition-all duration-300">
-                <h3 className="font-bold text-lg text-[#B64847] mb-3 group-hover:translate-x-1 transition-transform">{uni.name}</h3>
+              <div key={i} className="group bg-[#FFFAF5] border border-[#E4DBCA] rounded-2xl p-6 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col">
+                <div className="flex items-start justify-between mb-4">
+                  <h3 className="font-bold text-lg text-[#B64847] group-hover:translate-x-1 transition-transform flex-1">{uni.name}</h3>
+                  {uni.logo && (
+                    <div className="relative w-12 h-12 ml-2 flex-shrink-0">
+                      <Image
+                        src={uni.logo}
+                        alt={uni.name}
+                        fill
+                        className="object-contain"
+                      />
+                    </div>
+                  )}
+                </div>
                 <div className="space-y-2 text-[#886644] font-bold text-sm">
                   <p className="flex items-center gap-3 tracking-tight">
-                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">📧</span> 
+                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">📧</span>
                     {uni.email}
                   </p>
                   <p className="flex items-center gap-3 tracking-tight">
-                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">📱</span> 
+                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">📱</span>
                     {uni.instagram}
                   </p>
                 </div>
