@@ -9,6 +9,7 @@ import { API_ENDPOINTS } from '@/lib/constants';
 export default function HomePage() {
   const { language } = useLanguage();
   const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
@@ -19,6 +20,16 @@ export default function HomePage() {
       onSuccess: () => setNewsletterEmail(''),
     });
   };
+
+  const faqData = language === 'id' ? [
+    { q: 'Apa saja manfaat menjadi anggota?', a: 'Anggota PPIAQ mendapatkan akses eksklusif ke acara khusus, diskon dari mitra, akses awal ke kalender program, dan akses penuh ke papan komunitas.' },
+    { q: 'Bisakah saya menjadi anggota?', a: 'Ya! Jika Anda mahasiswa Indonesia di Queensland atau tertarik mendukung komunitas, Anda bisa mendaftar sebagai Ordinary Member atau Associate Member.' },
+    { q: 'Mengapa saya harus menyelesaikan formulir database?', a: 'Formulir database membantu kami tetap terhubung dengan semua pelajar Indonesia dan memberikan informasi penting tentang peluang, acara, dan dukungan komunitas.' },
+  ] : [
+    { q: 'What are the benefits of becoming a member?', a: 'PPIAQ members receive exclusive pricing to special events, early access to our program calendar, full access to our community board, and special partner discounts.' },
+    { q: 'Can I become a member?', a: 'Yes! If you\'re an Indonesian student in Queensland or interested in supporting our community, you can register as an Ordinary Member or Associate Member.' },
+    { q: 'Why should I complete the database form?', a: 'The database form helps us stay connected with all Indonesian students and allows us to share important information about opportunities, events, and community support.' },
+  ];
 
   return (
     <main className="font-montserrat text-[#303030] bg-[#FFFAF5] overflow-x-hidden">
@@ -139,20 +150,22 @@ export default function HomePage() {
           <h2 className="font-tan-angleton font-bold text-4xl text-[#B64847] mb-12">
             {language === 'id' ? 'Pertanyaan yang Sering Diajukan' : 'Frequently asked questions'}
           </h2>
-          
+
           <div className="space-y-4">
-            {(language === 'id' ? [
-              'Apa saja manfaat menjadi anggota?',
-              'Bisakah saya menjadi anggota?',
-              'Mengapa saya harus menyelesaikan formulir database?',
-            ] : [
-              'What are the benefits of becoming a member?',
-              'Can I become a member?',
-              'Why should I complete the database form?',
-            ]).map((q, i) => (
-              <div key={i} className="bg-[#FEB602]/20 p-6 flex justify-between items-center cursor-pointer group hover:bg-[#FEB602]/30 transition-all rounded-lg">
-                <span className="font-bold text-sm tracking-widest uppercase opacity-70 group-hover:opacity-100">{q}</span>
-                <span className="text-2xl font-light text-[#B64847]">+</span>
+            {faqData.map((faq, i) => (
+              <div key={i} className="bg-[#FEB602]/20 rounded-lg overflow-hidden transition-all">
+                <button
+                  onClick={() => setExpandedFAQ(expandedFAQ === i ? null : i)}
+                  className="w-full p-6 flex justify-between items-center cursor-pointer group hover:bg-[#FEB602]/30 transition-all"
+                >
+                  <span className="font-bold text-sm tracking-widest uppercase opacity-70 group-hover:opacity-100 text-left">{faq.q}</span>
+                  <span className={`text-2xl font-light text-[#B64847] transition-transform duration-300 ${expandedFAQ === i ? 'rotate-45' : ''}`}>+</span>
+                </button>
+                {expandedFAQ === i && (
+                  <div className="px-6 pb-6 bg-[#FEB602]/10 border-t border-[#FEB602]/30">
+                    <p className="text-gray-600 leading-relaxed">{faq.a}</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
