@@ -76,6 +76,7 @@ let events: Event[] = [
     title: 'Pre-Departure Briefing - Semester 1, 2026',
     date: 'Thursday, February 5, 2026',
     location: 'Zoom',
+    image: '/images/predeparture.jpg',
   },
   {
     id: '2',
@@ -84,6 +85,7 @@ let events: Event[] = [
     title: 'QUT Market Day - Join ISAQ / PPIA QUT',
     date: 'Monday, February 16, 2026',
     location: 'QUT',
+    image: '/images/qutmarketday.jpg',
   },
   {
     id: '3',
@@ -92,6 +94,7 @@ let events: Event[] = [
     title: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ',
     date: 'Wednesday, February 18, 2026',
     location: 'UQ St. Lucia',
+    image: '/images/uqmarketday.jpg',
   },
 ];
 

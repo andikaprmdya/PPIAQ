@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useLanguage } from '@/lib/language-context';
 
 export default function PestaRakyatPage() {
@@ -118,26 +119,62 @@ export default function PestaRakyatPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-3 h-auto md:h-112.5">
-          <div className="md:col-span-2 md:row-span-2 bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-3xl flex items-center justify-center text-[#886644]/40 font-bold italic text-xs hover:bg-[#E4DBCA]/40 transition-all shadow-sm overflow-hidden group">
-            <span className="group-hover:scale-105 transition-transform duration-500">[FEATURED_01]</span>
+          <div className="md:col-span-2 md:row-span-2 border border-[#E4DBCA] rounded-3xl flex items-center justify-center shadow-sm overflow-hidden group">
+            <Image
+              src="/images/pesra biggest box.jpg"
+              alt="Pesra Gallery - Featured"
+              width={500}
+              height={500}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
           </div>
-          
-          <div className="aspect-square md:aspect-auto bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
-            <span className="group-hover:scale-105 transition-transform duration-500">[IMAGE_02]</span>
+
+          <div className="aspect-square md:aspect-auto border border-[#E4DBCA] rounded-2xl flex items-center justify-center shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+            <Image
+              src="/images/pesra 1.jpg"
+              alt="Pesra Gallery 1"
+              width={300}
+              height={300}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
           </div>
-          <div className="aspect-square md:aspect-auto bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
-            <span className="group-hover:scale-105 transition-transform duration-500">[IMAGE_03]</span>
+          <div className="aspect-square md:aspect-auto border border-[#E4DBCA] rounded-2xl flex items-center justify-center shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+            <Image
+              src="/images/pesra 2.jpg"
+              alt="Pesra Gallery 2"
+              width={300}
+              height={300}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
           </div>
-          <div className="aspect-square md:aspect-auto bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
-            <span className="group-hover:scale-105 transition-transform duration-500">[IMAGE_04]</span>
+          <div className="aspect-square md:aspect-auto border border-[#E4DBCA] rounded-2xl flex items-center justify-center shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+            <Image
+              src="/images/pesra 3.jpg"
+              alt="Pesra Gallery 3"
+              width={300}
+              height={300}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
           </div>
-          <div className="aspect-square md:aspect-auto bg-[#E4DBCA]/20 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
-            <span className="group-hover:scale-105 transition-transform duration-500">[IMAGE_05]</span>
+          <div className="aspect-square md:aspect-auto border border-[#E4DBCA] rounded-2xl flex items-center justify-center shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+            <Image
+              src="/images/pesra 4.jpg"
+              alt="Pesra Gallery 4"
+              width={300}
+              height={300}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
           </div>
         </div>
-        
-        <div className="mt-3 w-full h-24 bg-[#E4DBCA]/10 border border-[#E4DBCA] rounded-2xl flex items-center justify-center text-[#886644]/40 font-bold italic text-[10px] shadow-sm hover:border-[#FEB602] transition-all">
-          [IMAGE_06_PANORAMIC]
+
+        <div className="mt-3 w-full border border-[#E4DBCA] rounded-2xl flex items-center justify-center shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+          <Image
+            src="/images/pesra rectangle.jpg"
+            alt="Pesra Gallery - Panoramic"
+            width={600}
+            height={200}
+            className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+          />
         </div>
       </section>
 
@@ -172,12 +209,14 @@ export default function PestaRakyatPage() {
         </div>
       </section>
 
-      {/* --- FOOTER DECORATION (ALREADY COMPACTED) --- */}
-      <div className="py-8 flex flex-col items-center opacity-20">
-         <div className="w-px h-12 bg-[#B64847] mb-6"></div>
-         <div className="w-16 h-16 border border-dashed border-[#886644] rounded-full flex items-center justify-center text-[8px] font-bold text-[#886644] rotate-12">
-            [BIRD]
-         </div>
+      {/* --- CENDRAWASIH FOOTER --- */}
+      <div className="py-12 px-6 flex justify-center">
+        <Image
+          src="/images/Cendrawasih_Down.png"
+          alt="Cendrawasih Bird"
+          width={200}
+          height={150}
+        />
       </div>
 
     </main>

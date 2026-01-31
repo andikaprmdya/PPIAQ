@@ -12,11 +12,11 @@ const UNIVERSITIES = [
 ];
 
 const TEAM_MEMBERS = [
-  { name: 'Ahmad Wijaya', role: { id: 'Ketua', en: 'President' }, university: 'University of Queensland', instagram: '@ahmadwijaya' },
-  { name: 'Siti Nurhaliza', role: { id: 'Sekretaris', en: 'Secretary' }, university: 'Griffith University', instagram: '@sitihaliza' },
-  { name: 'Budi Santoso', role: { id: 'Bendahara', en: 'Treasurer' }, university: 'James Cook University', instagram: '@budisantoso' },
-  { name: 'Lisa Rahmawati', role: { id: 'Kepala Acara', en: 'Events Head' }, university: 'QUT', instagram: '@lisarahmawati' },
-  { name: 'Rina Kartika', role: { id: 'Humas', en: 'Public Relations' }, university: 'University of Queensland', instagram: '@rinakartika' },
+  { name: 'Rafika Kusuma', role: { id: 'Ketua', en: 'President' }, university: 'University of Queensland', instagram: '@rafikakusuma', image: '/images/rafika.png' },
+  { name: 'Andika Pramudya Wardana', role: { id: 'Wakil Ketua Internal', en: 'Vice President Internal' }, university: 'University of Queensland', instagram: '@andikawdna', image: '/images/Andika.png' },
+  { name: 'Vincent Hamdali', role: { id: 'Wakil Ketua Eksternal', en: 'Vice President External' }, university: 'University of Queensland', instagram: '@vincenthamdali', image: '/images/vincent.jpg' },
+  { name: 'Emmanuela Stefany Sugiarto', role: { id: 'Sekretaris Jenderal', en: 'Secretary General' }, university: 'University of Queensland', instagram: '@emmanuelas', image: '/images/emma.png' },
+  { name: 'Fanny Alfianti', role: { id: 'Bendahara Jenderal', en: 'Treasurer General' }, university: 'University of Queensland', instagram: '@fannyalfianti', image: '/images/Fani.png' },
 ];
 
 export default function AboutPage() {
@@ -102,7 +102,7 @@ export default function AboutPage() {
                       alt={uni.name}
                       width={48}
                       height={48}
-                      className="ml-2 flex-shrink-0"
+                      className="ml-2 shrink-0"
                     />
                   )}
                 </div>
@@ -152,11 +152,13 @@ export default function AboutPage() {
             {TEAM_MEMBERS.map((member, i) => (
               <div key={i} className="group relative">
                 <div className="bg-white rounded-3xl p-5 text-center border border-[#E4DBCA] shadow-sm group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
-                  <div className="relative w-16 h-16 mx-auto mb-5">
-                    <div className="absolute inset-0 bg-linear-to-tr from-[#B64847] to-[#FEB602] rounded-2xl rotate-3 group-hover:rotate-6 transition-transform"></div>
-                    <div className="relative w-full h-full bg-[#303030] rounded-2xl flex items-center justify-center text-lg font-bold text-white shadow-md border border-white/20 overflow-hidden">
-                      {member.name.charAt(0)}
-                    </div>
+                  <div className="relative w-16 h-16 mx-auto mb-5 rounded-2xl overflow-hidden shadow-md border border-white/20">
+                    <Image
+                      src={member.image}
+                      alt={member.name}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
                   <h3 className="font-bold text-sm text-[#303030] mb-0.5 group-hover:text-[#B64847] transition-colors leading-tight">{member.name}</h3>
                   <p className="text-[#886644] font-bold text-[9px] uppercase tracking-widest mb-3">

@@ -102,13 +102,19 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { day: '5', month: 'FEB', title: 'Pre-Departure Briefing - Semester 1, 2026', date: 'Thursday, February 5, 2026', loc: 'Zoom' },
-              { day: '16', month: 'FEB', title: 'QUT Market Day - Join ISAQ / PPIA QUT', date: 'Monday, February 16, 2026', loc: 'QUT' },
-              { day: '18', month: 'FEB', title: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ', date: 'Wednesday, February 18, 2026', loc: 'UQ St. Lucia' },
+              { day: '5', month: 'FEB', title: 'Pre-Departure Briefing - Semester 1, 2026', date: 'Thursday, February 5, 2026', loc: 'Zoom', image: '/images/predeparture.jpg' },
+              { day: '16', month: 'FEB', title: 'QUT Market Day - Join ISAQ / PPIA QUT', date: 'Monday, February 16, 2026', loc: 'QUT', image: '/images/qutmarketday.jpg' },
+              { day: '18', month: 'FEB', title: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ', date: 'Wednesday, February 18, 2026', loc: 'UQ St. Lucia', image: '/images/uqmarketday.jpg' },
             ].map((event, i) => (
               <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-[#E4DBCA] group hover:-translate-y-1.25">
-                <div className="h-48 bg-gray-200 relative flex items-center justify-center text-gray-400 italic">
-                  [Event Image]
+                <div className="h-48 bg-gray-200 relative flex items-center justify-center text-gray-400 italic overflow-hidden">
+                  <Image
+                    src={event.image}
+                    alt={event.title}
+                    width={300}
+                    height={192}
+                    className="object-cover w-full h-full"
+                  />
                   <div className="absolute top-4 left-4 bg-[#B64847] text-white p-2 min-w-12 text-center rounded-md">
                     <p className="text-xl font-bold leading-none">{event.day}</p>
                     <p className="text-xs">{event.month}</p>
