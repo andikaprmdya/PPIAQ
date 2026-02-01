@@ -184,10 +184,6 @@ export function getUserByEmail(email: string): User | null {
   return users.find((u) => u.email === email) || null;
 }
 
-export function getUserByUsername(username: string): User | null {
-  return users.find((u) => u.username === username) || null;
-}
-
 export function getAllUsers(): User[] {
   return users;
 }

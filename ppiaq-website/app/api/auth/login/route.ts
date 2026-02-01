@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Login user
+    // Login user (verifies password with bcrypt)
     const user = loginUser(email, password);
 
     if (!user) {
@@ -23,17 +23,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Remove password from response
-    const { password: _, ...userWithoutPassword } = user;
+    // Check user status
+    if (user.status === 'pending') {
+      return NextResponse.json(
+        {
+          error: 'Application pending approval',
+          message: 'Your application is pending admin approval. Please wait for approval before logging in.',
+          user: undefined,
+        },
+        { status: 403 }
+      );
+    }
 
-    return NextResponse.json(
+    if (user.status === 'rejected') {
+      return NextResponse.json(
+        {
+          error: 'Application rejected',
+          message: `Your application was rejected: ${user.rejectionReason || 'No reason provided'}`,
+          user: undefined,
+        },
+        { status: 403 }
+      );
+    }
+
+    // Set cookie for session
+    const response = NextResponse.json(
       {
         message: 'Login successful',
-        user: userWithoutPassword,
+        user: { ...user, password: undefined },
       },
       { status: 200 }
     );
+
+    response.cookies.set('userEmail', email, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return response;
   } catch (error) {
+    console.error('Login error:', error);
     return NextResponse.json(
       { error: 'Login failed' },
       { status: 500 }

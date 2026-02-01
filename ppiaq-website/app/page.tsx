@@ -35,8 +35,21 @@ export default function HomePage() {
     <main className="font-montserrat text-[#303030] bg-[#FFFAF5] overflow-x-hidden">
       
       {/* --- SECTION 1: HERO (Berdasarkan image_9e5455.jpg) --- */}
-      <section className="bg-[#B64847] text-white py-20 px-6 min-h-[70vh] flex items-center">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12">
+      <section className="text-white py-20 px-6 min-h-[70vh] flex items-center relative overflow-hidden">
+        {/* Video Background */}
+        <video
+          autoPlay
+          muted
+          loop
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/images/QUEENSLAND, AUSTRALIA - DJI Cinematic Video - Justin Bainbridge (1080p, h264).mp4" type="video/mp4" />
+        </video>
+
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/40"></div>
+
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 relative z-10">
           {/* Cendrawasih Image */}
           <Image
             src="/images/Cendrawasih_Up.png"
