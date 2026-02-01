@@ -22,26 +22,26 @@ export default function Header() {
   }, []);
 
   const baseNavItems = [
-    { label: translations.navigation.home, href: '/' },
-    { label: translations.navigation.about, href: '/about' },
+    { label: getTranslation(translations.navigation.home, language), href: '/' },
+    { label: getTranslation(translations.navigation.about, language), href: '/about' },
   ];
 
   const publicNavItems = [
-    { label: translations.navigation.membership, href: '/membership' },
-    { label: translations.navigation.pestaRakyat, href: '/pesta-rakyat' },
-    { label: translations.navigation.contact, href: '/contact' },
+    { label: getTranslation(translations.navigation.membership, language), href: '/membership' },
+    { label: getTranslation(translations.navigation.pestaRakyat, language), href: '/pesta-rakyat' },
+    { label: getTranslation(translations.navigation.contact, language), href: '/contact' },
   ];
 
   const userNavItems = [
     { label: language === 'id' ? 'Papan Komunitas' : 'Community Board', href: '/community-board' },
-    { label: translations.navigation.pestaRakyat, href: '/pesta-rakyat' },
-    { label: translations.navigation.contact, href: '/contact' },
+    { label: getTranslation(translations.navigation.pestaRakyat, language), href: '/pesta-rakyat' },
+    { label: getTranslation(translations.navigation.contact, language), href: '/contact' },
   ];
 
   const adminNavItems = [
     { label: language === 'id' ? 'Dashboard Admin' : 'Admin Dashboard', href: '/admin/dashboard' },
-    { label: translations.navigation.pestaRakyat, href: '/pesta-rakyat' },
-    { label: translations.navigation.contact, href: '/contact' },
+    { label: getTranslation(translations.navigation.pestaRakyat, language), href: '/pesta-rakyat' },
+    { label: getTranslation(translations.navigation.contact, language), href: '/contact' },
   ];
 
   const navItems = isAuthenticated ? (isAdmin ? adminNavItems : userNavItems) : [...baseNavItems, ...publicNavItems];
@@ -77,12 +77,12 @@ export default function Header() {
             <div className="hidden lg:flex gap-8 items-center h-full">
               {navItems.map((item) => (
                 <Link
-                  key={getTranslation(item.label, language)}
+                  key={item.label}
                   href={item.href}
                   className="relative text-[13px] font-bold uppercase tracking-widest text-[#303030] transition-all duration-300 py-2 group-hover/nav:text-white/90 hover:text-[#FEB602]! hover:scale-110 active:scale-95 group/item"
                 >
-                  {getTranslation(item.label, language)}
-                  
+                  {item.label}
+
                   {/* Underline: Hanya muncul saat ITEM ini di-hover, bukan saat NAV di-hover */}
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FEB602] transition-all duration-300 group-hover/item:w-full"></span>
                 </Link>
