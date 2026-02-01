@@ -5,27 +5,36 @@ export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json();
 
-    // Validation
-    if (!email || !email.includes('@')) {
+    if (!email) {
       return NextResponse.json(
-        { error: 'Valid email is required' },
+        { error: 'Email is required' },
         { status: 400 }
       );
     }
 
-    // Subscribe
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
+
+    // Subscribe to newsletter
     const subscriber = subscribeToNewsletter(email);
 
     return NextResponse.json(
       {
-        message: 'Subscription successful',
+        message: 'Successfully subscribed to newsletter',
         subscriber,
       },
       { status: 201 }
     );
   } catch (error) {
+    console.error('POST /api/newsletter/subscribe error:', error);
     return NextResponse.json(
-      { error: 'Subscription failed' },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

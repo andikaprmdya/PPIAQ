@@ -3,18 +3,52 @@
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/language-context';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function CommunityBoardPage() {
   const { user, isAuthenticated } = useAuth();
   const { language } = useLanguage();
   const router = useRouter();
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterLoading, setNewsletterLoading] = useState(false);
+  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
+  const [newsletterError, setNewsletterError] = useState('');
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/auth/login');
     }
   }, [isAuthenticated, router]);
+
+  const handleNewsletterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNewsletterLoading(true);
+    setNewsletterError('');
+    setNewsletterSuccess(false);
+
+    try {
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setNewsletterError(data.error || (language === 'id' ? 'Subscription gagal' : 'Subscription failed'));
+        return;
+      }
+
+      setNewsletterSuccess(true);
+      setNewsletterEmail('');
+      setTimeout(() => setNewsletterSuccess(false), 4000);
+    } catch (err) {
+      setNewsletterError(language === 'id' ? 'Terjadi kesalahan' : 'An error occurred');
+    } finally {
+      setNewsletterLoading(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -190,30 +224,46 @@ export default function CommunityBoardPage() {
         </section>
 
         {/* Newsletter Signup */}
-        <section className="mt-16 bg-gradient-to-r from-[#B64847] to-[#303030] rounded-3xl p-8 md:p-12 text-white">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="font-tan-angleton font-bold text-3xl mb-4">
-              {language === 'id' ? 'Tetap Terhubung' : 'Stay Updated'}
-            </h2>
-            <p className="text-white/80 mb-8">
-              {language === 'id'
-                ? 'Berlangganan newsletter kami untuk mendapatkan update terbaru tentang acara dan peluang komunitas'
-                : 'Subscribe to our newsletter for the latest updates on events and community opportunities'}
-            </p>
+        <section className="mt-16">
+          <div className="bg-white rounded-3xl border-2 border-[#FEB602] p-8 md:p-12 overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+            {/* Left Content */}
+            <div className="flex-1">
+              <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-3">
+                {language === 'id' ? 'Tetap Terhubung' : 'Stay Updated'}
+              </h2>
+              <p className="text-gray-600 mb-1 leading-relaxed">
+                {language === 'id'
+                  ? 'Berlangganan newsletter kami untuk mendapatkan update terbaru tentang acara dan peluang komunitas'
+                  : 'Subscribe to our newsletter for the latest updates on events and community opportunities'}
+              </p>
+              <div className="w-12 h-1 bg-[#FEB602] rounded-full mt-4"></div>
+            </div>
 
-            <form className="flex flex-col sm:flex-row gap-3">
+            {/* Right Form */}
+            <form className="flex flex-col gap-3 w-full md:w-auto" onSubmit={handleNewsletterSubmit}>
               <input
                 type="email"
-                placeholder={language === 'id' ? 'Email Anda' : 'Your email'}
-                className="flex-1 px-6 py-3 rounded-xl focus:outline-none text-[#303030]"
+                value={newsletterEmail}
+                onChange={(e) => setNewsletterEmail(e.target.value)}
+                placeholder={language === 'id' ? 'Email Anda' : 'your@email.com'}
+                className="px-6 py-3 border border-[#E4DBCA] rounded-2xl focus:outline-none focus:border-[#B64847] transition-all text-sm w-full md:w-64"
                 required
               />
-              <button
-                type="submit"
-                className="px-8 py-3 bg-[#FEB602] text-[#B64847] font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-white transition-all"
-              >
-                {language === 'id' ? 'Berlangganan' : 'Subscribe'}
-              </button>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="submit"
+                  disabled={newsletterLoading}
+                  className="px-8 py-3 bg-[#B64847] text-white font-bold uppercase tracking-widest text-xs rounded-2xl hover:bg-[#303030] transition-all shadow-md disabled:opacity-50"
+                >
+                  {newsletterLoading ? (language === 'id' ? 'Sedang...' : 'Loading...') : (language === 'id' ? 'Berlangganan' : 'Subscribe')}
+                </button>
+                {newsletterSuccess && (
+                  <p className="text-green-600 text-xs font-bold">✓ {language === 'id' ? 'Berhasil berlangganan!' : 'Successfully subscribed!'}</p>
+                )}
+                {newsletterError && (
+                  <p className="text-red-600 text-xs font-bold">✗ {newsletterError}</p>
+                )}
+              </div>
             </form>
           </div>
         </section>

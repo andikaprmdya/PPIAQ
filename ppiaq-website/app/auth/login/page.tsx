@@ -4,11 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/language-context';
+import { useAuth } from '@/lib/auth-context';
 import { getTranslation, translations } from '@/lib/translations';
 
 export default function LoginPage() {
   const { language } = useLanguage();
   const router = useRouter();
+  const { login, loading: authLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,100 +22,112 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+      const result = await login(email, password);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || 'Login failed');
+      if (!result.success) {
+        setError(result.message);
+        setIsLoading(false);
         return;
       }
 
-      // Store user data (in production, use secure cookies/tokens)
-      localStorage.setItem('user', JSON.stringify(data.user));
-      router.push('/');
+      // Login berhasil! Auto-refresh untuk update navbar & auth state
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
     } catch (err) {
-      setError('Network error. Please try again.');
-    } finally {
+      setError(language === 'id' ? 'Terjadi kesalahan jaringan' : 'Network error. Please try again.');
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
-        {/* Title */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">
-            {getTranslation(translations.auth.login.title, language)}
-          </h2>
+    <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6 overflow-x-hidden flex items-center justify-center">
+      <div className="max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <p className="font-nickainley text-2xl text-[#886644] mb-2">
+            {language === 'id' ? 'Selamat Datang Kembali' : 'Welcome Back'}
+          </p>
+          <h1 className="font-tan-angleton font-bold text-4xl text-[#B64847] uppercase tracking-tighter mb-4">
+            {language === 'id' ? 'Masuk' : 'Sign In'}
+          </h1>
+          <div className="w-12 h-1 bg-[#FEB602] rounded-full mx-auto"></div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
+        {/* Form Card */}
+        <div className="bg-white rounded-3xl border border-[#E4DBCA] p-8 shadow-lg">
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl">
+              <p className="text-red-700 font-medium text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Login Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
+            <div className="group">
+              <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                {language === 'id' ? 'Email' : 'Email Address'} *
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                placeholder={language === 'id' ? 'Email Anda' : 'your@email.com'}
+              />
+            </div>
+
+            {/* Password */}
+            <div className="group">
+              <label htmlFor="password" className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                {language === 'id' ? 'Kata Sandi' : 'Password'} *
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                placeholder="••••••••"
+              />
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full px-6 py-3 bg-[#B64847] text-white font-bold uppercase tracking-widest text-xs rounded-2xl hover:bg-[#303030] transition-all disabled:opacity-50 mt-8"
+            >
+              {isLoading ? (language === 'id' ? 'Sedang masuk...' : 'Signing in...') : (language === 'id' ? 'Masuk' : 'Sign In')}
+            </button>
+          </form>
+
+          {/* Divider */}
+          <div className="my-6 border-t border-[#E4DBCA]"></div>
+
+          {/* Register Link */}
+          <div className="text-center text-sm">
+            <span className="text-gray-600">
+              {language === 'id' ? 'Belum punya akun? ' : "Don't have an account? "}
+            </span>
+            <Link href="/auth/register" className="text-[#B64847] font-bold hover:underline">
+              {language === 'id' ? 'Daftar di sini' : 'Sign up here'}
+            </Link>
           </div>
-        )}
+        </div>
 
-        {/* Login Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              {getTranslation(translations.auth.login.email, language)}
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="you@example.com"
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              {getTranslation(translations.auth.login.password, language)}
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            {isLoading ? (language === 'id' ? 'Sedang masuk...' : 'Signing in...') : getTranslation(translations.auth.login.submit, language)}
-          </button>
-        </form>
-
-        {/* Register Link */}
-        <div className="text-center text-sm">
-          <span className="text-gray-600">
-            {getTranslation(translations.auth.login.noAccount, language)}{' '}
-          </span>
-          <Link href="/auth/register" className="text-blue-600 hover:text-blue-700 font-medium">
-            {getTranslation(translations.auth.login.register, language)}
-          </Link>
+        {/* Info Note */}
+        <div className="mt-8 text-center text-xs text-gray-500 italic">
+          {language === 'id'
+            ? '🔐 Data Anda dilindungi dengan enkripsi'
+            : '🔐 Your data is protected with encryption'}
         </div>
       </div>
-    </div>
+    </main>
   );
 }

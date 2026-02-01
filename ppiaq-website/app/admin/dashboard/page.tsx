@@ -21,6 +21,12 @@ interface User {
   paymentProofUrl?: string;
 }
 
+interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  subscribedAt: string;
+}
+
 export default function AdminDashboardPage() {
   const { user, isAdmin } = useAuth();
   const router = useRouter();
@@ -28,8 +34,9 @@ export default function AdminDashboardPage() {
   const [pendingUsers, setPendingUsers] = useState<User[]>([]);
   const [approvedUsers, setApprovedUsers] = useState<User[]>([]);
   const [rejectedUsers, setRejectedUsers] = useState<User[]>([]);
+  const [newsletterSubscribers, setNewsletterSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'newsletter'>('pending');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
@@ -49,10 +56,11 @@ export default function AdminDashboardPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const [pendingRes, approvedRes, rejectedRes] = await Promise.all([
+      const [pendingRes, approvedRes, rejectedRes, newsletterRes] = await Promise.all([
         fetch('/api/admin/users?status=pending'),
         fetch('/api/admin/users?status=approved'),
         fetch('/api/admin/users?status=rejected'),
+        fetch('/api/admin/newsletter'),
       ]);
 
       if (pendingRes.ok) {
@@ -67,8 +75,12 @@ export default function AdminDashboardPage() {
         const data = await rejectedRes.json();
         setRejectedUsers(data);
       }
+      if (newsletterRes.ok) {
+        const data = await newsletterRes.json();
+        setNewsletterSubscribers(data);
+      }
     } catch (error) {
-      console.error('Failed to fetch users:', error);
+      console.error('Failed to fetch data:', error);
     } finally {
       setLoading(false);
     }
@@ -129,7 +141,11 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const displayUsers = activeTab === 'pending' ? pendingUsers : activeTab === 'approved' ? approvedUsers : rejectedUsers;
+  const displayUsers =
+    activeTab === 'pending' ? pendingUsers
+    : activeTab === 'approved' ? approvedUsers
+    : activeTab === 'rejected' ? rejectedUsers
+    : [];
 
   if (loading) {
     return (
@@ -157,7 +173,7 @@ export default function AdminDashboardPage() {
 
         {/* Tabs */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-          {(['pending', 'approved', 'rejected'] as const).map((tab) => (
+          {(['pending', 'approved', 'rejected', 'newsletter'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -170,12 +186,47 @@ export default function AdminDashboardPage() {
               {tab === 'pending' && `${language === 'id' ? 'Menunggu' : 'Pending'} (${pendingUsers.length})`}
               {tab === 'approved' && `${language === 'id' ? 'Disetujui' : 'Approved'} (${approvedUsers.length})`}
               {tab === 'rejected' && `${language === 'id' ? 'Ditolak' : 'Rejected'} (${rejectedUsers.length})`}
+              {tab === 'newsletter' && `${language === 'id' ? 'Newsletter' : 'Newsletter'} (${newsletterSubscribers.length})`}
             </button>
           ))}
         </div>
 
-        {/* Users Grid */}
-        {displayUsers.length === 0 ? (
+        {/* Users Grid / Newsletter List */}
+        {activeTab === 'newsletter' ? (
+          // Newsletter Subscribers
+          newsletterSubscribers.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-gray-500 text-lg">
+                {language === 'id' ? 'Tidak ada subscriber newsletter' : 'No newsletter subscribers'}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl border border-[#E4DBCA] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[#B64847] text-white">
+                    <tr>
+                      <th className="px-6 py-4 text-left font-bold uppercase text-xs tracking-widest">Email</th>
+                      <th className="px-6 py-4 text-left font-bold uppercase text-xs tracking-widest">
+                        {language === 'id' ? 'Bergabung' : 'Subscribed'}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {newsletterSubscribers.map((sub) => (
+                      <tr key={sub.id} className="border-t border-[#E4DBCA] hover:bg-[#FFFAF5] transition-all">
+                        <td className="px-6 py-4 text-sm font-medium">{sub.email}</td>
+                        <td className="px-6 py-4 text-sm text-gray-500">
+                          {new Date(sub.subscribedAt).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )
+        ) : displayUsers.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-gray-500 text-lg">
               {activeTab === 'pending' && (language === 'id' ? 'Tidak ada aplikasi menunggu' : 'No pending applications')}
