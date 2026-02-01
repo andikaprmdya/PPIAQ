@@ -167,13 +167,13 @@ export default function PestaRakyatPage() {
           </div>
         </div>
 
-        <div className="mt-3 w-full border border-[#E4DBCA] rounded-2xl flex items-center justify-center shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
+        <div className="mt-3 w-full h-32 border border-[#E4DBCA] rounded-2xl shadow-sm hover:border-[#FEB602] transition-all overflow-hidden group">
           <Image
             src="/images/pesra rectangle.jpg"
             alt="Pesra Gallery - Panoramic"
-            width={600}
+            width={800}
             height={200}
-            className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         </div>
       </section>
