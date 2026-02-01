@@ -86,6 +86,25 @@ let users: User[] = [
     approvedAt: new Date('2024-01-01'),
     approvedBy: 'system',
   },
+  {
+    id: '2',
+    firstName: 'Budi',
+    lastName: 'Santoso',
+    email: 'budi@example.com',
+    password: bcryptjs.hashSync('Test12345', 10),
+    nationality: 'Indonesia',
+    educationLevel: 'S1 (Bachelor)',
+    university: 'University of Queensland',
+    major: 'Computer Science',
+    birthDate: '2000-05-15',
+    membershipType: 'ordinary',
+    paymentProofUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+    role: 'user',
+    status: 'approved',
+    createdAt: new Date('2024-01-15'),
+    approvedAt: new Date('2024-01-16'),
+    approvedBy: '1',
+  },
 ];
 
 let newsletterSubscribers: NewsletterSubscriber[] = [
