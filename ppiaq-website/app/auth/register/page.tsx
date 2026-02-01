@@ -4,17 +4,25 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/language-context';
-import { getTranslation, translations } from '@/lib/translations';
 
 interface FormData {
+  // Step 1: Personal
   firstName: string;
   lastName: string;
+  nationality: string;
+  birthDate: string;
+
+  // Step 2: Education
+  educationLevel: string;
+  university: string;
+  major: string;
+
+  // Step 3: Account & Payment
   email: string;
-  username: string;
   password: string;
   confirmPassword: string;
   membershipType: 'ordinary' | 'associate';
-  university: string;
+  paymentProofFile: File | null;
 }
 
 const UNIVERSITIES = [
@@ -22,75 +30,139 @@ const UNIVERSITIES = [
   'Griffith University',
   'James Cook University',
   'Queensland University of Technology',
+  'Other',
 ];
+
+const EDUCATION_LEVELS = ['S1 (Bachelor)', 'S2 (Master)', 'S3 (Doctorate)'];
+
+const NATIONALITIES = ['Indonesia', 'Other'];
 
 export default function RegisterPage() {
   const { language } = useLanguage();
   const router = useRouter();
-  const [step, setStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState<Partial<FormData>>({});
   const [isComplete, setIsComplete] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+    firstName: '',
+    lastName: '',
+    nationality: '',
+    birthDate: '',
+    educationLevel: '',
+    university: '',
+    major: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    membershipType: 'ordinary',
+    paymentProofFile: null,
+  });
 
   const steps = [
     {
       id: 'personal',
-      title: translations.auth.register.step1.title,
-      fields: [
-        { name: 'firstName', label: translations.auth.register.step1.firstName, type: 'text' },
-        { name: 'lastName', label: translations.auth.register.step1.lastName, type: 'text' },
-        { name: 'email', label: translations.auth.register.step1.email, type: 'email' },
-      ],
+      title: language === 'id' ? 'Informasi Pribadi' : 'Personal Information',
+      description: language === 'id' ? 'Mulai dengan data dasar Anda' : 'Start with your basic information',
+    },
+    {
+      id: 'education',
+      title: language === 'id' ? 'Informasi Pendidikan' : 'Educational Information',
+      description: language === 'id' ? 'Berikan detail pendidikan Anda' : 'Provide your education details',
     },
     {
       id: 'account',
-      title: translations.auth.register.step2.title,
-      fields: [
-        { name: 'username', label: translations.auth.register.step2.username, type: 'text' },
-        { name: 'password', label: translations.auth.register.step2.password, type: 'password' },
-        { name: 'confirmPassword', label: translations.auth.register.step2.confirmPassword, type: 'password' },
-      ],
-    },
-    {
-      id: 'membership',
-      title: translations.auth.register.step3.title,
+      title: language === 'id' ? 'Akun & Bukti Pembayaran' : 'Account & Payment Proof',
+      description: language === 'id' ? 'Lengkapi akun dan upload bukti' : 'Complete your account and upload proof',
     },
   ];
 
-  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        setError(language === 'id' ? 'Format file harus JPEG, JPG, atau PNG' : 'File must be JPEG, JPG, or PNG');
+        return;
+      }
+
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        setError(language === 'id' ? 'Ukuran file maksimal 5MB' : 'File size must not exceed 5MB');
+        return;
+      }
+
+      setFormData((prev) => ({ ...prev, paymentProofFile: file }));
+      setError('');
+    }
   };
 
   const validateStep = (): boolean => {
     setError('');
 
-    if (step === 0) {
-      if (!formData.firstName || !formData.lastName || !formData.email) {
-        setError(language === 'id' ? 'Semua field harus diisi' : 'All fields are required');
+    if (currentStep === 0) {
+      // Validate personal info
+      if (!formData.firstName.trim()) {
+        setError(language === 'id' ? 'Nama depan harus diisi' : 'First name is required');
         return false;
       }
-      if (!formData.email?.includes('@')) {
-        setError(language === 'id' ? 'Email tidak valid' : 'Invalid email');
+      if (!formData.lastName.trim()) {
+        setError(language === 'id' ? 'Nama belakang harus diisi' : 'Last name is required');
         return false;
       }
-    } else if (step === 1) {
-      if (!formData.username || !formData.password || !formData.confirmPassword) {
-        setError(language === 'id' ? 'Semua field harus diisi' : 'All fields are required');
+      if (!formData.nationality) {
+        setError(language === 'id' ? 'Kewarganegaraan harus dipilih' : 'Nationality is required');
+        return false;
+      }
+      if (!formData.birthDate) {
+        setError(language === 'id' ? 'Tanggal lahir harus diisi' : 'Birth date is required');
+        return false;
+      }
+    } else if (currentStep === 1) {
+      // Validate education info
+      if (!formData.educationLevel) {
+        setError(language === 'id' ? 'Jenjang pendidikan harus dipilih' : 'Education level is required');
+        return false;
+      }
+      if (!formData.university) {
+        setError(language === 'id' ? 'Universitas harus dipilih' : 'University is required');
+        return false;
+      }
+      if (!formData.major.trim()) {
+        setError(language === 'id' ? 'Jurusan harus diisi' : 'Major is required');
+        return false;
+      }
+    } else if (currentStep === 2) {
+      // Validate account & payment
+      if (!formData.email.trim()) {
+        setError(language === 'id' ? 'Email harus diisi' : 'Email is required');
+        return false;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        setError(language === 'id' ? 'Format email tidak valid' : 'Invalid email format');
+        return false;
+      }
+      if (!formData.password) {
+        setError(language === 'id' ? 'Kata sandi harus diisi' : 'Password is required');
+        return false;
+      }
+      if (formData.password.length < 6) {
+        setError(language === 'id' ? 'Kata sandi minimal 6 karakter' : 'Password must be at least 6 characters');
         return false;
       }
       if (formData.password !== formData.confirmPassword) {
         setError(language === 'id' ? 'Kata sandi tidak cocok' : 'Passwords do not match');
         return false;
       }
-      if ((formData.password?.length || 0) < 8) {
-        setError(language === 'id' ? 'Kata sandi minimal 8 karakter' : 'Password must be at least 8 characters');
-        return false;
-      }
-    } else if (step === 2) {
-      if (!formData.membershipType || !formData.university) {
-        setError(language === 'id' ? 'Semua field harus diisi' : 'All fields are required');
+      if (!formData.paymentProofFile) {
+        setError(language === 'id' ? 'Bukti pembayaran harus diunggah' : 'Payment proof must be uploaded');
         return false;
       }
     }
@@ -98,42 +170,67 @@ export default function RegisterPage() {
     return true;
   };
 
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject('Failed to convert file');
+        }
+      };
+      reader.onerror = () => reject('Failed to read file');
+    });
+  };
+
   const handleNext = async () => {
     if (!validateStep()) return;
 
-    if (step < steps.length - 1) {
-      setStep(step + 1);
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
     } else {
       // Submit form
       setIsLoading(true);
       try {
+        // Convert file to base64
+        let paymentProofUrl = '';
+        if (formData.paymentProofFile) {
+          paymentProofUrl = await convertFileToBase64(formData.paymentProofFile);
+        }
+
         const response = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            username: formData.username,
+            firstName: formData.firstName.trim(),
+            lastName: formData.lastName.trim(),
+            email: formData.email.trim(),
             password: formData.password,
-            membershipType: formData.membershipType,
+            nationality: formData.nationality,
+            educationLevel: formData.educationLevel,
             university: formData.university,
+            major: formData.major.trim(),
+            birthDate: formData.birthDate,
+            membershipType: formData.membershipType,
+            paymentProofUrl,
           }),
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          setError(data.error || 'Registration failed');
+          setError(data.error || (language === 'id' ? 'Pendaftaran gagal' : 'Registration failed'));
           return;
         }
 
         setIsComplete(true);
         setTimeout(() => {
           router.push('/auth/login');
-        }, 2000);
+        }, 3000);
       } catch (err) {
-        setError('Network error. Please try again.');
+        setError(language === 'id' ? 'Terjadi kesalahan jaringan' : 'Network error. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -141,196 +238,368 @@ export default function RegisterPage() {
   };
 
   const handlePrev = () => {
-    if (step > 0) {
-      setStep(step - 1);
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
       setError('');
     }
   };
 
-  const progress = ((step + 1) / steps.length) * 100;
+  const progress = ((currentStep + 1) / steps.length) * 100;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
+    <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6 overflow-x-hidden">
+      <div className="max-w-2xl mx-auto">
         {!isComplete ? (
           <>
+            {/* Header */}
+            <div className="text-center mb-12">
+              <p className="font-nickainley text-2xl text-[#886644] mb-2">
+                {language === 'id' ? 'Bergabung dengan komunitas' : 'Join our community'}
+              </p>
+              <h1 className="font-tan-angleton font-bold text-4xl md:text-5xl text-[#B64847] uppercase tracking-tighter mb-4">
+                {language === 'id' ? 'Daftar Sekarang' : 'Register Now'}
+              </h1>
+              <div className="w-12 h-1 bg-[#FEB602] mx-auto rounded-full"></div>
+            </div>
+
             {/* Progress Bar */}
-            <div className="mb-8">
-              <div className="flex justify-between mb-2">
-                <span className="text-sm font-medium">
-                  {language === 'id' ? 'Langkah' : 'Step'} {step + 1} {language === 'id' ? 'dari' : 'of'} {steps.length}
+            <div className="mb-12">
+              <div className="flex justify-between items-center mb-4">
+                <span className="font-bold text-sm uppercase tracking-widest text-[#886644]">
+                  {language === 'id' ? 'Langkah' : 'Step'} {currentStep + 1} {language === 'id' ? 'dari' : 'of'} {steps.length}
                 </span>
-                <span className="text-sm font-medium">{Math.round(progress)}%</span>
+                <span className="font-bold text-sm uppercase tracking-widest text-[#B64847]">{Math.round(progress)}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full h-2 bg-[#E4DBCA] rounded-full overflow-hidden">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  className="h-full bg-[#B64847] transition-all duration-500 rounded-full"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             </div>
 
             {/* Step Indicators */}
-            <div className="flex justify-between mb-8">
-              {steps.map((s, i) => (
-                <div key={s.id} className="flex flex-col items-center">
+            <div className="flex justify-between mb-12">
+              {steps.map((step, index) => (
+                <div key={step.id} className="flex flex-col items-center flex-1">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                      i < step
-                        ? 'bg-blue-600 text-white'
-                        : i === step
-                        ? 'bg-blue-600 text-white ring-2 ring-blue-300'
-                        : 'bg-gray-200 text-gray-700'
+                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm transition-all mb-2 ${
+                      index < currentStep
+                        ? 'bg-[#B64847] text-white ring-2 ring-[#FEB602]'
+                        : index === currentStep
+                        ? 'bg-[#B64847] text-white ring-2 ring-[#FEB602] scale-110'
+                        : 'bg-[#E4DBCA] text-[#886644]'
                     }`}
                   >
-                    {i < step ? '✓' : i + 1}
+                    {index < currentStep ? '✓' : index + 1}
                   </div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-center text-[#886644]">
+                    {step.title}
+                  </span>
                 </div>
               ))}
             </div>
 
-            {/* Title and Error */}
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {getTranslation(steps[step].title, language)}
-              </h2>
-            </div>
-
-            {error && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                {error}
+            {/* Form Card */}
+            <div className="bg-white p-8 md:p-12 rounded-3xl border border-[#E4DBCA] shadow-lg mb-8">
+              {/* Step Title */}
+              <div className="mb-8">
+                <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">
+                  {steps[currentStep].title}
+                </h2>
+                <p className="text-gray-600 text-sm">{steps[currentStep].description}</p>
               </div>
-            )}
 
-            {/* Form Content */}
-            {step === 0 || step === 1 ? (
-              <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-                {steps[step].fields?.map((field: any) => (
-                  <div key={field.name}>
-                    <label className="block text-sm font-medium text-gray-700">
-                      {getTranslation(field.label, language)}
+              {/* Error Message */}
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl">
+                  <p className="text-red-700 font-medium text-sm">{error}</p>
+                </div>
+              )}
+
+              {/* Step 0: Personal Information */}
+              {currentStep === 0 && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                      <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                        {language === 'id' ? 'Nama Depan' : 'First Name'} *
+                      </label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleInputChange}
+                        className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                        placeholder={language === 'id' ? 'Nama depan' : 'First name'}
+                      />
+                    </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                        {language === 'id' ? 'Nama Belakang' : 'Last Name'} *
+                      </label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleInputChange}
+                        className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                        placeholder={language === 'id' ? 'Nama belakang' : 'Last name'}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Kewarganegaraan' : 'Nationality'} *
+                    </label>
+                    <select
+                      name="nationality"
+                      value={formData.nationality}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium appearance-none cursor-pointer"
+                    >
+                      <option value="">{language === 'id' ? 'Pilih kewarganegaraan' : 'Select nationality'}</option>
+                      {NATIONALITIES.map((nat) => (
+                        <option key={nat} value={nat}>
+                          {nat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Tanggal Lahir' : 'Date of Birth'} *
                     </label>
                     <input
-                      type={field.type}
-                      name={field.name}
-                      value={formData[field.name as keyof FormData] || ''}
-                      onChange={handleFieldChange}
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      placeholder={field.name}
+                      type="date"
+                      name="birthDate"
+                      value={formData.birthDate}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
                     />
                   </div>
-                ))}
-              </form>
-            ) : (
-              <div className="space-y-4">
-                {/* Membership Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {getTranslation(translations.auth.register.step3.membershipType, language)}
-                  </label>
-                  <select
-                    name="membershipType"
-                    value={formData.membershipType || ''}
-                    onChange={handleFieldChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">
-                      {language === 'id' ? 'Pilih jenis' : 'Select type'}
-                    </option>
-                    <option value="ordinary">
-                      {getTranslation(translations.auth.register.step3.ordinary, language)} (ID)
-                    </option>
-                    <option value="associate">
-                      {getTranslation(translations.auth.register.step3.associate, language)} (Non-ID)
-                    </option>
-                  </select>
                 </div>
+              )}
 
-                {/* University */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {getTranslation(translations.auth.register.step3.university, language)}
-                  </label>
-                  <select
-                    name="university"
-                    value={formData.university || ''}
-                    onChange={handleFieldChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">
-                      {language === 'id' ? 'Pilih universitas' : 'Select university'}
-                    </option>
-                    {UNIVERSITIES.map((uni) => (
-                      <option key={uni} value={uni}>
-                        {uni}
-                      </option>
-                    ))}
-                  </select>
+              {/* Step 1: Education Information */}
+              {currentStep === 1 && (
+                <div className="space-y-6">
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Jenjang Pendidikan' : 'Education Level'} *
+                    </label>
+                    <select
+                      name="educationLevel"
+                      value={formData.educationLevel}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium appearance-none cursor-pointer"
+                    >
+                      <option value="">{language === 'id' ? 'Pilih jenjang' : 'Select level'}</option>
+                      {EDUCATION_LEVELS.map((level) => (
+                        <option key={level} value={level}>
+                          {level}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Universitas' : 'University'} *
+                    </label>
+                    <select
+                      name="university"
+                      value={formData.university}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium appearance-none cursor-pointer"
+                    >
+                      <option value="">{language === 'id' ? 'Pilih universitas' : 'Select university'}</option>
+                      {UNIVERSITIES.map((uni) => (
+                        <option key={uni} value={uni}>
+                          {uni}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Jurusan' : 'Major'} *
+                    </label>
+                    <input
+                      type="text"
+                      name="major"
+                      value={formData.major}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                      placeholder={language === 'id' ? 'Jurusan' : 'Your major'}
+                    />
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* Step 2: Account & Payment */}
+              {currentStep === 2 && (
+                <div className="space-y-6">
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Alamat Email' : 'Email Address'} *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                      placeholder={language === 'id' ? 'Email Anda' : 'your@email.com'}
+                    />
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Kata Sandi' : 'Password'} *
+                    </label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                      placeholder={language === 'id' ? 'Minimal 6 karakter' : 'At least 6 characters'}
+                    />
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Konfirmasi Kata Sandi' : 'Confirm Password'} *
+                    </label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                      placeholder={language === 'id' ? 'Konfirmasi kata sandi' : 'Confirm password'}
+                    />
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Jenis Keanggotaan' : 'Membership Type'} *
+                    </label>
+                    <select
+                      name="membershipType"
+                      value={formData.membershipType}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium appearance-none cursor-pointer"
+                    >
+                      <option value="ordinary">
+                        {language === 'id' ? 'Anggota Biasa' : 'Ordinary Member'} (Indonesian Students)
+                      </option>
+                      <option value="associate">
+                        {language === 'id' ? 'Anggota Asosiasi' : 'Associate Member'} (Other Students/Supporters)
+                      </option>
+                    </select>
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Bukti Pembayaran' : 'Payment Proof'} (JPEG/JPG/PNG, Max 5MB) *
+                    </label>
+                    <div className="border-2 border-dashed border-[#E4DBCA] rounded-2xl p-6 text-center hover:border-[#B64847] transition-colors cursor-pointer group">
+                      <input
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.JPG,.JPEG,.PNG"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="paymentProof"
+                      />
+                      <label htmlFor="paymentProof" className="cursor-pointer">
+                        <div className="text-4xl mb-2">📸</div>
+                        <p className="font-bold text-sm text-[#B64847] mb-1">
+                          {formData.paymentProofFile
+                            ? formData.paymentProofFile.name
+                            : language === 'id'
+                            ? 'Klik atau seret file'
+                            : 'Click to upload or drag file'}
+                        </p>
+                        <p className="text-[10px] text-gray-400">
+                          {language === 'id' ? 'Format: JPEG, JPG, PNG | Ukuran maksimal: 5MB' : 'Format: JPEG, JPG, PNG | Max size: 5MB'}
+                        </p>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between gap-4 pt-6">
+            <div className="flex gap-4">
               <button
                 onClick={handlePrev}
-                disabled={step === 0}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                disabled={currentStep === 0}
+                className="flex-1 px-6 py-3 border-2 border-[#B64847] text-[#B64847] font-bold uppercase tracking-widest text-xs rounded-2xl hover:bg-[#B64847] hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {language === 'id' ? 'Kembali' : 'Back'}
               </button>
               <button
                 onClick={handleNext}
                 disabled={isLoading}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                className="flex-1 px-6 py-3 bg-[#B64847] text-white font-bold uppercase tracking-widest text-xs rounded-2xl hover:bg-[#303030] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading
                   ? language === 'id'
                     ? 'Sedang...'
                     : 'Loading...'
-                  : step === steps.length - 1
-                  ? getTranslation(translations.auth.register.submit, language)
+                  : currentStep === steps.length - 1
+                  ? language === 'id'
+                    ? 'Daftar'
+                    : 'Register'
                   : language === 'id'
                   ? 'Selanjutnya'
                   : 'Next'}
               </button>
             </div>
+
+            {/* Already have account */}
+            <div className="text-center mt-8">
+              <span className="text-sm text-gray-600">
+                {language === 'id' ? 'Sudah punya akun? ' : 'Already have an account? '}
+                <Link href="/auth/login" className="text-[#B64847] font-bold hover:underline">
+                  {language === 'id' ? 'Masuk di sini' : 'Sign in here'}
+                </Link>
+              </span>
+            </div>
           </>
         ) : (
           // Success Message
-          <div className="text-center py-8">
-            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100 mb-4">
-              <span className="text-3xl">✓</span>
+          <div className="text-center py-12">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-[#FEB602]/20 mb-6">
+              <span className="text-5xl">✓</span>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {getTranslation(translations.auth.register.success, language)}
+            <h2 className="font-tan-angleton font-bold text-4xl text-[#B64847] mb-4">
+              {language === 'id' ? 'Pendaftaran Berhasil!' : 'Registration Successful!'}
             </h2>
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 mb-2 text-base leading-relaxed max-w-lg mx-auto">
               {language === 'id'
-                ? 'Terima kasih atas pendaftaran Anda. Silakan masuk.'
-                : 'Thank you for registering. Please sign in.'}
+                ? 'Terima kasih telah mendaftar. Aplikasi Anda sedang menunggu persetujuan admin. Anda akan dapat masuk setelah disetujui.'
+                : 'Thank you for registering. Your application is pending admin approval. You will be able to sign in after approval.'}
+            </p>
+            <p className="text-sm text-[#886644] mb-8 font-medium italic">
+              {language === 'id' ? 'Mengalihkan ke halaman login...' : 'Redirecting to login page...'}
             </p>
             <Link
               href="/auth/login"
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="inline-block px-8 py-3 bg-[#B64847] text-white font-bold uppercase tracking-widest text-xs rounded-2xl hover:bg-[#303030] transition-all"
             >
-              {getTranslation(translations.navigation.login, language)}
-            </Link>
-          </div>
-        )}
-
-        {/* Login Link */}
-        {!isComplete && (
-          <div className="text-center text-sm">
-            <span className="text-gray-600">
-              {getTranslation(translations.auth.register.alreadyHave, language)}{' '}
-            </span>
-            <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-medium">
-              {getTranslation(translations.auth.register.login, language)}
+              {language === 'id' ? 'Ke Halaman Login' : 'Go to Login'}
             </Link>
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 }
