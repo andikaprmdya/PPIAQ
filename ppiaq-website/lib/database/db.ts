@@ -1,14 +1,36 @@
 // Dummy Database
+import bcryptjs from 'bcryptjs';
+
 interface User {
   id: string;
+  // Basic Info
   firstName: string;
   lastName: string;
   email: string;
-  username: string;
-  password: string; // In production, hash this!
-  membershipType: 'ordinary' | 'associate';
+  password: string; // Hashed with bcryptjs
+
+  // Educational Info
+  nationality: string;
+  educationLevel: string; // S1, S2, S3, etc
   university: string;
+  major: string;
+  birthDate: string; // YYYY-MM-DD format
+
+  // Membership
+  membershipType: 'ordinary' | 'associate';
+  paymentProofUrl: string; // Path to uploaded payment proof (base64 or file path)
+
+  // Auth & Status
+  role: 'user' | 'admin';
+  status: 'pending' | 'approved' | 'rejected';
+
+  // Audit Trail
   createdAt: Date;
+  approvedAt?: Date;
+  approvedBy?: string; // Admin ID
+  rejectedAt?: Date;
+  rejectedBy?: string; // Admin ID
+  rejectionReason?: string;
 }
 
 interface NewsletterSubscriber {
@@ -47,14 +69,22 @@ interface TeamMember {
 let users: User[] = [
   {
     id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john@example.com',
-    username: 'johndoe',
-    password: 'Password123',
-    membershipType: 'ordinary',
+    firstName: 'Admin',
+    lastName: 'User',
+    email: 'admin@ppiaq.org',
+    password: bcryptjs.hashSync('Admin123!', 10), // Default admin password
+    nationality: 'Indonesia',
+    educationLevel: 'S2',
     university: 'University of Queensland',
-    createdAt: new Date('2024-01-15'),
+    major: 'Engineering',
+    birthDate: '1990-01-01',
+    membershipType: 'ordinary',
+    paymentProofUrl: '',
+    role: 'admin',
+    status: 'approved',
+    createdAt: new Date('2024-01-01'),
+    approvedAt: new Date('2024-01-01'),
+    approvedBy: 'system',
   },
 ];
 
@@ -111,20 +141,30 @@ export function registerUser(
   firstName: string,
   lastName: string,
   email: string,
-  username: string,
   password: string,
+  nationality: string,
+  educationLevel: string,
+  university: string,
+  major: string,
+  birthDate: string,
   membershipType: 'ordinary' | 'associate',
-  university: string
+  paymentProofUrl: string
 ): User {
   const newUser: User = {
     id: String(users.length + 1),
     firstName,
     lastName,
     email,
-    username,
-    password,
-    membershipType,
+    password: bcryptjs.hashSync(password, 10), // Hash password
+    nationality,
+    educationLevel,
     university,
+    major,
+    birthDate,
+    membershipType,
+    paymentProofUrl,
+    role: 'user',
+    status: 'pending', // Users start as pending
     createdAt: new Date(),
   };
   users.push(newUser);
@@ -132,7 +172,12 @@ export function registerUser(
 }
 
 export function loginUser(email: string, password: string): User | null {
-  return users.find((u) => u.email === email && u.password === password) || null;
+  const user = users.find((u) => u.email === email);
+  if (!user) return null;
+
+  // Compare hashed passwords using bcryptjs
+  const isPasswordValid = bcryptjs.compareSync(password, user.password);
+  return isPasswordValid ? user : null;
 }
 
 export function getUserByEmail(email: string): User | null {
@@ -202,4 +247,39 @@ export function getAllTeamMembers(): TeamMember[] {
 
 export function getTeamMemberById(id: string): TeamMember | null {
   return teamMembers.find((m) => m.id === id) || null;
+}
+
+// NEW: Approval & Status functions
+export function getPendingUsers(): User[] {
+  return users.filter((u) => u.status === 'pending');
+}
+
+export function approveUser(userId: string, adminId: string): User | null {
+  const user = users.find((u) => u.id === userId);
+  if (!user) return null;
+
+  user.status = 'approved';
+  user.approvedAt = new Date();
+  user.approvedBy = adminId;
+  return user;
+}
+
+export function rejectUser(userId: string, adminId: string, reason: string): User | null {
+  const user = users.find((u) => u.id === userId);
+  if (!user) return null;
+
+  user.status = 'rejected';
+  user.rejectedAt = new Date();
+  user.rejectedBy = adminId;
+  user.rejectionReason = reason;
+  return user;
+}
+
+export function getUsersByStatus(status: 'pending' | 'approved' | 'rejected'): User[] {
+  return users.filter((u) => u.status === status);
+}
+
+export function isAdmin(userId: string): boolean {
+  const user = users.find((u) => u.id === userId);
+  return user?.role === 'admin' ? true : false;
 }
