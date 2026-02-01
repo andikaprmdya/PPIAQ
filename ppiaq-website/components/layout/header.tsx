@@ -3,11 +3,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useLanguage } from '@/lib/language-context';
+import { useAuth } from '@/lib/auth-context';
 import { getTranslation, translations } from '@/lib/translations';
 import { useState, useEffect } from 'react';
 
 export default function Header() {
   const { language, setLanguage } = useLanguage();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -19,13 +21,30 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navItems = [
+  const baseNavItems = [
     { label: translations.navigation.home, href: '/' },
     { label: translations.navigation.about, href: '/about' },
+  ];
+
+  const publicNavItems = [
     { label: translations.navigation.membership, href: '/membership' },
     { label: translations.navigation.pestaRakyat, href: '/pesta-rakyat' },
     { label: translations.navigation.contact, href: '/contact' },
   ];
+
+  const userNavItems = [
+    { label: language === 'id' ? 'Papan Komunitas' : 'Community Board', href: '/community-board' },
+    { label: translations.navigation.pestaRakyat, href: '/pesta-rakyat' },
+    { label: translations.navigation.contact, href: '/contact' },
+  ];
+
+  const adminNavItems = [
+    { label: language === 'id' ? 'Dashboard Admin' : 'Admin Dashboard', href: '/admin/dashboard' },
+    { label: translations.navigation.pestaRakyat, href: '/pesta-rakyat' },
+    { label: translations.navigation.contact, href: '/contact' },
+  ];
+
+  const navItems = isAuthenticated ? (isAdmin ? adminNavItems : userNavItems) : [...baseNavItems, ...publicNavItems];
 
   return (
     <>
@@ -96,18 +115,40 @@ export default function Header() {
 
               {/* Auth Buttons */}
               <div className="hidden md:flex items-center gap-5">
-                <Link
-                  href="/auth/login"
-                  className="text-[12px] font-bold uppercase tracking-widest text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:text-[#FEB602]! hover:scale-110"
-                >
-                  {getTranslation(translations.navigation.login, language)}
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="bg-[#B64847] text-white px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95 group-hover/nav:bg-white group-hover/nav:text-[#B64847] hover:bg-[#FEB602]! hover:text-[#B64847]! hover:scale-105"
-                >
-                  {getTranslation(translations.navigation.register, language)}
-                </Link>
+                {isAuthenticated ? (
+                  <>
+                    <span className="text-[12px] font-bold text-[#B64847] group-hover/nav:text-white transition-colors">
+                      {user?.firstName}
+                    </span>
+                    <Link
+                      href="/profile"
+                      className="text-[12px] font-bold uppercase tracking-widest text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:text-[#FEB602]! hover:scale-110"
+                    >
+                      {language === 'id' ? 'Profil' : 'Profile'}
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="bg-[#B64847] text-white px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95 group-hover/nav:bg-white group-hover/nav:text-[#B64847] hover:bg-[#FEB602]! hover:text-[#B64847]! hover:scale-105"
+                    >
+                      {language === 'id' ? 'Keluar' : 'Logout'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      className="text-[12px] font-bold uppercase tracking-widest text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:text-[#FEB602]! hover:scale-110"
+                    >
+                      {getTranslation(translations.navigation.login, language)}
+                    </Link>
+                    <Link
+                      href="/auth/register"
+                      className="bg-[#B64847] text-white px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95 group-hover/nav:bg-white group-hover/nav:text-[#B64847] hover:bg-[#FEB602]! hover:text-[#B64847]! hover:scale-105"
+                    >
+                      {getTranslation(translations.navigation.register, language)}
+                    </Link>
+                  </>
+                )}
               </div>
 
               {/* Mobile Menu Icon */}
@@ -127,14 +168,58 @@ export default function Header() {
             <div className="flex flex-col gap-6 mt-8 border-t border-white/20 pt-8">
               {navItems.map((item) => (
                 <Link
-                  key={getTranslation(item.label, language)}
+                  key={item.href}
                   href={item.href}
                   className="text-lg font-bold uppercase tracking-[0.2em] text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:text-[#FEB602]!"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {getTranslation(item.label, language)}
+                  {item.label}
                 </Link>
               ))}
+
+              {/* Mobile Auth Section */}
+              <div className="border-t border-white/20 pt-6 flex flex-col gap-4">
+                {isAuthenticated ? (
+                  <>
+                    <p className="text-sm font-bold text-[#B64847]">
+                      {language === 'id' ? 'Masuk sebagai:' : 'Logged in as:'} {user?.firstName}
+                    </p>
+                    <Link
+                      href="/profile"
+                      className="text-lg font-bold uppercase tracking-[0.2em] text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:text-[#FEB602]!"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {language === 'id' ? 'Profil' : 'Profile'}
+                    </Link>
+                    <button
+                      onClick={() => {
+                        logout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="bg-[#B64847] text-white px-6 py-3 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95"
+                    >
+                      {language === 'id' ? 'Keluar' : 'Logout'}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/auth/login"
+                      className="text-lg font-bold uppercase tracking-[0.2em] text-[#303030] transition-colors duration-300 group-hover/nav:text-white hover:text-[#FEB602]!"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {getTranslation(translations.navigation.login, language)}
+                    </Link>
+                    <Link
+                      href="/auth/register"
+                      className="bg-[#B64847] text-white px-6 py-3 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      {getTranslation(translations.navigation.register, language)}
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </nav>
