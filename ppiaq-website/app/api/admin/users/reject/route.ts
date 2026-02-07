@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByEmail, rejectUser, isAdmin } from '@/lib/database/db';
+import { sendEmail, getMembershipApplicationTemplate } from '@/lib/email/brevo';
 import { cookies } from 'next/headers';
 
 export async function POST(request: NextRequest) {
@@ -38,12 +39,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Send email notification to user
+    const emailTemplate = getMembershipApplicationTemplate(user.firstName, user.lastName, 'rejected', reason);
+    await sendEmail({
+      to: [{ email: user.email, name: `${user.firstName} ${user.lastName}` }],
+      subject: 'PPIAQ Membership Application - Update',
+      htmlContent: emailTemplate,
+    });
+
     // Return user without password
     const { password, ...userWithoutPassword } = user;
 
     return NextResponse.json(
       {
-        message: 'User rejected successfully',
+        message: 'User rejected successfully and notification email sent',
         user: userWithoutPassword,
       },
       { status: 200 }

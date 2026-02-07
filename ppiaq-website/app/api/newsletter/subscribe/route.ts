@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { subscribeToNewsletter } from '@/lib/database/db';
+import { sendEmail, getNewsletterSubscriptionTemplate } from '@/lib/email/brevo';
 
 export async function POST(request: NextRequest) {
   try {
@@ -24,9 +25,17 @@ export async function POST(request: NextRequest) {
     // Subscribe to newsletter
     const subscriber = subscribeToNewsletter(email);
 
+    // Send confirmation email
+    const emailTemplate = getNewsletterSubscriptionTemplate(email);
+    await sendEmail({
+      to: [{ email }],
+      subject: 'Welcome to PPIAQ Newsletter',
+      htmlContent: emailTemplate,
+    });
+
     return NextResponse.json(
       {
-        message: 'Successfully subscribed to newsletter',
+        message: 'Successfully subscribed to newsletter. Check your email for confirmation.',
         subscriber,
       },
       { status: 201 }

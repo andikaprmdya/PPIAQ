@@ -68,13 +68,18 @@ export default function AboutPage() {
       </section>
 
       {/* --- CENDRAWASIH DECORATION --- */}
-      <div className="max-w-5xl mx-auto px-6 mb-12 flex justify-center">
+      <div className="max-w-5xl mx-auto px-6 mb-12 flex flex-col items-center gap-6">
         <Image
           src="/images/Cendrawasih_Down.png"
           alt="Cendrawasih Bird Decoration"
           width={250}
           height={150}
         />
+
+        {/* VISI MISI Button */}
+        <a href="/visi-misi" className="px-8 py-3 bg-[#B64847] text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#303030] transition-all shadow-lg active:scale-95">
+          Visi Misi
+        </a>
       </div>
 
       {/* --- BRANCHES SECTION --- */}
@@ -181,9 +186,9 @@ export default function AboutPage() {
 
           {/* View More Button */}
           <div className="mt-12 flex justify-center">
-            <button className="px-8 py-3 bg-[#B64847] text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#303030] transition-all shadow-lg active:scale-95">
+            <a href="/meet-the-team" className="px-8 py-3 bg-[#B64847] text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#303030] transition-all shadow-lg active:scale-95 inline-block">
               View More Members
-            </button>
+            </a>
           </div>
         </div>
       </section>

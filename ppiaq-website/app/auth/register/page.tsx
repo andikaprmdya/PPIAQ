@@ -11,6 +11,8 @@ interface FormData {
   lastName: string;
   nationality: string;
   birthDate: string;
+  phoneNumber: string;
+  studentId: string;
 
   // Step 2: Education
   educationLevel: string;
@@ -49,6 +51,8 @@ export default function RegisterPage() {
     lastName: '',
     nationality: '',
     birthDate: '',
+    phoneNumber: '',
+    studentId: '',
     educationLevel: '',
     university: '',
     major: '',
@@ -58,6 +62,9 @@ export default function RegisterPage() {
     membershipType: 'ordinary',
     paymentProofFile: null,
   });
+
+  // Track if Rubric link was clicked for UQ, QUT, Griffith, JCU
+  const [rubricLinkClicked, setRubricLinkClicked] = useState(false);
 
   const steps = [
     {
@@ -138,6 +145,14 @@ export default function RegisterPage() {
         setError(language === 'id' ? 'Jurusan harus diisi' : 'Major is required');
         return false;
       }
+      // Check if Rubric link was clicked for UQ, QUT, Griffith, JCU
+      const rubricUniversities = ['University of Queensland', 'Queensland University of Technology', 'Griffith University', 'James Cook University'];
+      if (rubricUniversities.includes(formData.university) && !rubricLinkClicked) {
+        setError(language === 'id'
+          ? 'Silakan klik link Rubric untuk menyelesaikan pendaftaran universitas Anda'
+          : 'Please click the Rubric link to complete your university registration');
+        return false;
+      }
     } else if (currentStep === 2) {
       // Validate account & payment
       if (!formData.email.trim()) {
@@ -213,6 +228,8 @@ export default function RegisterPage() {
             university: formData.university,
             major: formData.major.trim(),
             birthDate: formData.birthDate,
+            phoneNumber: formData.phoneNumber.trim(),
+            studentId: formData.studentId.trim(),
             membershipType: formData.membershipType,
             paymentProofUrl,
           }),
@@ -381,6 +398,36 @@ export default function RegisterPage() {
                       className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
                     />
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="group">
+                      <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                        {language === 'id' ? 'Nomor Telepon' : 'Phone Number'}
+                      </label>
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleInputChange}
+                        className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                        placeholder={language === 'id' ? 'Nomor telepon' : 'Phone number'}
+                      />
+                    </div>
+
+                    <div className="group">
+                      <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                        {language === 'id' ? 'ID Mahasiswa' : 'Student ID'}
+                      </label>
+                      <input
+                        type="text"
+                        name="studentId"
+                        value={formData.studentId}
+                        onChange={handleInputChange}
+                        className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                        placeholder={language === 'id' ? 'ID Mahasiswa' : 'Student ID'}
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -438,6 +485,33 @@ export default function RegisterPage() {
                       placeholder={language === 'id' ? 'Jurusan' : 'Your major'}
                     />
                   </div>
+
+                  {/* Rubric Link for University Students */}
+                  {['University of Queensland', 'Queensland University of Technology', 'Griffith University', 'James Cook University'].includes(formData.university) && (
+                    <div className="mt-8 p-6 bg-[#FEB602]/10 border border-[#FEB602] rounded-2xl">
+                      <p className="text-sm font-semibold text-[#B64847] mb-4">
+                        {language === 'id'
+                          ? '⚠️ Penting: Silakan klik link berikut untuk menyelesaikan pendaftaran universitas Anda di Rubric'
+                          : '⚠️ Important: Please click the link below to complete your university registration on Rubric'}
+                      </p>
+                      <a
+                        href="https://campus.hellorubric.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setRubricLinkClicked(true)}
+                        className="inline-block px-6 py-3 bg-[#B64847] text-white rounded-xl font-semibold hover:bg-[#9a3a3e] transition-all"
+                      >
+                        {language === 'id' ? '→ Buka Rubric Campus' : '→ Open Rubric Campus'}
+                      </a>
+                      {rubricLinkClicked && (
+                        <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                          <p className="text-green-800 font-semibold text-sm flex items-center gap-2">
+                            ✓ {language === 'id' ? 'Link sudah diklik' : 'Link clicked'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 

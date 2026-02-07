@@ -2,16 +2,39 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/lib/language-context';
 import { useFormSubmit } from '@/lib/hooks/useFormSubmit';
 import { API_ENDPOINTS } from '@/lib/constants';
+
+interface FAQItem {
+  id: string;
+  question: { id: string; en: string };
+  answer: { id: string; en: string };
+}
 
 export default function HomePage() {
   const { language } = useLanguage();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
+  const [faqData, setFaqData] = useState<FAQItem[]>([]);
+  const [faqLoading, setFaqLoading] = useState(true);
   const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
+
+  useEffect(() => {
+    const fetchFAQ = async () => {
+      try {
+        const res = await fetch('/api/faq?page=home');
+        const data = await res.json();
+        setFaqData(data.data || []);
+      } catch (error) {
+        console.error('Error fetching FAQ:', error);
+      } finally {
+        setFaqLoading(false);
+      }
+    };
+    fetchFAQ();
+  }, []);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,15 +45,15 @@ export default function HomePage() {
     });
   };
 
-  const faqData = language === 'id' ? [
-    { q: 'Apa saja manfaat menjadi anggota?', a: 'Anggota PPIAQ mendapatkan akses eksklusif ke acara khusus, diskon dari mitra, akses awal ke kalender program, dan akses penuh ke papan komunitas.' },
-    { q: 'Bisakah saya menjadi anggota?', a: 'Ya! Jika Anda mahasiswa Indonesia di Queensland atau tertarik mendukung komunitas, Anda bisa mendaftar sebagai Ordinary Member atau Associate Member.' },
-    { q: 'Mengapa saya harus menyelesaikan formulir database?', a: 'Formulir database membantu kami tetap terhubung dengan semua pelajar Indonesia dan memberikan informasi penting tentang peluang, acara, dan dukungan komunitas.' },
-  ] : [
-    { q: 'What are the benefits of becoming a member?', a: 'PPIAQ members receive exclusive pricing to special events, early access to our program calendar, full access to our community board, and special partner discounts.' },
-    { q: 'Can I become a member?', a: 'Yes! If you\'re an Indonesian student in Queensland or interested in supporting our community, you can register as an Ordinary Member or Associate Member.' },
-    { q: 'Why should I complete the database form?', a: 'The database form helps us stay connected with all Indonesian students and allows us to share important information about opportunities, events, and community support.' },
-  ];
+  const getFAQDisplay = () => {
+    if (faqLoading) return [];
+    return faqData.map((item) => ({
+      q: language === 'id' ? item.question.id : item.question.en,
+      a: language === 'id' ? item.answer.id : item.answer.en,
+    }));
+  };
+
+  const displayFAQ = getFAQDisplay();
 
   return (
     <main className="font-montserrat text-[#303030] bg-[#FFFAF5] overflow-x-hidden">
@@ -172,22 +195,28 @@ export default function HomePage() {
           </h2>
 
           <div className="space-y-4">
-            {faqData.map((faq, i) => (
-              <div key={i} className="bg-[#FEB602]/20 rounded-lg overflow-hidden transition-all">
-                <button
-                  onClick={() => setExpandedFAQ(expandedFAQ === i ? null : i)}
-                  className="w-full p-6 flex justify-between items-center cursor-pointer group hover:bg-[#FEB602]/30 transition-all"
-                >
-                  <span className="font-bold text-sm tracking-widest uppercase opacity-70 group-hover:opacity-100 text-left">{faq.q}</span>
-                  <span className={`text-2xl font-light text-[#B64847] transition-transform duration-300 ${expandedFAQ === i ? 'rotate-45' : ''}`}>+</span>
-                </button>
-                {expandedFAQ === i && (
-                  <div className="px-6 pb-6 bg-[#FEB602]/10 border-t border-[#FEB602]/30">
-                    <p className="text-gray-600 leading-relaxed">{faq.a}</p>
-                  </div>
-                )}
-              </div>
-            ))}
+            {faqLoading ? (
+              <div className="text-center py-8 text-[#886644]">Loading FAQs...</div>
+            ) : displayFAQ.length === 0 ? (
+              <div className="text-center py-8 text-[#886644]">No FAQs available</div>
+            ) : (
+              displayFAQ.map((faq, i) => (
+                <div key={i} className="bg-[#FEB602]/20 rounded-lg overflow-hidden transition-all">
+                  <button
+                    onClick={() => setExpandedFAQ(expandedFAQ === i ? null : i)}
+                    className="w-full p-6 flex justify-between items-center cursor-pointer group hover:bg-[#FEB602]/30 transition-all"
+                  >
+                    <span className="font-bold text-sm tracking-widest uppercase opacity-70 group-hover:opacity-100 text-left">{faq.q}</span>
+                    <span className={`text-2xl font-light text-[#B64847] transition-transform duration-300 ${expandedFAQ === i ? 'rotate-45' : ''}`}>+</span>
+                  </button>
+                  {expandedFAQ === i && (
+                    <div className="px-6 pb-6 bg-[#FEB602]/10 border-t border-[#FEB602]/30">
+                      <p className="text-gray-600 leading-relaxed">{faq.a}</p>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>

@@ -10,6 +10,8 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string;
+  studentId?: string;
   nationality: string;
   educationLevel: string;
   university: string;
@@ -18,6 +20,7 @@ interface User {
   membershipType: 'ordinary' | 'associate';
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
+  rejectionReason?: string;
   paymentProofUrl?: string;
 }
 
@@ -40,6 +43,11 @@ export default function AdminDashboardPage() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editFormData, setEditFormData] = useState<Partial<User>>({});
+  const [editError, setEditError] = useState<string | null>(null);
 
   // Redirect if not admin
   useEffect(() => {
@@ -141,6 +149,162 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleUnreject = async (userId: string) => {
+    setActionLoading(true);
+    try {
+      const response = await fetch('/api/admin/users/unreject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (response.ok) {
+        // Update local state
+        setRejectedUsers(rejectedUsers.filter((u) => u.id !== userId));
+        const unrejectUser = rejectedUsers.find((u) => u.id === userId);
+        if (unrejectUser) {
+          setPendingUsers([...pendingUsers, { ...unrejectUser, status: 'pending' }]);
+        }
+        setSelectedUser(null);
+      }
+    } catch (error) {
+      console.error('Failed to unreject user:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImportLoading(true);
+    setImportMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/admin/users/import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setImportMessage({
+          type: 'success',
+          text: `Import completed: ${data.results.imported} imported, ${data.results.updated} updated`,
+        });
+        await fetchUsers();
+      } else {
+        setImportMessage({
+          type: 'error',
+          text: data.error || 'Import failed',
+        });
+      }
+    } catch (error) {
+      setImportMessage({
+        type: 'error',
+        text: 'Error during import',
+      });
+    } finally {
+      setImportLoading(false);
+      event.target.value = '';
+    }
+  };
+
+  const handleExport = async (format: 'csv' | 'excel') => {
+    try {
+      const response = await fetch(`/api/admin/users/export?format=${format}`);
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = format === 'csv' ? 'ppiaq-members.csv' : 'ppiaq-members.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+    }
+  };
+
+  const handleEditModeToggle = (user: User) => {
+    if (!editMode) {
+      // Opening edit mode - pre-fill with current data
+      setEditFormData({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        phoneNumber: user.phoneNumber || '',
+        studentId: user.studentId || '',
+        email: user.email,
+        nationality: user.nationality,
+        educationLevel: user.educationLevel,
+        university: user.university,
+        major: user.major,
+        birthDate: user.birthDate,
+        membershipType: user.membershipType,
+        status: user.status,
+      });
+    }
+    setEditMode(!editMode);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedUser) return;
+
+    setActionLoading(true);
+    setEditError(null);
+    try {
+      console.log('Saving user:', selectedUser.id, 'with data:', editFormData);
+
+      const response = await fetch(`/api/admin/users?id=${selectedUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editFormData),
+      });
+
+      console.log('Response status:', response.status);
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType?.includes('application/json')) {
+        const text = await response.text();
+        console.error('Response is not JSON:', contentType, text.substring(0, 200));
+        setEditError(`Server error: ${response.status} - Invalid response format`);
+        return;
+      }
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const updatedUserData = data.user;
+
+        // Update in all lists
+        setPendingUsers(pendingUsers.map((u) => (u.id === selectedUser.id ? updatedUserData : u)));
+        setApprovedUsers(approvedUsers.map((u) => (u.id === selectedUser.id ? updatedUserData : u)));
+        setRejectedUsers(rejectedUsers.map((u) => (u.id === selectedUser.id ? updatedUserData : u)));
+        setSelectedUser(updatedUserData);
+        setEditMode(false);
+        setEditError(null);
+      } else {
+        setEditError(data.error || data.details || 'Failed to update user');
+        console.error('API Error:', data);
+      }
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      setEditError(`Error: ${errorMsg}`);
+      console.error('Failed to save edit:', error);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const displayUsers =
     activeTab === 'pending' ? pendingUsers
     : activeTab === 'approved' ? approvedUsers
@@ -169,6 +333,43 @@ export default function AdminDashboardPage() {
             {language === 'id' ? 'Kelola Aplikasi' : 'Manage Applications'}
           </h1>
           <div className="w-12 h-1 bg-[#FEB602] rounded-full"></div>
+        </div>
+
+        {/* Import/Export Message */}
+        {importMessage && (
+          <div className={`mb-6 p-4 rounded-xl ${
+            importMessage.type === 'success'
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}>
+            {importMessage.text}
+          </div>
+        )}
+
+        {/* Import/Export Buttons */}
+        <div className="mb-8 flex flex-wrap gap-4">
+          <label className="px-6 py-3 bg-[#B64847] text-white rounded-xl hover:bg-[#9a3a3e] cursor-pointer font-bold uppercase tracking-widest text-xs transition-all">
+            <input
+              type="file"
+              accept=".csv,.xlsx,.xls"
+              onChange={handleImport}
+              disabled={importLoading}
+              className="hidden"
+            />
+            📤 {language === 'id' ? 'Import CSV/Excel' : 'Import CSV/Excel'}
+          </label>
+          <button
+            onClick={() => handleExport('csv')}
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold uppercase tracking-widest text-xs transition-all"
+          >
+            📥 CSV
+          </button>
+          <button
+            onClick={() => handleExport('excel')}
+            className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-bold uppercase tracking-widest text-xs transition-all"
+          >
+            📥 Excel
+          </button>
         </div>
 
         {/* Tabs */}
@@ -385,6 +586,147 @@ export default function AdminDashboardPage() {
                 </div>
               )}
 
+              {/* Edit Mode */}
+              {editMode && (
+                <div className="space-y-4 mb-6">
+                  <h3 className="font-bold text-[#B64847] mb-4">{language === 'id' ? 'Edit Data Member' : 'Edit Member Data'}</h3>
+
+                  {editError && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-red-800 font-semibold text-sm">❌ {editError}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">First Name</label>
+                        <input
+                          type="text"
+                          value={editFormData.firstName || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, firstName: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Last Name</label>
+                        <input
+                          type="text"
+                          value={editFormData.lastName || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, lastName: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Phone Number</label>
+                        <input
+                          type="tel"
+                          value={editFormData.phoneNumber || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, phoneNumber: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Student ID</label>
+                        <input
+                          type="text"
+                          value={editFormData.studentId || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, studentId: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Nationality</label>
+                        <input
+                          type="text"
+                          value={editFormData.nationality || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, nationality: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Education Level</label>
+                        <input
+                          type="text"
+                          value={editFormData.educationLevel || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, educationLevel: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">University</label>
+                        <input
+                          type="text"
+                          value={editFormData.university || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, university: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Major</label>
+                        <input
+                          type="text"
+                          value={editFormData.major || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, major: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Membership Type</label>
+                        <select
+                          value={editFormData.membershipType || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, membershipType: e.target.value as 'ordinary' | 'associate' })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        >
+                          <option value="ordinary">Ordinary</option>
+                          <option value="associate">Associate</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Status</label>
+                        <select
+                          value={editFormData.status || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value as 'pending' | 'approved' | 'rejected' })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="approved">Approved</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <button
+                      onClick={handleSaveEdit}
+                      disabled={actionLoading}
+                      className="flex-1 px-4 py-3 bg-blue-600 text-white font-bold uppercase tracking-widest text-xs rounded-lg hover:bg-blue-700 transition-all disabled:opacity-50"
+                    >
+                      {actionLoading ? (language === 'id' ? 'Menyimpan...' : 'Saving...') : (language === 'id' ? 'Simpan' : 'Save')}
+                    </button>
+                    <button
+                      onClick={() => setEditMode(false)}
+                      className="flex-1 px-4 py-3 bg-gray-400 text-white font-bold uppercase tracking-widest text-xs rounded-lg hover:bg-gray-500 transition-all"
+                    >
+                      {language === 'id' ? 'Batal' : 'Cancel'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Action Section */}
               {selectedUser.status === 'pending' && (
                 <div className="space-y-4 mb-6">
@@ -420,7 +762,54 @@ export default function AdminDashboardPage() {
                     >
                       {actionLoading ? (language === 'id' ? 'Sedang...' : 'Loading...') : (language === 'id' ? 'Tolak' : 'Reject')}
                     </button>
+                    <button
+                      onClick={() => setEditMode(!editMode)}
+                      className="flex-1 px-6 py-3 bg-blue-600 text-white font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-blue-700 transition-all"
+                    >
+                      {language === 'id' ? 'Edit' : 'Edit'}
+                    </button>
                   </div>
+                </div>
+              )}
+
+              {/* Unreject Button for Rejected Users */}
+              {selectedUser.status === 'rejected' && (
+                <div className="space-y-4 mb-6">
+                  {selectedUser.rejectionReason && (
+                    <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-red-600 mb-1">
+                        {language === 'id' ? 'Alasan Penolakan' : 'Rejection Reason'}
+                      </p>
+                      <p className="text-sm text-red-800">{selectedUser.rejectionReason}</p>
+                    </div>
+                  )}
+                  <div className="flex gap-4">
+                    <button
+                      onClick={() => handleUnreject(selectedUser.id)}
+                      disabled={actionLoading}
+                      className="flex-1 px-6 py-3 bg-green-600 text-white font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-green-700 transition-all disabled:opacity-50"
+                    >
+                      {actionLoading ? (language === 'id' ? 'Sedang...' : 'Loading...') : (language === 'id' ? 'Batalkan Penolakan' : 'Unreject')}
+                    </button>
+                    <button
+                      onClick={() => handleEditModeToggle(selectedUser)}
+                      className="flex-1 px-6 py-3 bg-blue-600 text-white font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-blue-700 transition-all"
+                    >
+                      {editMode ? (language === 'id' ? 'Batal' : 'Cancel') : (language === 'id' ? 'Edit' : 'Edit')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Edit Button for Approved Users */}
+              {selectedUser.status === 'approved' && (
+                <div className="mb-6">
+                  <button
+                    onClick={() => handleEditModeToggle(selectedUser)}
+                    className="w-full px-6 py-3 bg-blue-600 text-white font-bold uppercase tracking-widest text-xs rounded-xl hover:bg-blue-700 transition-all"
+                  >
+                    {editMode ? (language === 'id' ? 'Batal' : 'Cancel') : (language === 'id' ? 'Edit Data' : 'Edit Data')}
+                  </button>
                 </div>
               )}
 

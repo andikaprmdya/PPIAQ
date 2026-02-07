@@ -1,28 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllTeamMembers, getTeamMemberById } from '@/lib/database/db';
+import { getAllCMSTeamMembers } from '@/lib/database/db';
 
-export async function GET(request: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
-    if (id) {
-      const member = getTeamMemberById(id);
-      if (!member) {
-        return NextResponse.json(
-          { error: 'Team member not found' },
-          { status: 404 }
-        );
-      }
-      return NextResponse.json({ member }, { status: 200 });
-    }
-
-    const members = getAllTeamMembers();
-    return NextResponse.json({ members }, { status: 200 });
+    const members = getAllCMSTeamMembers(true).sort((a, b) => a.order - b.order);
+    return NextResponse.json({
+      data: members,
+      message: `Retrieved ${members.length} active team members`,
+      meta: { total: members.length },
+    });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to fetch team members' },
-      { status: 500 }
-    );
+    console.error('Error fetching team members:', error);
+    return NextResponse.json({ error: 'Failed to fetch team members' }, { status: 500 });
   }
 }

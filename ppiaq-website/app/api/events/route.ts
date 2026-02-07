@@ -1,28 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllEvents, getEventById } from '@/lib/database/db';
+import { getAllCMSEvents } from '@/lib/database/db';
 
-export async function GET(request: NextRequest) {
+// GET /api/events - Public endpoint for published events
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    // Get published events only
+    const events = getAllCMSEvents(true); // true = published only
 
-    if (id) {
-      const event = getEventById(id);
-      if (!event) {
-        return NextResponse.json(
-          { error: 'Event not found' },
-          { status: 404 }
-        );
-      }
-      return NextResponse.json({ event }, { status: 200 });
-    }
-
-    const events = getAllEvents();
-    return NextResponse.json({ events }, { status: 200 });
+    return NextResponse.json({
+      data: events,
+      message: `Retrieved ${events.length} published events`,
+      meta: { total: events.length },
+    });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to fetch events' },
-      { status: 500 }
-    );
+    console.error('Error fetching events:', error);
+    return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
   }
 }
