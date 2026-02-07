@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState } from 'react';
 import { useLanguage } from '@/lib/language-context';
 import { useFormSubmit } from '@/lib/hooks/useFormSubmit';
@@ -103,15 +104,19 @@ export default function HomePage() {
               : 'Whether this is your first time away from home, or you\'re a seasoned international student, we\'re here for you to be your community. Now, how can we help you today?'}
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <button className="p-6 bg-black text-white font-bold hover:bg-[#B64847] transition-colors uppercase tracking-widest text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 max-w-md mx-auto">
+            <button
+              onClick={() => {
+                const link = document.createElement('a');
+                link.href = '/EOI guide.pdf';
+                link.download = 'EOI guide.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="p-6 bg-black text-white font-bold hover:bg-[#B64847] transition-colors uppercase tracking-widest text-sm"
+            >
               {language === 'id' ? 'Panduan Queensland' : 'Guide to Queensland Booklet'}
-            </button>
-            <button className="p-6 bg-black text-white font-bold hover:bg-[#B64847] transition-colors uppercase tracking-widest text-sm">
-              {language === 'id' ? 'Tambahkan Saya ke Database' : 'Add Me to the Database'}
-            </button>
-            <button className="p-6 bg-black text-white font-bold hover:bg-[#B64847] transition-colors uppercase tracking-widest text-sm">
-              {language === 'id' ? 'Saya Ingin Menjadi Anggota' : 'I Want to Become a Member'}
             </button>
           </div>
         </div>
@@ -126,32 +131,34 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { day: '5', month: 'FEB', title: 'Pre-Departure Briefing - Semester 1, 2026', date: 'Thursday, February 5, 2026', loc: 'Zoom', image: '/images/predeparture.jpg' },
-              { day: '16', month: 'FEB', title: 'QUT Market Day - Join ISAQ / PPIA QUT', date: 'Monday, February 16, 2026', loc: 'QUT', image: '/images/qutmarketday.jpg' },
-              { day: '18', month: 'FEB', title: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ', date: 'Wednesday, February 18, 2026', loc: 'UQ St. Lucia', image: '/images/uqmarketday.jpg' },
+              { day: '5', month: 'FEB', title: 'Pre-Departure Briefing - Semester 1, 2026', date: 'Thursday, February 5, 2026', loc: 'Zoom', image: '/images/predeparture.jpg', href: '/events/pre-departure-briefing' },
+              { day: '16', month: 'FEB', title: 'QUT Market Day - Join ISAQ / PPIA QUT', date: 'Monday, February 16, 2026', loc: 'QUT', image: '/images/qutmarketday.jpg', href: '/events/qut-market-day' },
+              { day: '18', month: 'FEB', title: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ', date: 'Wednesday, February 18, 2026', loc: 'UQ St. Lucia', image: '/images/uqmarketday.jpg', href: '/events/uq-market-day' },
             ].map((event, i) => (
-              <div key={i} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-[#E4DBCA] group hover:-translate-y-1.25">
-                <div className="h-48 bg-gray-200 relative flex items-center justify-center text-gray-400 italic overflow-hidden">
-                  <Image
-                    src={event.image}
-                    alt={event.title}
-                    width={300}
-                    height={192}
-                    className="object-cover w-full h-full"
-                  />
-                  <div className="absolute top-4 left-4 bg-[#B64847] text-white p-2 min-w-12 text-center rounded-md">
-                    <p className="text-xl font-bold leading-none">{event.day}</p>
-                    <p className="text-xs">{event.month}</p>
+              <Link key={i} href={event.href} className="block">
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-[#E4DBCA] group hover:-translate-y-1.25 h-full cursor-pointer">
+                  <div className="h-48 bg-gray-200 relative flex items-center justify-center text-gray-400 italic overflow-hidden">
+                    <Image
+                      src={event.image}
+                      alt={event.title}
+                      width={300}
+                      height={192}
+                      className="object-cover w-full h-full"
+                    />
+                    <div className="absolute top-4 left-4 bg-[#B64847] text-white p-2 min-w-12 text-center rounded-md">
+                      <p className="text-xl font-bold leading-none">{event.day}</p>
+                      <p className="text-xs">{event.month}</p>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="font-bold text-lg mb-4 group-hover:text-[#B64847] transition-colors">{event.title}</h3>
+                    <div className="space-y-1 text-sm text-gray-500 font-medium">
+                      <p>📅 {event.date}</p>
+                      <p>📍 {event.loc}</p>
+                    </div>
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="font-bold text-lg mb-4 group-hover:text-[#B64847] transition-colors">{event.title}</h3>
-                  <div className="space-y-1 text-sm text-gray-500 font-medium">
-                    <p>📅 {event.date}</p>
-                    <p>📍 {event.loc}</p>
-                  </div>
-                </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
