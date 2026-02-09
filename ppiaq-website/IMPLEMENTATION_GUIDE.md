@@ -209,7 +209,7 @@ Andika,Pramudya,andika@example.com,+61412345678,12345,ordinary,pending,2026-02-0
 Make sure `.env.local` is configured:
 
 ```env
-BREVO_API_KEY=REDACTED
+BREVO_API_KEY=your-brevo-api-key-here
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
