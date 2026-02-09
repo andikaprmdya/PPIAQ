@@ -9,10 +9,10 @@ export async function GET(req: NextRequest) {
 
     let data;
     if (key) {
-      const content = getStaticContentByKey(key);
+      const content = await getStaticContentByKey(key);
       data = content ? [content] : [];
     } else if (page) {
-      data = getStaticContentByPage(page);
+      data = await getStaticContentByPage(page);
     } else {
       return NextResponse.json({ error: 'page or key parameter required' }, { status: 400 });
     }
