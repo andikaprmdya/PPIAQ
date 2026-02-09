@@ -19,7 +19,19 @@ export default function HomePage() {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const [faqData, setFaqData] = useState<FAQItem[]>([]);
   const [faqLoading, setFaqLoading] = useState(true);
+  const [currentBg, setCurrentBg] = useState(0);
   const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
+
+  const backgroundImages = [
+    '/images/pesra 1.jpg',
+    '/images/pesra 2.jpg',
+    '/images/pesra 3.jpg',
+    '/images/pesra 4.jpg',
+    '/images/pesra biggest box.jpg',
+    '/images/pesra rectangle.jpg',
+    '/images/qutmarketday.jpg',
+    '/images/uqmarketday.jpg',
+  ];
 
   useEffect(() => {
     const fetchFAQ = async () => {
@@ -34,6 +46,14 @@ export default function HomePage() {
       }
     };
     fetchFAQ();
+  }, []);
+
+  // Slideshow effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
+    }, 5000); // Change image every 5 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
@@ -60,15 +80,21 @@ export default function HomePage() {
       
       {/* --- SECTION 1: HERO (Berdasarkan image_9e5455.jpg) --- */}
       <section className="text-white py-20 px-6 min-h-[70vh] flex items-center relative overflow-hidden">
-        {/* Video Background */}
-        <video
-          autoPlay
-          muted
-          loop
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/images/QUEENSLAND, AUSTRALIA - DJI Cinematic Video - Justin Bainbridge (1080p, h264).mp4" type="video/mp4" />
-        </video>
+        {/* Image Carousel Background */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          {backgroundImages.map((image, index) => (
+            <Image
+              key={index}
+              src={image}
+              alt={`Background ${index}`}
+              fill
+              className={`object-cover transition-opacity duration-1000 ${
+                currentBg === index ? 'opacity-100' : 'opacity-0'
+              }`}
+              priority={index === 0}
+            />
+          ))}
+        </div>
 
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/40"></div>
