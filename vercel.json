@@ -1,0 +1,6 @@
+{
+  "buildCommand": "cd ppiaq-website && npm run build",
+  "devCommand": "cd ppiaq-website && npm run dev",
+  "installCommand": "cd ppiaq-website && npm install",
+  "outputDirectory": "ppiaq-website/.next"
+}
