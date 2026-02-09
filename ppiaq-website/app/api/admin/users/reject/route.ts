@@ -13,9 +13,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const adminUser = getUserByEmail(userEmail);
+    const adminUser = await getUserByEmail(userEmail);
 
-    if (!adminUser || !isAdmin(adminUser.id)) {
+    if (!adminUser || !(await isAdmin(adminUser.id))) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Reject the user
-    const user = rejectUser(userId, adminUser.id, reason);
+    const user = await rejectUser(userId, adminUser.id, reason);
 
     if (!user) {
       return NextResponse.json(

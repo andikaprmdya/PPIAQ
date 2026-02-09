@@ -13,9 +13,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const adminUser = getUserByEmail(userEmail);
+    const adminUser = await getUserByEmail(userEmail);
 
-    if (!adminUser || !isAdmin(adminUser.id)) {
+    if (!adminUser || !(await isAdmin(adminUser.id))) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const format = request.nextUrl.searchParams.get('format') || 'excel';
 
     // Get all users
-    const users = getAllUsers();
+    const users = await getAllUsers();
 
     // Transform data for export (exclude password)
     const exportData = users.map((user) => ({

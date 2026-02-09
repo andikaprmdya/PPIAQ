@@ -8,11 +8,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const { id } = await params;
-    const member = getCMSTeamMemberById(id);
+    const member = await getCMSTeamMemberById(id);
     if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 });
 
     return NextResponse.json({ data: member });
@@ -28,12 +28,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const { id } = await params;
     const body = await req.json();
-    const updated = updateCMSTeamMember(id, body);
+    const updated = await updateCMSTeamMember(id, body);
 
     if (!updated) return NextResponse.json({ error: 'Member not found' }, { status: 404 });
     return NextResponse.json({ data: updated, message: 'Member updated successfully' });
@@ -49,11 +49,11 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const { id } = await params;
-    const deleted = deleteCMSTeamMember(id);
+    const deleted = await deleteCMSTeamMember(id);
     if (!deleted) return NextResponse.json({ error: 'Member not found' }, { status: 404 });
 
     return NextResponse.json({ message: 'Member deleted successfully' });

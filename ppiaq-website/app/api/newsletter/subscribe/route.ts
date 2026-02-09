@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Subscribe to newsletter
-    const subscriber = subscribeToNewsletter(email);
+    const subscriber = await subscribeToNewsletter(email);
 
     // Send confirmation email
     const emailTemplate = getNewsletterSubscriptionTemplate(email);

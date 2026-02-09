@@ -5,7 +5,7 @@ import { getAllCMSEvents } from '@/lib/database/db';
 export async function GET(req: NextRequest) {
   try {
     // Get published events only
-    const events = getAllCMSEvents(true); // true = published only
+    const events = await getAllCMSEvents(true); // true = published only
 
     return NextResponse.json({
       data: events,

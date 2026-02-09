@@ -12,14 +12,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
+    const user = await getUserByEmail(userEmail);
 
-    if (!user || !isAdmin(user.id)) {
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
     // Get all newsletter subscribers
-    const subscribers = getAllNewsletterSubscribers();
+    const subscribers = await getAllNewsletterSubscribers();
 
     return NextResponse.json(subscribers, { status: 200 });
   } catch (error) {

@@ -10,7 +10,7 @@ export async function GET() {
       return Response.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
+    const user = await getUserByEmail(userEmail);
 
     if (!user) {
       return Response.json({ error: 'User not found' }, { status: 404 });

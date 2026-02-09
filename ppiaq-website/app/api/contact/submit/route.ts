@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Submit message
-    const contactMessage = submitContactMessage(name, email, message);
+    const contactMessage = await submitContactMessage(name, email, message);
 
     // Send email notification to PPIAQ with all contact details
     const contactEmailTemplate = `

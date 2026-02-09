@@ -23,8 +23,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     const status = url.searchParams.get('status') as 'draft' | 'published' | null;
 
     // Fetch events
-    const allEvents = getAllCMSEvents();
+    const allEvents = await getAllCMSEvents();
     const filteredEvents = status ? allEvents.filter((e) => e.status === status) : allEvents;
 
     return NextResponse.json({
@@ -58,8 +58,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Create event
-    const newEvent = createCMSEvent({
+    const newEvent = await createCMSEvent({
       day: body.day,
       month: body.month,
       title: body.title,
@@ -105,8 +105,8 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -121,7 +121,7 @@ export async function PUT(req: NextRequest) {
     const body = await req.json();
 
     // Update event
-    const updatedEvent = updateCMSEvent(eventId, {
+    const updatedEvent = await updateCMSEvent(eventId, {
       ...body,
     });
 
@@ -147,8 +147,8 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -161,7 +161,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     // Delete event
-    const deleted = deleteCMSEvent(eventId);
+    const deleted = await deleteCMSEvent(eventId);
 
     if (!deleted) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });

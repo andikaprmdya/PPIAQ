@@ -1,0 +1,255 @@
+// Prisma schema for PPIAQ Website Database
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// USER & AUTHENTICATION
+// ==========================================
+
+model User {
+  id              String    @id @default(cuid())
+
+  // Basic Info
+  firstName       String
+  lastName        String
+  email           String    @unique
+  password        String    // Hashed with bcryptjs
+  phoneNumber     String?
+  studentId       String?
+
+  // Educational Info
+  nationality     String
+  educationLevel  String
+  university      String
+  major           String
+  birthDate       String
+
+  // Membership
+  membershipType  MembershipType
+  paymentProofUrl String    @db.Text // Base64 image
+
+  // Auth & Status
+  role            Role      @default(USER)
+  status          UserStatus @default(PENDING)
+
+  // Audit Trail
+  createdAt       DateTime  @default(now())
+  dateJoined      DateTime?
+  approvedAt      DateTime?
+  approvedBy      String?
+  rejectedAt      DateTime?
+  rejectedBy      String?
+  rejectionReason String?
+
+  // Relations
+  createdEvents   Event[]   @relation("CreatedBy")
+  uploadedImages  ImageAsset[]
+
+  @@index([email])
+  @@index([status])
+  @@map("users")
+}
+
+enum MembershipType {
+  ORDINARY
+  ASSOCIATE
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ==========================================
+// NEWSLETTER
+// ==========================================
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  subscribedAt DateTime @default(now())
+
+  @@index([email])
+  @@map("newsletter_subscribers")
+}
+
+// ==========================================
+// CONTACT
+// ==========================================
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  email       String
+  message     String   @db.Text
+  submittedAt DateTime @default(now())
+
+  @@index([submittedAt])
+  @@map("contact_messages")
+}
+
+// ==========================================
+// CMS - EVENTS
+// ==========================================
+
+model Event {
+  id              String      @id @default(cuid())
+  day             String
+  month           String
+
+  // Bilingual fields stored as JSON
+  title           Json        // { id: string, en: string }
+  location        Json        // { id: string, en: string }
+  description     Json        // { id: string, en: string }
+
+  date            String
+  image           String      @db.Text // Base64 or URL
+  registrationUrl String?
+
+  status          EventStatus @default(DRAFT)
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  createdBy       String
+  createdByUser   User        @relation("CreatedBy", fields: [createdBy], references: [id])
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("events")
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// ==========================================
+// CMS - TEAM MEMBERS
+// ==========================================
+
+model TeamMember {
+  id         String         @id @default(cuid())
+  name       String
+
+  // Bilingual fields
+  role       Json           // { id: string, en: string }
+  bio        Json           // { id: string, en: string }
+
+  university String
+  instagram  String
+  image      String         @db.Text // Base64
+
+  division   Division
+  order      Int
+  isActive   Boolean        @default(true)
+
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([division, order])
+  @@index([isActive])
+  @@map("team_members")
+}
+
+enum Division {
+  CORE
+  ADMIN
+  EDUCATION
+  SPORTS
+  MEDIA
+  PARTNERSHIP
+}
+
+// ==========================================
+// CMS - STATIC CONTENT
+// ==========================================
+
+model StaticContent {
+  id      String       @id @default(cuid())
+  key     String       @unique // e.g. 'homepage_hero_title'
+  type    ContentType
+
+  // Bilingual content
+  content Json         // { id: string, en: string }
+
+  page    String       // 'home' | 'about' | 'membership' | 'visi-misi'
+  section String       // 'hero' | 'faq' | 'cta'
+  order   Int
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([page, section])
+  @@index([key])
+  @@map("static_contents")
+}
+
+enum ContentType {
+  TEXT
+  RICHTEXT
+  IMAGE
+  URL
+}
+
+// ==========================================
+// CMS - FAQ
+// ==========================================
+
+model FAQ {
+  id       String   @id @default(cuid())
+
+  // Bilingual fields
+  question Json     // { id: string, en: string }
+  answer   Json     // { id: string, en: string }
+
+  page     String   // 'home' | 'membership'
+  order    Int
+  isActive Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([page, isActive, order])
+  @@map("faqs")
+}
+
+// ==========================================
+// CMS - IMAGE LIBRARY
+// ==========================================
+
+model ImageAsset {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  base64Data  String   @db.Text
+  mimeType    String
+  size        Int      // bytes
+  category    ImageCategory
+  usedIn      Json     // Array of content IDs: string[]
+
+  createdAt   DateTime @default(now())
+  uploadedBy  String
+  uploader    User     @relation(fields: [uploadedBy], references: [id])
+
+  @@index([category])
+  @@index([createdAt])
+  @@map("image_assets")
+}
+
+enum ImageCategory {
+  EVENT
+  TEAM
+  HERO
+  GENERAL
+}

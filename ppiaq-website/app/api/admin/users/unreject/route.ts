@@ -13,9 +13,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const adminUser = getUserByEmail(userEmail);
+    const adminUser = await getUserByEmail(userEmail);
 
-    if (!adminUser || !isAdmin(adminUser.id)) {
+    if (!adminUser || !(await isAdmin(adminUser.id))) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Unreject the user (change status back to pending)
-    const user = unrejectUser(userId);
+    const user = await unrejectUser(userId);
 
     if (!user) {
       return NextResponse.json(

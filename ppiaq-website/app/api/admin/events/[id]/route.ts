@@ -13,13 +13,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
     const { id } = await params;
-    const event = getCMSEventById(id);
+    const event = await getCMSEventById(id);
     if (!event) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
@@ -42,14 +42,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
     const { id } = await params;
     const body = await req.json();
-    const updated = updateCMSEvent(id, body);
+    const updated = await updateCMSEvent(id, body);
 
     if (!updated) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
@@ -73,13 +73,13 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
     const { id } = await params;
-    const deleted = deleteCMSEvent(id);
+    const deleted = await deleteCMSEvent(id);
     if (!deleted) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }

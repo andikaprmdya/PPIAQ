@@ -17,14 +17,14 @@ export async function GET(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const adminUser = getUserByEmail(userEmail);
+    const adminUser = await getUserByEmail(userEmail);
 
-    if (!adminUser || !isAdmin(adminUser.id)) {
+    if (!adminUser || !(await isAdmin(adminUser.id))) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
     // Get user by ID
-    const user = getUserById(userId);
+    const user = await getUserById(userId);
 
     if (!user) {
       return NextResponse.json(
@@ -61,9 +61,9 @@ export async function PUT(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const adminUser = getUserByEmail(userEmail);
+    const adminUser = await getUserByEmail(userEmail);
 
-    if (!adminUser || !isAdmin(adminUser.id)) {
+    if (!adminUser || !(await isAdmin(adminUser.id))) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -71,7 +71,7 @@ export async function PUT(
     console.log('Updating user', userId, 'with data:', updates);
 
     // Update the user
-    const user = updateUser(userId, updates);
+    const user = await updateUser(userId, updates);
 
     if (!user) {
       return NextResponse.json(

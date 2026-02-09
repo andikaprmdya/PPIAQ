@@ -25,9 +25,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const adminUser = getUserByEmail(userEmail);
+    const adminUser = await getUserByEmail(userEmail);
 
-    if (!adminUser || !isAdmin(adminUser.id)) {
+    if (!adminUser || !(await isAdmin(adminUser.id))) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get existing emails
-    const existingUsers = getAllUsers();
+    const existingUsers = await getAllUsers();
     const existingEmails = existingUsers.map((u) => u.email);
 
     // Process data - update or skip existing emails

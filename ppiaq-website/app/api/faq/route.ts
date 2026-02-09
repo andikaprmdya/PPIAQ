@@ -4,7 +4,7 @@ import { getAllFAQs } from '@/lib/database/db';
 export async function GET(req: NextRequest) {
   try {
     const page = new URL(req.url).searchParams.get('page');
-    const faqs = getAllFAQs(page || undefined);
+    const faqs = await getAllFAQs(page || undefined);
 
     return NextResponse.json({
       data: faqs,

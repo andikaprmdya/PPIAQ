@@ -8,11 +8,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const { id } = await params;
-    const faq = getFAQById(id);
+    const faq = await getFAQById(id);
     if (!faq) return NextResponse.json({ error: 'FAQ not found' }, { status: 404 });
 
     return NextResponse.json({ data: faq });
@@ -28,12 +28,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const { id } = await params;
     const body = await req.json();
-    const updated = updateFAQ(id, body);
+    const updated = await updateFAQ(id, body);
 
     if (!updated) return NextResponse.json({ error: 'FAQ not found' }, { status: 404 });
     return NextResponse.json({ data: updated, message: 'FAQ updated successfully' });
@@ -49,11 +49,11 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const { id } = await params;
-    const deleted = deleteFAQ(id);
+    const deleted = await deleteFAQ(id);
     if (!deleted) return NextResponse.json({ error: 'FAQ not found' }, { status: 404 });
 
     return NextResponse.json({ message: 'FAQ deleted successfully' });

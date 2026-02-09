@@ -13,11 +13,11 @@ export async function GET(req: NextRequest) {
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const category = new URL(req.url).searchParams.get('category');
-    const images = getAllImageAssets(category || undefined);
+    const images = await getAllImageAssets(category || undefined);
 
     return NextResponse.json({
       data: images,
@@ -36,8 +36,8 @@ export async function POST(req: NextRequest) {
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const body = await req.json();
     if (!body.name || !body.base64Data || !body.mimeType || !body.category) {
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     }
 
     const sizeInBytes = Buffer.byteLength(body.base64Data, 'utf-8');
-    const newImage = uploadImageAsset({
+    const newImage = await uploadImageAsset({
       name: body.name,
       description: body.description,
       base64Data: body.base64Data,

@@ -3,7 +3,7 @@ import { getAllCMSTeamMembers } from '@/lib/database/db';
 
 export async function GET(req: NextRequest) {
   try {
-    const members = getAllCMSTeamMembers(true).sort((a, b) => a.order - b.order);
+    const members = (await getAllCMSTeamMembers(true)).sort((a, b) => a.order - b.order);
     return NextResponse.json({
       data: members,
       message: `Retrieved ${members.length} active team members`,

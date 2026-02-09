@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Login user (verifies password with bcrypt)
-    const user = loginUser(email, password);
+    const user = await loginUser(email, password);
 
     if (!user) {
       return NextResponse.json(

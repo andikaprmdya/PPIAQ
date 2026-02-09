@@ -12,9 +12,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
+    const user = await getUserByEmail(userEmail);
 
-    if (!user || !isAdmin(user.id)) {
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const users = getUsersByStatus(status);
+    const users = await getUsersByStatus(status);
 
     // Return users without password
     const usersWithoutPassword = users.map(({ password, ...u }) => u);
@@ -54,9 +54,9 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const adminUser = getUserByEmail(userEmail);
+    const adminUser = await getUserByEmail(userEmail);
 
-    if (!adminUser || !isAdmin(adminUser.id)) {
+    if (!adminUser || !(await isAdmin(adminUser.id))) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
@@ -75,7 +75,7 @@ export async function PUT(request: NextRequest) {
     console.log('Updating user', userId, 'with data:', updates);
 
     // Update the user
-    const user = updateUser(userId, updates);
+    const user = await updateUser(userId, updates);
 
     if (!user) {
       return NextResponse.json(

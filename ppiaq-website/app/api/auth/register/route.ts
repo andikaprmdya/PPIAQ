@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if email already exists
-    if (getUserByEmail(email)) {
+    if (await getUserByEmail(email)) {
       return NextResponse.json(
         { error: 'Email already registered' },
         { status: 400 }
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Register user with status 'pending' (requires admin approval)
-    const user = registerUser(
+    const user = await registerUser(
       firstName,
       lastName,
       email,

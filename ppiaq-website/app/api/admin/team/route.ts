@@ -18,13 +18,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
     const division = new URL(req.url).searchParams.get('division');
-    const members = getAllCMSTeamMembers();
+    const members = await getAllCMSTeamMembers();
     const filtered = division ? members.filter((m) => m.division === division) : members;
 
     return NextResponse.json({
@@ -48,8 +48,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const newMember = createCMSTeamMember({
+    const newMember = await createCMSTeamMember({
       name: body.name,
       role: body.role,
       university: body.university || '',
@@ -91,18 +91,18 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) {
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
     const body = await req.json();
-    
+
     if (!Array.isArray(body.ids)) {
       return NextResponse.json({ error: 'ids must be an array' }, { status: 400 });
     }
 
-    const success = reorderCMSTeamMembers(body.ids);
+    const success = await reorderCMSTeamMembers(body.ids);
 
     if (!success) {
       return NextResponse.json({ error: 'Failed to reorder members' }, { status: 500 });

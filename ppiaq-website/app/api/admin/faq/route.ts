@@ -14,10 +14,10 @@ export async function GET(req: NextRequest) {
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
-    const faqs = getAllFAQs();
+    const faqs = await getAllFAQs();
     return NextResponse.json({
       data: faqs,
       message: `Retrieved ${faqs.length} FAQs`,
@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const body = await req.json();
     if (!body.question || !body.answer || !body.page) {
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const newFAQ = createFAQ({
+    const newFAQ = await createFAQ({
       question: body.question,
       answer: body.answer,
       page: body.page,
@@ -67,15 +67,15 @@ export async function PUT(req: NextRequest) {
     const userEmail = cookieStore.get('userEmail')?.value;
     if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
 
-    const user = getUserByEmail(userEmail);
-    if (!user || !isAdmin(user.id)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await getUserByEmail(userEmail);
+    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const body = await req.json();
     if (!Array.isArray(body.ids)) {
       return NextResponse.json({ error: 'ids must be an array' }, { status: 400 });
     }
 
-    const success = reorderFAQs(body.ids);
+    const success = await reorderFAQs(body.ids);
     if (!success) return NextResponse.json({ error: 'Failed to reorder FAQs' }, { status: 500 });
 
     return NextResponse.json({ message: 'FAQs reordered successfully' });
