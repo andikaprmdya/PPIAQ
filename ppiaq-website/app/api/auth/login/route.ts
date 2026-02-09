@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { UserStatus } from '@prisma/client';
+import { UserStatus, Role } from '@prisma/client';
 import { loginUser } from '@/lib/database/db';
 
 export async function POST(request: NextRequest) {
@@ -47,11 +47,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Determine redirect URL based on role
+    const redirectTo = user.role === Role.ADMIN ? '/admin/dashboard' : '/profile';
+
     // Set cookie for session
     const response = NextResponse.json(
       {
         message: 'Login successful',
         user: { ...user, password: undefined },
+        redirectTo,
       },
       { status: 200 }
     );
