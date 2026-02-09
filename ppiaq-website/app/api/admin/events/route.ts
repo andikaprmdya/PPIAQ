@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { EventStatus } from '@prisma/client';
 import {
   getAllCMSEvents,
   getCMSEventById,
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest) {
     // Get query parameters
     const url = new URL(req.url);
     const statusParam = url.searchParams.get('status');
-    const status = statusParam ? (statusParam.toUpperCase() as 'DRAFT' | 'PUBLISHED') : null;
+    const status = statusParam ? (statusParam.toUpperCase() as EventStatus) : null;
 
     // Fetch events
     const allEvents = await getAllCMSEvents();
