@@ -29,7 +29,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; message: string; redirectTo?: string }>;
   logout: () => void;
   refetchUser: () => Promise<void>;
   error: string | null;
