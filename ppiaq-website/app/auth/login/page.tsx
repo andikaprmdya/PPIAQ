@@ -30,9 +30,10 @@ export default function LoginPage() {
         return;
       }
 
-      // Login berhasil! Auto-refresh untuk update navbar & auth state
+      // Login berhasil! Redirect ke dashboard atau home berdasarkan role
+      const redirectUrl = result.redirectTo || '/';
       setTimeout(() => {
-        window.location.href = '/';
+        window.location.href = redirectUrl;
       }, 500);
     } catch (err) {
       setError(language === 'id' ? 'Terjadi kesalahan jaringan' : 'Network error. Please try again.');

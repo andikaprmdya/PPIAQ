@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setUser(data.user);
-      return { success: true, message: 'Login successful' };
+      return { success: true, message: 'Login successful', redirectTo: data.redirectTo || '/' };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Login failed';
       setError(errorMessage);
