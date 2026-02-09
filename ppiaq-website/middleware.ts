@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByEmail } from '@/lib/database/db';
+import { Role, UserStatus } from '@prisma/client';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Get user email from cookie
@@ -15,14 +16,14 @@ export function middleware(request: NextRequest) {
     }
 
     // Get user from database
-    const user = getUserByEmail(userEmail);
+    const user = await getUserByEmail(userEmail);
 
     if (!user) {
       // User not found, redirect to login
       return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
-    if (user.role !== 'admin') {
+    if (user.role !== Role.ADMIN) {
       // Not an admin, redirect to home
       return NextResponse.redirect(new URL('/', request.url));
     }
@@ -36,20 +37,20 @@ export function middleware(request: NextRequest) {
     }
 
     // Get user from database
-    const user = getUserByEmail(userEmail);
+    const user = await getUserByEmail(userEmail);
 
     if (!user) {
       // User not found, redirect to login
       return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
-    if (user.status !== 'approved') {
+    if (user.status !== UserStatus.APPROVED) {
       // Not approved, redirect to home or pending page
       // For now, redirect to home with message in search params
       const url = new URL('/', request.url);
       url.searchParams.set(
         'message',
-        user.status === 'pending'
+        user.status === UserStatus.PENDING
           ? 'Your application is pending approval'
           : 'Your application was rejected'
       );
