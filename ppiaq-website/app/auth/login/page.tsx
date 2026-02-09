@@ -32,6 +32,8 @@ export default function LoginPage() {
 
       // Login berhasil! Redirect ke dashboard atau home berdasarkan role
       const redirectUrl = result.redirectTo || '/';
+      console.log('Login result:', result);
+      console.log('Redirecting to:', redirectUrl);
       setTimeout(() => {
         window.location.href = redirectUrl;
       }, 500);
