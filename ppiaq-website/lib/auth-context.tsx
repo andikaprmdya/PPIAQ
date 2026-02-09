@@ -12,10 +12,10 @@ export interface User {
   university: string;
   major: string;
   birthDate: string;
-  membershipType: 'ordinary' | 'associate';
+  membershipType: 'ORDINARY' | 'ASSOCIATE';
   paymentProofUrl: string;
-  role: 'user' | 'admin';
-  status: 'pending' | 'approved' | 'rejected';
+  role: 'USER' | 'ADMIN';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: Date;
   approvedAt?: Date;
   approvedBy?: string;
@@ -79,12 +79,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       // Check user status
-      if (data.user.status === 'pending') {
+      if (data.user.status === 'PENDING') {
         setError('Your application is pending admin approval');
         return { success: false, message: 'Your application is pending admin approval. Please wait for approval.' };
       }
 
-      if (data.user.status === 'rejected') {
+      if (data.user.status === 'REJECTED') {
         setError(`Your application was rejected: ${data.user.rejectionReason || 'No reason provided'}`);
         return { success: false, message: `Your application was rejected: ${data.user.rejectionReason || 'No reason provided'}` };
       }
