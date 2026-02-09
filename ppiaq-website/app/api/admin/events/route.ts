@@ -30,7 +30,8 @@ export async function GET(req: NextRequest) {
 
     // Get query parameters
     const url = new URL(req.url);
-    const status = url.searchParams.get('status') as 'draft' | 'published' | null;
+    const statusParam = url.searchParams.get('status');
+    const status = statusParam ? (statusParam.toUpperCase() as 'DRAFT' | 'PUBLISHED') : null;
 
     // Fetch events
     const allEvents = await getAllCMSEvents();
