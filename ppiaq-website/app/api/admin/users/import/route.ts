@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUserByEmail, isAdmin, getAllUsers } from '@/lib/database/db';
 import { cookies } from 'next/headers';
+import { MembershipType, UserStatus } from '@prisma/client';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 
@@ -138,8 +139,8 @@ export async function POST(request: NextRequest) {
           existingUser.lastName = lastName;
           existingUser.phoneNumber = phoneNumber;
           existingUser.studentId = studentId;
-          existingUser.membershipType = membershipType as 'ordinary' | 'associate';
-          existingUser.status = status as 'pending' | 'approved' | 'rejected';
+          existingUser.membershipType = (membershipType as string).toUpperCase() as MembershipType;
+          existingUser.status = (status as string).toUpperCase() as UserStatus;
           if (dateJoined) {
             existingUser.dateJoined = new Date(dateJoined);
           }
