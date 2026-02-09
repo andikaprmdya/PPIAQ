@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { UserStatus } from '@prisma/client';
 import { loginUser } from '@/lib/database/db';
 
 export async function POST(request: NextRequest) {
@@ -24,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check user status
-    if (user.status === 'pending') {
+    if (user.status === UserStatus.PENDING) {
       return NextResponse.json(
         {
           error: 'Application pending approval',
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (user.status === 'rejected') {
+    if (user.status === UserStatus.REJECTED) {
       return NextResponse.json(
         {
           error: 'Application rejected',
