@@ -52,7 +52,16 @@ export default function HomeContentAdminPage() {
 
   const fetchContent = async () => {
     try {
-      const res = await fetch('/api/admin/content?page=home');
+      const url = new URL('/api/admin/content', window.location.origin);
+      url.searchParams.set('page', 'home');
+
+      const res = await fetch(url.toString());
+      if (!res.ok) {
+        const errorData = await res.json();
+        console.error('API error:', res.status, errorData);
+        return;
+      }
+
       const data = await res.json();
       setContentData(data.data || []);
     } catch (error) {
