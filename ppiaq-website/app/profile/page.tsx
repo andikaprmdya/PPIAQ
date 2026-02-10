@@ -85,7 +85,7 @@ export default function ProfilePage() {
                       {language === 'id' ? 'Jenis Keanggotaan' : 'Membership Type'}
                     </p>
                     <p className="font-medium">
-                      {user.membershipType === 'ordinary'
+                      {user.membershipType === 'ORDINARY'
                         ? language === 'id'
                           ? 'Anggota Biasa'
                           : 'Ordinary Member'
@@ -201,11 +201,11 @@ export default function ProfilePage() {
                   {language === 'id' ? 'Status' : 'Status'}
                 </p>
                 <p className="font-bold text-green-700">
-                  {user.status === 'approved'
+                  {user.status === 'APPROVED'
                     ? language === 'id'
                       ? '✓ Disetujui'
                       : '✓ Approved'
-                    : user.status === 'pending'
+                    : user.status === 'PENDING'
                     ? language === 'id'
                       ? '⏳ Menunggu'
                       : '⏳ Pending'
@@ -218,17 +218,17 @@ export default function ProfilePage() {
             </div>
 
             <p className="text-sm text-gray-600 italic">
-              {user.status === 'approved' && (
+              {user.status === 'APPROVED' && (
                 language === 'id'
                   ? 'Anda adalah anggota aktif PPIA Queensland. Nikmati semua manfaat keanggotaan!'
                   : 'You are an active member of PPIA Queensland. Enjoy all member benefits!'
               )}
-              {user.status === 'pending' && (
+              {user.status === 'PENDING' && (
                 language === 'id'
                   ? 'Aplikasi Anda sedang ditinjau oleh admin. Mohon tunggu persetujuan.'
                   : 'Your application is being reviewed by admin. Please wait for approval.'
               )}
-              {user.status === 'rejected' && (
+              {user.status === 'REJECTED' && (
                 language === 'id'
                   ? `Aplikasi Anda ditolak. Alasan: ${user.rejectionReason || 'Tidak ada alasan yang diberikan'}`
                   : `Your application was rejected. Reason: ${user.rejectionReason || 'No reason provided'}`
