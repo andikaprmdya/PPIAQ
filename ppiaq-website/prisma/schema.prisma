@@ -182,9 +182,10 @@ model StaticContent {
 
   // Bilingual content
   content Json         // { id: string, en: string }
+  image   String?      @db.Text // Optional: Base64 or URL for image content
 
-  page    String       // 'home' | 'about' | 'membership' | 'visi-misi'
-  section String       // 'hero' | 'faq' | 'cta'
+  page    String       // 'home' | 'about' | 'membership' | 'pesta-rakyat'
+  section String       // 'hero' | 'features' | 'team' | 'faq' | 'cta'
   order   Int
 
   createdAt DateTime   @default(now())
