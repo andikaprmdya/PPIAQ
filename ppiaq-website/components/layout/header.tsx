@@ -12,6 +12,7 @@ export default function Header() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isContentDropdownOpen, setIsContentDropdownOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -40,8 +41,13 @@ export default function Header() {
 
   const adminNavItems = [
     { label: language === 'id' ? 'Dashboard Admin' : 'Admin Dashboard', href: '/admin/dashboard' },
-    { label: getTranslation(translations.navigation.pestaRakyat, language), href: '/pesta-rakyat' },
-    { label: getTranslation(translations.navigation.contact, language), href: '/contact' },
+  ];
+
+  const contentMenuItems = [
+    { label: language === 'id' ? 'Home' : 'Home', href: '/admin/content/home' },
+    { label: language === 'id' ? 'About' : 'About', href: '/admin/content/about' },
+    { label: language === 'id' ? 'Keanggotaan' : 'Membership', href: '/admin/content/membership' },
+    { label: getTranslation(translations.navigation.pestaRakyat, language), href: '/admin/content/pesta-rakyat' },
   ];
 
   const navItems = isAuthenticated ? (isAdmin ? adminNavItems : userNavItems) : [...baseNavItems, ...publicNavItems];
@@ -87,6 +93,36 @@ export default function Header() {
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FEB602] transition-all duration-300 group-hover/item:w-full"></span>
                 </Link>
               ))}
+
+              {/* Admin Content Dropdown */}
+              {isAdmin && (
+                <div className="relative group/content">
+                  <button
+                    onClick={() => setIsContentDropdownOpen(!isContentDropdownOpen)}
+                    className="relative text-[13px] font-bold uppercase tracking-widest text-[#303030] transition-all duration-300 py-2 group-hover/nav:text-white/90 hover:text-[#FEB602]! hover:scale-110 group/item flex items-center gap-2"
+                  >
+                    {language === 'id' ? 'Konten' : 'Content'}
+                    <span className={`transition-transform ${isContentDropdownOpen ? 'rotate-180' : ''}`}>▼</span>
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#FEB602] transition-all duration-300 group-hover/item:w-full"></span>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isContentDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-2 bg-white border border-[#E4DBCA] rounded-xl shadow-lg overflow-hidden z-50 min-w-[200px]">
+                      {contentMenuItems.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setIsContentDropdownOpen(false)}
+                          className="block w-full text-left px-4 py-3 text-[12px] font-bold uppercase tracking-widest text-[#303030] hover:bg-[#FFFAF5] hover:text-[#B64847] transition-all border-b border-[#E4DBCA] last:border-b-0"
+                        >
+                          {item.label}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* --- RIGHT ACTIONS --- */}

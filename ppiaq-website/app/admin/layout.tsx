@@ -9,7 +9,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { isAdmin, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [contentDropdownOpen, setContentDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAdmin) {
@@ -21,17 +20,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return null;
   }
 
-  const mainNavItems = [
+  const sidebarItems = [
     { label: 'Dashboard', href: '/admin/dashboard' },
     { label: 'Events', href: '/admin/events' },
     { label: 'Team', href: '/admin/team' },
-  ];
-
-  const contentMenuItems = [
-    { label: 'Home', href: '/admin/content/home' },
-    { label: 'About', href: '/admin/content/about' },
-    { label: 'Membership', href: '/admin/content/membership' },
-    { label: 'Pesta Rakyat', href: '/admin/content/pesta-rakyat' },
   ];
 
   return (
@@ -44,8 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
 
         <nav className="p-4 space-y-2">
-          {/* Main Navigation Items */}
-          {mainNavItems.map((item) => (
+          {sidebarItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -60,47 +51,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {item.label}
             </Link>
           ))}
-
-          {/* Content Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setContentDropdownOpen(!contentDropdownOpen)}
-              className={`
-                w-full text-left px-4 py-3 rounded-xl font-bold text-sm uppercase tracking-widest transition-all flex items-center justify-between
-                ${pathname.startsWith('/admin/content')
-                  ? 'bg-[#B64847] text-white shadow-lg'
-                  : 'text-[#886644] hover:bg-[#FFFAF5] hover:text-[#B64847]'
-                }
-              `}
-            >
-              Content
-              <span className={`transition-transform ${contentDropdownOpen ? 'rotate-180' : ''}`}>
-                ▼
-              </span>
-            </button>
-
-            {/* Dropdown Menu */}
-            {contentDropdownOpen && (
-              <div className="mt-1 bg-white border border-[#E4DBCA] rounded-xl shadow-lg overflow-hidden">
-                {contentMenuItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setContentDropdownOpen(false)}
-                    className={`
-                      block w-full text-left px-6 py-2.5 text-xs uppercase tracking-widest font-bold transition-all border-l-4
-                      ${pathname === item.href
-                        ? 'bg-[#FFFAF5] text-[#B64847] border-l-[#B64847]'
-                        : 'text-[#886644] border-l-transparent hover:bg-[#FFFAF5] hover:text-[#B64847]'
-                      }
-                    `}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
         </nav>
 
         <div className="absolute bottom-6 left-6 right-6">
@@ -123,10 +73,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {pathname === '/admin/dashboard' && 'Dashboard'}
               {pathname.startsWith('/admin/events') && 'Events Management'}
               {pathname.startsWith('/admin/team') && 'Team Management'}
-              {pathname === '/admin/content/home' && 'Home Page Content'}
-              {pathname === '/admin/content/about' && 'About Page Content'}
-              {pathname === '/admin/content/membership' && 'Membership Page Content'}
-              {pathname === '/admin/content/pesta-rakyat' && 'Pesta Rakyat Page Content'}
             </h2>
           </div>
         </div>
