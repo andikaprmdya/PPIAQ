@@ -4,6 +4,30 @@ import { useState, useEffect } from 'react';
 
 type BilingualField = { id: string; en: string };
 
+// ── Defined OUTSIDE component to prevent remount on every render ──
+const inputClass = 'w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847] text-[#303030]';
+const labelClass = 'block text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1';
+
+function BilingualInput({
+  label, value, onChange,
+}: { label: string; value: BilingualField; onChange: (v: BilingualField) => void }) {
+  return (
+    <div className="space-y-2">
+      <p className={labelClass}>{label}</p>
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <p className="text-[9px] font-bold text-[#886644] mb-1">English</p>
+          <input className={inputClass} placeholder="English" value={value.en} onChange={e => onChange({ ...value, en: e.target.value })} />
+        </div>
+        <div>
+          <p className="text-[9px] font-bold text-[#886644] mb-1">Indonesia</p>
+          <input className={inputClass} placeholder="Indonesia" value={value.id} onChange={e => onChange({ ...value, id: e.target.value })} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface Discount {
   id: string;
   name: BilingualField;
@@ -240,28 +264,6 @@ export default function AdminCommunityBoardPage() {
     setEditingAnnouncement(a);
     setAnnouncementForm({ title: a.title, description: a.description, date: a.date, isActive: a.isActive, order: a.order });
   };
-
-  // ── SHARED UI ──────────────────────────────────────────────────
-  const inputClass = 'w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]';
-  const labelClass = 'block text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1';
-
-  const BilingualInput = ({
-    label, value, onChange,
-  }: { label: string; value: BilingualField; onChange: (v: BilingualField) => void }) => (
-    <div className="space-y-2">
-      <p className={labelClass}>{label}</p>
-      <div className="grid grid-cols-2 gap-2">
-        <div>
-          <p className="text-[9px] text-gray-400 mb-1">English</p>
-          <input className={inputClass} placeholder="English" value={value.en} onChange={e => onChange({ ...value, en: e.target.value })} />
-        </div>
-        <div>
-          <p className="text-[9px] text-gray-400 mb-1">Indonesia</p>
-          <input className={inputClass} placeholder="Indonesia" value={value.id} onChange={e => onChange({ ...value, id: e.target.value })} />
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="space-y-6">
