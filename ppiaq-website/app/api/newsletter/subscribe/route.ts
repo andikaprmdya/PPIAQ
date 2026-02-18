@@ -25,13 +25,18 @@ export async function POST(request: NextRequest) {
     // Subscribe to newsletter
     const subscriber = await subscribeToNewsletter(email);
 
-    // Send confirmation email
+    // Send confirmation email (non-blocking - subscription succeeds even if email fails)
     const emailTemplate = getNewsletterSubscriptionTemplate(email);
-    await sendEmail({
-      to: [{ email }],
-      subject: 'Welcome to PPIAQ Newsletter',
-      htmlContent: emailTemplate,
-    });
+    try {
+      await sendEmail({
+        to: [{ email }],
+        subject: 'Welcome to PPIAQ Newsletter',
+        htmlContent: emailTemplate,
+      });
+    } catch (emailError) {
+      console.error('POST /api/newsletter/subscribe - email send failed:', emailError);
+      // Subscription still succeeds, email confirmation is best-effort
+    }
 
     return NextResponse.json(
       {

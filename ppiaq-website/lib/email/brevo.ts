@@ -1,5 +1,3 @@
-const apiKey = process.env.BREVO_API_KEY;
-
 interface EmailParams {
   to: { email: string; name?: string }[];
   subject: string;
@@ -8,13 +6,11 @@ interface EmailParams {
 }
 
 export async function sendEmail(params: EmailParams): Promise<any> {
+  const apiKey = process.env.BREVO_API_KEY;
+  console.log('🔑 BREVO_API_KEY exists:', !!apiKey, '| length:', apiKey?.length ?? 0);
   try {
     if (!apiKey) {
       console.warn('⚠️ Brevo API key not configured. Email not sent.');
-      console.log('📧 Email details:', {
-        to: params.to,
-        subject: params.subject,
-      });
       return { message: 'Email service not configured (development mode)' };
     }
 
@@ -48,12 +44,14 @@ export async function sendEmail(params: EmailParams): Promise<any> {
       console.log('✅ Email sent successfully:', data);
       return data;
     } else {
-      console.error('❌ Brevo API error:', data);
-      return null;
+      console.error('❌ Brevo API error - Status:', response.status);
+      console.error('❌ Brevo API error - Response:', JSON.stringify(data, null, 2));
+      console.error('❌ Sender email used:', emailData.sender.email);
+      throw new Error(`Brevo API error ${response.status}: ${JSON.stringify(data)}`);
     }
   } catch (error) {
     console.error('❌ Error sending email:', error);
-    return null;
+    throw error;
   }
 }
 
