@@ -200,7 +200,7 @@ export default function AdminDashboardPage() {
         setImportResults(data.results);
         setImportMessage({
           type: 'success',
-          text: `Import completed: ${data.results.updated} updated, ${data.results.skipped} skipped`,
+          text: `Import completed: ${data.results.imported} created, ${data.results.updated} updated, ${data.results.skipped} skipped`,
         });
         await fetchUsers();
       } else {
@@ -221,9 +221,10 @@ export default function AdminDashboardPage() {
   };
 
   const handleDownloadTemplate = () => {
-    const headers = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Student ID', 'Membership Type', 'Status', 'Date Joined'];
-    const exampleRow = ['John', 'Doe', 'john.doe@email.com', '+61400000000', 'S1234567', 'ordinary', 'approved', '2025-01-01'];
-    const csvContent = [headers.join(','), exampleRow.join(',')].join('\n');
+    const headers = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Student ID', 'Membership Type', 'Status', 'Date Joined', 'Nationality', 'Education Level', 'University', 'Major'];
+    const exampleRow1 = ['John', 'Doe', 'john.doe@email.com', '+61400000000', 'S1234567', 'ordinary', 'approved', '2025-01-01', 'Indonesia', 'S1 (Bachelor)', 'University of Queensland', 'Computer Science'];
+    const exampleRow2 = ['Jane', 'Smith', 'jane.smith@email.com', '+61411111111', 'S7654321', 'associate', 'pending', '', 'Other', 'S2 (Master)', 'Griffith University', 'Business'];
+    const csvContent = [headers.join(','), exampleRow1.join(','), exampleRow2.join(',')].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -422,11 +423,11 @@ export default function AdminDashboardPage() {
                     {['First Name', 'Last Name', 'Email'].map(col => (
                       <span key={col} className="px-2 py-0.5 bg-[#B64847]/10 text-[#B64847] rounded text-[10px] font-bold">{col} *</span>
                     ))}
-                    {['Phone Number', 'Student ID', 'Membership Type', 'Status', 'Date Joined'].map(col => (
+                    {['Phone Number', 'Student ID', 'Membership Type', 'Status', 'Date Joined', 'Nationality', 'Education Level', 'University', 'Major'].map(col => (
                       <span key={col} className="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-[10px] font-medium">{col}</span>
                     ))}
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-2">Membership Type: <code>ordinary</code> or <code>associate</code> · Status: <code>pending</code>, <code>approved</code>, or <code>rejected</code></p>
+                  <p className="text-[10px] text-gray-400 mt-2">Membership Type: <code>ordinary</code> or <code>associate</code> · Status: <code>pending</code>, <code>approved</code>, or <code>rejected</code> · New users get temp password: <code>TempPass123!</code></p>
                 </div>
 
                 {/* Step 2: Upload File */}
