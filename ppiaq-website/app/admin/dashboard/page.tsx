@@ -18,7 +18,7 @@ interface User {
   major: string;
   birthDate: string;
   membershipType: 'ordinary' | 'associate';
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: string;
   rejectionReason?: string;
   paymentProofUrl?: string;
@@ -39,8 +39,9 @@ export default function AdminDashboardPage() {
   const [rejectedUsers, setRejectedUsers] = useState<User[]>([]);
   const [newsletterSubscribers, setNewsletterSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'newsletter'>('pending');
+  const [activeTab, setActiveTab] = useState<'PENDING' | 'APPROVED' | 'REJECTED' | 'newsletter'>('PENDING');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
@@ -110,7 +111,7 @@ export default function AdminDashboardPage() {
         setPendingUsers(pendingUsers.filter((u) => u.id !== userId));
         const approvedUser = pendingUsers.find((u) => u.id === userId);
         if (approvedUser) {
-          setApprovedUsers([...approvedUsers, { ...approvedUser, status: 'approved' }]);
+          setApprovedUsers([...approvedUsers, { ...approvedUser, status: 'APPROVED' }]);
         }
         setSelectedUser(null);
       }
@@ -137,7 +138,7 @@ export default function AdminDashboardPage() {
         setPendingUsers(pendingUsers.filter((u) => u.id !== userId));
         const rejectedUser = pendingUsers.find((u) => u.id === userId);
         if (rejectedUser) {
-          setRejectedUsers([...rejectedUsers, { ...rejectedUser, status: 'rejected' }]);
+          setRejectedUsers([...rejectedUsers, { ...rejectedUser, status: 'REJECTED' }]);
         }
         setSelectedUser(null);
         setRejectionReason('');
@@ -163,7 +164,7 @@ export default function AdminDashboardPage() {
         setRejectedUsers(rejectedUsers.filter((u) => u.id !== userId));
         const unrejectUser = rejectedUsers.find((u) => u.id === userId);
         if (unrejectUser) {
-          setPendingUsers([...pendingUsers, { ...unrejectUser, status: 'pending' }]);
+          setPendingUsers([...pendingUsers, { ...unrejectUser, status: 'PENDING' }]);
         }
         setSelectedUser(null);
       }
@@ -306,9 +307,9 @@ export default function AdminDashboardPage() {
   };
 
   const displayUsers =
-    activeTab === 'pending' ? pendingUsers
-    : activeTab === 'approved' ? approvedUsers
-    : activeTab === 'rejected' ? rejectedUsers
+    activeTab === 'PENDING' ? pendingUsers
+    : activeTab === 'APPROVED' ? approvedUsers
+    : activeTab === 'REJECTED' ? rejectedUsers
     : [];
 
   if (loading) {
@@ -374,7 +375,7 @@ export default function AdminDashboardPage() {
 
         {/* Tabs */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
-          {(['pending', 'approved', 'rejected', 'newsletter'] as const).map((tab) => (
+          {(['PENDING', 'APPROVED', 'REJECTED', 'newsletter'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -384,9 +385,9 @@ export default function AdminDashboardPage() {
                   : 'bg-white border-2 border-[#E4DBCA] text-[#B64847] hover:border-[#B64847]'
               }`}
             >
-              {tab === 'pending' && `${language === 'id' ? 'Menunggu' : 'Pending'} (${pendingUsers.length})`}
-              {tab === 'approved' && `${language === 'id' ? 'Disetujui' : 'Approved'} (${approvedUsers.length})`}
-              {tab === 'rejected' && `${language === 'id' ? 'Ditolak' : 'Rejected'} (${rejectedUsers.length})`}
+              {tab === 'PENDING' && `${language === 'id' ? 'Menunggu' : 'Pending'} (${pendingUsers.length})`}
+              {tab === 'APPROVED' && `${language === 'id' ? 'Disetujui' : 'Approved'} (${approvedUsers.length})`}
+              {tab === 'REJECTED' && `${language === 'id' ? 'Ditolak' : 'Rejected'} (${rejectedUsers.length})`}
               {tab === 'newsletter' && `${language === 'id' ? 'Newsletter' : 'Newsletter'} (${newsletterSubscribers.length})`}
             </button>
           ))}
@@ -430,9 +431,9 @@ export default function AdminDashboardPage() {
         ) : displayUsers.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-gray-500 text-lg">
-              {activeTab === 'pending' && (language === 'id' ? 'Tidak ada aplikasi menunggu' : 'No pending applications')}
-              {activeTab === 'approved' && (language === 'id' ? 'Tidak ada pengguna yang disetujui' : 'No approved users')}
-              {activeTab === 'rejected' && (language === 'id' ? 'Tidak ada pengguna yang ditolak' : 'No rejected users')}
+              {activeTab === 'PENDING' && (language === 'id' ? 'Tidak ada aplikasi menunggu' : 'No pending applications')}
+              {activeTab === 'APPROVED' && (language === 'id' ? 'Tidak ada pengguna yang disetujui' : 'No approved users')}
+              {activeTab === 'REJECTED' && (language === 'id' ? 'Tidak ada pengguna yang ditolak' : 'No rejected users')}
             </p>
           </div>
         ) : (
@@ -478,18 +479,18 @@ export default function AdminDashboardPage() {
                 <div className="flex items-center justify-between pt-4 border-t border-[#E4DBCA]">
                   <span
                     className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
-                      appUser.status === 'pending'
+                      appUser.status === 'PENDING'
                         ? 'bg-yellow-100 text-yellow-700'
-                        : appUser.status === 'approved'
+                        : appUser.status === 'APPROVED'
                         ? 'bg-green-100 text-green-700'
                         : 'bg-red-100 text-red-700'
                     }`}
                   >
-                    {appUser.status === 'pending'
+                    {appUser.status === 'PENDING'
                       ? language === 'id'
                         ? 'Menunggu'
                         : 'Pending'
-                      : appUser.status === 'approved'
+                      : appUser.status === 'APPROVED'
                       ? language === 'id'
                         ? 'Disetujui'
                         : 'Approved'
@@ -698,12 +699,12 @@ export default function AdminDashboardPage() {
                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Status</label>
                         <select
                           value={editFormData.status || ''}
-                          onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value as 'pending' | 'approved' | 'rejected' })}
+                          onChange={(e) => setEditFormData({ ...editFormData, status: e.target.value as 'PENDING' | 'APPROVED' | 'REJECTED' })}
                           className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
                         >
-                          <option value="pending">Pending</option>
-                          <option value="approved">Approved</option>
-                          <option value="rejected">Rejected</option>
+                          <option value="PENDING">Pending</option>
+                          <option value="APPROVED">Approved</option>
+                          <option value="REJECTED">Rejected</option>
                         </select>
                       </div>
                     </div>
@@ -728,7 +729,7 @@ export default function AdminDashboardPage() {
               )}
 
               {/* Action Section */}
-              {selectedUser.status === 'pending' && (
+              {selectedUser.status === 'PENDING' && (
                 <div className="space-y-4 mb-6">
                   <div>
                     <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
@@ -773,7 +774,7 @@ export default function AdminDashboardPage() {
               )}
 
               {/* Unreject Button for Rejected Users */}
-              {selectedUser.status === 'rejected' && (
+              {selectedUser.status === 'REJECTED' && (
                 <div className="space-y-4 mb-6">
                   {selectedUser.rejectionReason && (
                     <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
@@ -802,7 +803,7 @@ export default function AdminDashboardPage() {
               )}
 
               {/* Edit Button for Approved Users */}
-              {selectedUser.status === 'approved' && (
+              {selectedUser.status === 'APPROVED' && (
                 <div className="mb-6">
                   <button
                     onClick={() => handleEditModeToggle(selectedUser)}
