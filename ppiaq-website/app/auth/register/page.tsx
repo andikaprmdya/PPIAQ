@@ -243,6 +243,7 @@ export default function RegisterPage() {
         }
 
         setIsComplete(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         setTimeout(() => {
           router.push('/auth/login');
         }, 3000);

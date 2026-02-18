@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { label: 'Dashboard', href: '/admin/dashboard' },
     { label: 'Events', href: '/admin/events' },
     { label: 'Team', href: '/admin/team' },
+    { label: 'Community Board', href: '/admin/community-board' },
   ];
 
   return (
@@ -53,10 +54,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ))}
         </nav>
 
-        <div className="absolute bottom-6 left-6 right-6">
+        <div className="absolute bottom-6 left-6">
           <Link
             href="/"
-            className="block w-full px-4 py-2 text-center border-2 border-[#B64847] text-[#B64847] font-bold rounded-xl hover:bg-[#B64847] hover:text-white transition-all text-xs uppercase"
+            className="inline-flex items-center gap-2 px-4 py-2 border-2 border-[#B64847] text-[#B64847] font-bold rounded-xl hover:bg-[#B64847] hover:text-white transition-all text-xs uppercase"
           >
             ← Back to Site
           </Link>
@@ -73,6 +74,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {pathname === '/admin/dashboard' && 'Dashboard'}
               {pathname.startsWith('/admin/events') && 'Events Management'}
               {pathname.startsWith('/admin/team') && 'Team Management'}
+              {pathname.startsWith('/admin/community-board') && 'Community Board Management'}
             </h2>
           </div>
         </div>

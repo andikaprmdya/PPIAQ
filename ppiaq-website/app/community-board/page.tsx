@@ -5,6 +5,30 @@ import { useLanguage } from '@/lib/language-context';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+type BilingualField = { id: string; en: string };
+
+interface DBDiscount {
+  id: string;
+  name: BilingualField;
+  description: BilingualField;
+  code: string;
+  validUntil: string;
+}
+
+interface DBResource {
+  id: string;
+  category: BilingualField;
+  name: BilingualField;
+  location: string;
+}
+
+interface DBAnnouncement {
+  id: string;
+  title: BilingualField;
+  description: BilingualField;
+  date: string;
+}
+
 export default function CommunityBoardPage() {
   const { user, isAuthenticated } = useAuth();
   const { language } = useLanguage();
@@ -13,12 +37,30 @@ export default function CommunityBoardPage() {
   const [newsletterLoading, setNewsletterLoading] = useState(false);
   const [newsletterSuccess, setNewsletterSuccess] = useState(false);
   const [newsletterError, setNewsletterError] = useState('');
+  const [dbDiscounts, setDbDiscounts] = useState<DBDiscount[]>([]);
+  const [dbResources, setDbResources] = useState<DBResource[]>([]);
+  const [dbAnnouncements, setDbAnnouncements] = useState<DBAnnouncement[]>([]);
+  const [dbLoaded, setDbLoaded] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/auth/login');
     }
   }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    fetch('/api/community-board')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) {
+          setDbDiscounts(data.discounts || []);
+          setDbResources(data.resources || []);
+          setDbAnnouncements(data.announcements || []);
+        }
+        setDbLoaded(true);
+      })
+      .catch(() => setDbLoaded(true));
+  }, []);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,80 +102,43 @@ export default function CommunityBoardPage() {
     );
   }
 
-  const discounts = [
-    {
-      name: language === 'id' ? 'Restoran Indonesia' : 'Indonesian Restaurant',
-      description: language === 'id' ? 'Diskon 20% untuk member' : '20% discount for members',
-      code: 'PPIA20',
-      validUntil: '2026-12-31',
-    },
-    {
-      name: language === 'id' ? 'Tempat Fotokopi' : 'Copy Center',
-      description: language === 'id' ? 'Diskon 15% untuk penggandaan dokumen' : '15% off document copying',
-      code: 'PPIA15COPY',
-      validUntil: '2026-12-31',
-    },
-    {
-      name: language === 'id' ? 'Toko Buku' : 'Bookstore',
-      description: language === 'id' ? 'Diskon 10% untuk semua buku' : '10% off all books',
-      code: 'PPIA10BOOKS',
-      validUntil: '2026-12-31',
-    },
+  const fallbackDiscounts = [
+    { name: language === 'id' ? 'Restoran Indonesia' : 'Indonesian Restaurant', description: language === 'id' ? 'Diskon 20% untuk member' : '20% discount for members', code: 'PPIA20', validUntil: '2026-12-31' },
+    { name: language === 'id' ? 'Tempat Fotokopi' : 'Copy Center', description: language === 'id' ? 'Diskon 15% untuk penggandaan dokumen' : '15% off document copying', code: 'PPIA15COPY', validUntil: '2026-12-31' },
+    { name: language === 'id' ? 'Toko Buku' : 'Bookstore', description: language === 'id' ? 'Diskon 10% untuk semua buku' : '10% off all books', code: 'PPIA10BOOKS', validUntil: '2026-12-31' },
   ];
 
-  const resources = [
-    {
-      category: language === 'id' ? 'Restoran & Kafe' : 'Restaurants & Cafes',
-      items: [
-        { name: language === 'id' ? 'Warung Makan Jaya' : 'Warung Makan Jaya', location: 'South Bank' },
-        { name: language === 'id' ? 'Kafe Indonesia' : 'Indonesian Cafe', location: 'City' },
-        { name: language === 'id' ? 'Nasi Kuning' : 'Nasi Kuning', location: 'Fortitude Valley' },
-      ],
-    },
-    {
-      category: language === 'id' ? 'Akomodasi & Perumahan' : 'Accommodation & Housing',
-      items: [
-        { name: language === 'id' ? 'Asrama Mahasiswa' : 'Student Dorm', location: 'West End' },
-        { name: language === 'id' ? 'Apartemen Bersama' : 'Shared Apartment', location: 'Milton' },
-        { name: language === 'id' ? 'Rumah Sewa' : 'Rental House', location: 'Southbank' },
-      ],
-    },
-    {
-      category: language === 'id' ? 'Sumber Belajar' : 'Learning Resources',
-      items: [
-        { name: language === 'id' ? 'Perpustakaan Universitas' : 'University Library', location: 'Each Campus' },
-        { name: language === 'id' ? 'Pusat Bahasa' : 'Language Center', location: 'City' },
-        { name: language === 'id' ? 'Studio Belajar Bersama' : 'Study Group Studio', location: 'Online' },
-      ],
-    },
+  const discounts = dbLoaded && dbDiscounts.length > 0
+    ? dbDiscounts.map(d => ({ name: language === 'id' ? d.name.id : d.name.en, description: language === 'id' ? d.description.id : d.description.en, code: d.code, validUntil: d.validUntil }))
+    : fallbackDiscounts;
+
+  // Group DB resources by category
+  const dbResourcesByCategory = dbResources.reduce((acc, r) => {
+    const catKey = language === 'id' ? r.category.id : r.category.en;
+    if (!acc[catKey]) acc[catKey] = [];
+    acc[catKey].push({ name: language === 'id' ? r.name.id : r.name.en, location: r.location });
+    return acc;
+  }, {} as Record<string, { name: string; location: string }[]>);
+
+  const fallbackResources = [
+    { category: language === 'id' ? 'Restoran & Kafe' : 'Restaurants & Cafes', items: [{ name: 'Warung Makan Jaya', location: 'South Bank' }, { name: language === 'id' ? 'Kafe Indonesia' : 'Indonesian Cafe', location: 'City' }, { name: 'Nasi Kuning', location: 'Fortitude Valley' }] },
+    { category: language === 'id' ? 'Akomodasi & Perumahan' : 'Accommodation & Housing', items: [{ name: language === 'id' ? 'Asrama Mahasiswa' : 'Student Dorm', location: 'West End' }, { name: language === 'id' ? 'Apartemen Bersama' : 'Shared Apartment', location: 'Milton' }, { name: language === 'id' ? 'Rumah Sewa' : 'Rental House', location: 'Southbank' }] },
+    { category: language === 'id' ? 'Sumber Belajar' : 'Learning Resources', items: [{ name: language === 'id' ? 'Perpustakaan Universitas' : 'University Library', location: 'Each Campus' }, { name: language === 'id' ? 'Pusat Bahasa' : 'Language Center', location: 'City' }, { name: language === 'id' ? 'Studio Belajar Bersama' : 'Study Group Studio', location: 'Online' }] },
   ];
 
-  const announcements = [
-    {
-      title: language === 'id' ? 'Pesta Rakyat 2026' : 'Pesta Rakyat 2026',
-      date: '2026-08-17',
-      description:
-        language === 'id'
-          ? 'Bergabunglah dengan perayaan Indonesian Independence Day terbesar di Queensland!'
-          : 'Join the biggest Indonesian Independence Day celebration in Queensland!',
-    },
-    {
-      title: language === 'id' ? 'Workshop Keterampilan' : 'Skills Workshop',
-      date: '2026-03-15',
-      description:
-        language === 'id'
-          ? 'Workshop gratis untuk anggota tentang pengembangan karir dan networking'
-          : 'Free workshop for members on career development and networking',
-    },
-    {
-      title: language === 'id' ? 'Gathering Bulanan' : 'Monthly Gathering',
-      date: '2026-02-28',
-      description:
-        language === 'id'
-          ? 'Acara rutin bulanan untuk mempererat hubungan antar anggota'
-          : 'Regular monthly event to strengthen bonds among members',
-    },
+  const resources = dbLoaded && dbResources.length > 0
+    ? Object.entries(dbResourcesByCategory).map(([category, items]) => ({ category, items }))
+    : fallbackResources;
+
+  const fallbackAnnouncements = [
+    { title: language === 'id' ? 'Pesta Rakyat 2026' : 'Pesta Rakyat 2026', date: '2026-08-17', description: language === 'id' ? 'Bergabunglah dengan perayaan Indonesian Independence Day terbesar di Queensland!' : 'Join the biggest Indonesian Independence Day celebration in Queensland!' },
+    { title: language === 'id' ? 'Workshop Keterampilan' : 'Skills Workshop', date: '2026-03-15', description: language === 'id' ? 'Workshop gratis untuk anggota tentang pengembangan karir dan networking' : 'Free workshop for members on career development and networking' },
+    { title: language === 'id' ? 'Gathering Bulanan' : 'Monthly Gathering', date: '2026-02-28', description: language === 'id' ? 'Acara rutin bulanan untuk mempererat hubungan antar anggota' : 'Regular monthly event to strengthen bonds among members' },
   ];
+
+  const announcements = dbLoaded && dbAnnouncements.length > 0
+    ? dbAnnouncements.map(a => ({ title: language === 'id' ? a.title.id : a.title.en, date: a.date, description: language === 'id' ? a.description.id : a.description.en }))
+    : fallbackAnnouncements;
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6 overflow-x-hidden">

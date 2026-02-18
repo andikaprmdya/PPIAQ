@@ -34,6 +34,8 @@ export default function Header() {
   ];
 
   const userNavItems = [
+    { label: getTranslation(translations.navigation.home, language), href: '/' },
+    { label: getTranslation(translations.navigation.about, language), href: '/about' },
     { label: language === 'id' ? 'Papan Komunitas' : 'Community Board', href: '/community-board' },
     { label: getTranslation(translations.navigation.pestaRakyat, language), href: '/pesta-rakyat' },
     { label: getTranslation(translations.navigation.contact, language), href: '/contact' },

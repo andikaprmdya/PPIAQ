@@ -226,6 +226,56 @@ model FAQ {
 }
 
 // ==========================================
+// CMS - COMMUNITY BOARD
+// ==========================================
+
+model CommunityDiscount {
+  id          String   @id @default(cuid())
+  name        Json     // { id: string, en: string }
+  description Json     // { id: string, en: string }
+  code        String
+  validUntil  String
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("community_discounts")
+}
+
+model CommunityResource {
+  id       String   @id @default(cuid())
+  category Json     // { id: string, en: string }
+  name     Json     // { id: string, en: string }
+  location String
+  isActive Boolean  @default(true)
+  order    Int      @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("community_resources")
+}
+
+model CommunityAnnouncement {
+  id          String   @id @default(cuid())
+  title       Json     // { id: string, en: string }
+  description Json     // { id: string, en: string }
+  date        String
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("community_announcements")
+}
+
+// ==========================================
 // CMS - IMAGE LIBRARY
 // ==========================================
 
