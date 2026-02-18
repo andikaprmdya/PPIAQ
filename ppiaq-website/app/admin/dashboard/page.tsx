@@ -46,6 +46,8 @@ export default function AdminDashboardPage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [importLoading, setImportLoading] = useState(false);
   const [importMessage, setImportMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importResults, setImportResults] = useState<{ imported: number; updated: number; skipped: number; errors: string[] } | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [editFormData, setEditFormData] = useState<Partial<User>>({});
   const [editError, setEditError] = useState<string | null>(null);
@@ -181,6 +183,7 @@ export default function AdminDashboardPage() {
 
     setImportLoading(true);
     setImportMessage(null);
+    setImportResults(null);
 
     try {
       const formData = new FormData();
@@ -194,9 +197,10 @@ export default function AdminDashboardPage() {
       const data = await response.json();
 
       if (response.ok) {
+        setImportResults(data.results);
         setImportMessage({
           type: 'success',
-          text: `Import completed: ${data.results.imported} imported, ${data.results.updated} updated`,
+          text: `Import completed: ${data.results.updated} updated, ${data.results.skipped} skipped`,
         });
         await fetchUsers();
       } else {
@@ -208,12 +212,25 @@ export default function AdminDashboardPage() {
     } catch (error) {
       setImportMessage({
         type: 'error',
-        text: 'Error during import',
+        text: 'Error during import. Please check your file format.',
       });
     } finally {
       setImportLoading(false);
       event.target.value = '';
     }
+  };
+
+  const handleDownloadTemplate = () => {
+    const headers = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Student ID', 'Membership Type', 'Status', 'Date Joined'];
+    const exampleRow = ['John', 'Doe', 'john.doe@email.com', '+61400000000', 'S1234567', 'ordinary', 'approved', '2025-01-01'];
+    const csvContent = [headers.join(','), exampleRow.join(',')].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ppiaq-import-template.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleExport = async (format: 'csv' | 'excel') => {
@@ -336,42 +353,139 @@ export default function AdminDashboardPage() {
           <div className="w-12 h-1 bg-[#FEB602] rounded-full"></div>
         </div>
 
-        {/* Import/Export Message */}
-        {importMessage && (
-          <div className={`mb-6 p-4 rounded-xl ${
-            importMessage.type === 'success'
-              ? 'bg-green-50 text-green-800 border border-green-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
-          }`}>
-            {importMessage.text}
-          </div>
-        )}
-
         {/* Import/Export Buttons */}
         <div className="mb-8 flex flex-wrap gap-4">
-          <label className="px-6 py-3 bg-[#B64847] text-white rounded-xl hover:bg-[#9a3a3e] cursor-pointer font-bold uppercase tracking-widest text-xs transition-all">
-            <input
-              type="file"
-              accept=".csv,.xlsx,.xls"
-              onChange={handleImport}
-              disabled={importLoading}
-              className="hidden"
-            />
+          <button
+            onClick={() => { setShowImportModal(true); setImportMessage(null); setImportResults(null); }}
+            className="px-6 py-3 bg-[#B64847] text-white rounded-xl hover:bg-[#9a3a3e] font-bold uppercase tracking-widest text-xs transition-all flex items-center gap-2"
+          >
             📤 {language === 'id' ? 'Import CSV/Excel' : 'Import CSV/Excel'}
-          </label>
+          </button>
           <button
             onClick={() => handleExport('csv')}
             className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-bold uppercase tracking-widest text-xs transition-all"
           >
-            📥 CSV
+            📥 Export CSV
           </button>
           <button
             onClick={() => handleExport('excel')}
             className="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-bold uppercase tracking-widest text-xs transition-all"
           >
-            📥 Excel
+            📥 Export Excel
           </button>
         </div>
+
+        {/* Import Modal */}
+        {showImportModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => { if (!importLoading) setShowImportModal(false); }} />
+
+            {/* Modal */}
+            <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg border border-[#E4DBCA] overflow-hidden">
+              {/* Header */}
+              <div className="bg-[#B64847] px-8 py-6">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest mb-1">Admin Panel</p>
+                    <h2 className="font-tan-angleton text-white text-2xl font-bold">Import Members</h2>
+                  </div>
+                  {!importLoading && (
+                    <button onClick={() => setShowImportModal(false)} className="text-white/70 hover:text-white text-2xl transition-colors leading-none">✕</button>
+                  )}
+                </div>
+              </div>
+
+              <div className="px-8 py-6 space-y-6">
+
+                {/* Step 1: Download Template */}
+                <div className="bg-[#FFFAF5] rounded-2xl border border-[#E4DBCA] p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-[#FEB602] rounded-full flex items-center justify-center text-white font-black text-sm shrink-0">1</div>
+                    <div className="flex-1">
+                      <p className="font-bold text-[#303030] mb-1">Download Template</p>
+                      <p className="text-xs text-gray-500 mb-3">Download the CSV template, fill in member data, then upload below.</p>
+                      <button
+                        onClick={handleDownloadTemplate}
+                        className="inline-flex items-center gap-2 px-4 py-2 border-2 border-[#B64847] text-[#B64847] font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-[#B64847] hover:text-white transition-all"
+                      >
+                        ⬇ Download Template CSV
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Template Format Info */}
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Required Columns</p>
+                  <div className="flex flex-wrap gap-1">
+                    {['First Name', 'Last Name', 'Email'].map(col => (
+                      <span key={col} className="px-2 py-0.5 bg-[#B64847]/10 text-[#B64847] rounded text-[10px] font-bold">{col} *</span>
+                    ))}
+                    {['Phone Number', 'Student ID', 'Membership Type', 'Status', 'Date Joined'].map(col => (
+                      <span key={col} className="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-[10px] font-medium">{col}</span>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-2">Membership Type: <code>ordinary</code> or <code>associate</code> · Status: <code>pending</code>, <code>approved</code>, or <code>rejected</code></p>
+                </div>
+
+                {/* Step 2: Upload File */}
+                <div className="bg-[#FFFAF5] rounded-2xl border border-[#E4DBCA] p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 bg-[#B64847] rounded-full flex items-center justify-center text-white font-black text-sm shrink-0">2</div>
+                    <div className="flex-1">
+                      <p className="font-bold text-[#303030] mb-1">Upload File</p>
+                      <p className="text-xs text-gray-500 mb-3">Supports CSV, XLSX, and XLS formats.</p>
+                      <label className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs uppercase tracking-widest font-bold transition-all cursor-pointer ${
+                        importLoading
+                          ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          : 'bg-[#B64847] text-white hover:bg-[#9a3a3e]'
+                      }`}>
+                        <input
+                          type="file"
+                          accept=".csv,.xlsx,.xls"
+                          onChange={handleImport}
+                          disabled={importLoading}
+                          className="hidden"
+                        />
+                        {importLoading ? '⏳ Importing...' : '📤 Choose File & Import'}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Result */}
+                {importMessage && (
+                  <div className={`rounded-2xl p-4 border ${
+                    importMessage.type === 'success'
+                      ? 'bg-green-50 border-green-200 text-green-800'
+                      : 'bg-red-50 border-red-200 text-red-800'
+                  }`}>
+                    <p className="font-bold text-sm mb-1">{importMessage.type === 'success' ? '✅' : '❌'} {importMessage.text}</p>
+                    {importResults && importResults.errors.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs font-bold mb-1">Errors ({importResults.errors.length}):</p>
+                        <ul className="text-xs space-y-0.5 max-h-24 overflow-y-auto">
+                          {importResults.errors.map((err, i) => <li key={i}>• {err}</li>)}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Close button after done */}
+                {importMessage && (
+                  <button
+                    onClick={() => setShowImportModal(false)}
+                    className="w-full px-4 py-3 bg-[#303030] text-white font-bold rounded-2xl text-xs uppercase tracking-widest hover:bg-[#B64847] transition-all"
+                  >
+                    Close
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-2 mb-8 overflow-x-auto pb-2">
