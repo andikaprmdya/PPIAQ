@@ -484,32 +484,65 @@ export default function RegisterPage() {
                     />
                   </div>
 
-                  {/* Rubric Link for University Students */}
-                  {['University of Queensland', 'Queensland University of Technology', 'Griffith University', 'James Cook University'].includes(formData.university) && (
-                    <div className="mt-8 p-6 bg-[#FEB602]/10 border border-[#FEB602] rounded-2xl">
-                      <p className="text-sm font-semibold text-[#B64847] mb-4">
-                        {language === 'id'
-                          ? '⚠️ Penting: Silakan klik link berikut untuk menyelesaikan pendaftaran universitas Anda di Rubric'
-                          : '⚠️ Important: Please click the link below to complete your university registration on Rubric'}
-                      </p>
-                      <a
-                        href="https://campus.hellorubric.com/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setRubricLinkClicked(true)}
-                        className="inline-block px-6 py-3 bg-[#B64847] text-white rounded-xl font-semibold hover:bg-[#9a3a3e] transition-all"
-                      >
-                        {language === 'id' ? '→ Buka Rubric Campus' : '→ Open Rubric Campus'}
-                      </a>
-                      {rubricLinkClicked && (
-                        <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
-                          <p className="text-green-800 font-semibold text-sm flex items-center gap-2">
-                            ✓ {language === 'id' ? 'Link sudah diklik' : 'Link clicked'}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  {/* University-specific registration link */}
+                  {['University of Queensland', 'Queensland University of Technology', 'Griffith University', 'James Cook University'].includes(formData.university) && (() => {
+                    const uniConfig: Record<string, { label: string; labelId: string; href: string; isEmail?: boolean }> = {
+                      'University of Queensland': {
+                        label: '→ Register via UQISA (Rubric)',
+                        labelId: '→ Daftar via UQISA (Rubric)',
+                        href: 'https://campus.hellorubric.com/?s=6249',
+                      },
+                      'Queensland University of Technology': {
+                        label: '→ Register via ISAQ (Rubric)',
+                        labelId: '→ Daftar via ISAQ (Rubric)',
+                        href: 'https://campus.hellorubric.com/?s=5241',
+                      },
+                      'Griffith University': {
+                        label: '→ Register via Griffith Campus Groups',
+                        labelId: '→ Daftar via Griffith Campus Groups',
+                        href: 'https://griffith.campusgroups.com/student_community?club_id=206',
+                      },
+                      'James Cook University': {
+                        label: '→ Send Membership Email to JCUISA',
+                        labelId: '→ Kirim Email Keanggotaan ke JCUISA',
+                        href: `mailto:ppia.jcu.tc@gmail.com?cc=qld@ppi-australia.org&subject=PPIAQ%20Membership%20Application%20-%20JCU&body=Dear%20JCUISA%20Team%2C%0A%0AI%20would%20like%20to%20apply%20for%20PPIAQ%20membership%20as%20a%20James%20Cook%20University%20student.%0A%0APlease%20find%20my%20details%20below%3A%0AName%3A%20${encodeURIComponent((formData.firstName + ' ' + formData.lastName).trim())}%0AEmail%3A%20${encodeURIComponent(formData.email || '[Your Email]')}%0AStudent%20ID%3A%20${encodeURIComponent(formData.studentId || '[Your Student ID]')}%0AMajor%3A%20${encodeURIComponent(formData.major || '[Your Major]')}%0A%0AThank%20you!`,
+                        isEmail: true,
+                      },
+                    };
+                    const config = uniConfig[formData.university];
+                    return (
+                      <div className="mt-8 p-6 bg-[#FEB602]/10 border border-[#FEB602] rounded-2xl">
+                        <p className="text-sm font-semibold text-[#B64847] mb-1">
+                          {language === 'id' ? '⚠️ Langkah tambahan diperlukan' : '⚠️ Additional step required'}
+                        </p>
+                        <p className="text-xs text-gray-600 mb-4">
+                          {config.isEmail
+                            ? (language === 'id'
+                                ? 'Klik tombol di bawah untuk mengirim email keanggotaan ke JCUISA. Email akan terbuka di aplikasi email Anda.'
+                                : 'Click below to send your membership email to JCUISA. This will open your email app with a prefilled template.')
+                            : (language === 'id'
+                                ? 'Klik tombol di bawah untuk menyelesaikan pendaftaran komunitas universitas Anda.'
+                                : 'Click below to complete your university community registration.')}
+                        </p>
+                        <a
+                          href={config.href}
+                          target={config.isEmail ? '_self' : '_blank'}
+                          rel="noopener noreferrer"
+                          onClick={() => setRubricLinkClicked(true)}
+                          className="inline-block px-6 py-3 bg-[#B64847] text-white rounded-xl font-semibold hover:bg-[#9a3a3e] transition-all text-sm"
+                        >
+                          {language === 'id' ? config.labelId : config.label}
+                        </a>
+                        {rubricLinkClicked && (
+                          <div className="mt-4 p-3 bg-green-100 border border-green-300 rounded-lg">
+                            <p className="text-green-800 font-semibold text-sm">
+                              ✓ {language === 'id' ? 'Link sudah diklik, lanjutkan pendaftaran' : 'Link clicked, you may continue'}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
 
