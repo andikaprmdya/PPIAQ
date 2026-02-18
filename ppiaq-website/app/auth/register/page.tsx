@@ -244,9 +244,6 @@ export default function RegisterPage() {
 
         setIsComplete(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-        setTimeout(() => {
-          router.push('/auth/login');
-        }, 3000);
       } catch (err) {
         setError(language === 'id' ? 'Terjadi kesalahan jaringan' : 'Network error. Please try again.');
       } finally {
@@ -662,9 +659,6 @@ export default function RegisterPage() {
               {language === 'id'
                 ? 'Terima kasih telah mendaftar. Aplikasi Anda sedang menunggu persetujuan admin. Anda akan dapat masuk setelah disetujui.'
                 : 'Thank you for registering. Your application is pending admin approval. You will be able to sign in after approval.'}
-            </p>
-            <p className="text-sm text-[#886644] mb-8 font-medium italic">
-              {language === 'id' ? 'Mengalihkan ke halaman login...' : 'Redirecting to login page...'}
             </p>
             <Link
               href="/auth/login"
