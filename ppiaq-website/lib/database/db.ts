@@ -175,7 +175,7 @@ export function isAdminUser(user: { role: string }): boolean {
   return user.role === 'ADMIN';
 }
 
-export async function updateUser(userId: string, updates: Prisma.UserUpdateInput) {
+export async function updateUser(userId: string, updates: Record<string, unknown>) {
   const allowedFields = [
     'firstName',
     'lastName',
@@ -191,7 +191,7 @@ export async function updateUser(userId: string, updates: Prisma.UserUpdateInput
     'status',
   ];
 
-  const cleanedUpdates: Prisma.UserUpdateInput = {};
+  const cleanedUpdates: Record<string, unknown> = {};
   allowedFields.forEach((field) => {
     if (field in updates) {
       cleanedUpdates[field] = updates[field];
@@ -200,15 +200,15 @@ export async function updateUser(userId: string, updates: Prisma.UserUpdateInput
 
   // Map enum values
   if (cleanedUpdates.membershipType) {
-    cleanedUpdates.membershipType = mapEnum('membershipType', cleanedUpdates.membershipType);
+    cleanedUpdates.membershipType = mapEnum('membershipType', cleanedUpdates.membershipType as string);
   }
   if (cleanedUpdates.status) {
-    cleanedUpdates.status = mapEnum('userStatus', cleanedUpdates.status);
+    cleanedUpdates.status = mapEnum('userStatus', cleanedUpdates.status as string);
   }
 
   return await prisma.user.update({
     where: { id: userId },
-    data: cleanedUpdates,
+    data: cleanedUpdates as Prisma.UserUpdateInput,
   });
 }
 
@@ -259,32 +259,32 @@ export async function getCMSEventById(id: string) {
   return await prisma.event.findUnique({ where: { id } });
 }
 
-export async function createCMSEvent(data: Prisma.EventCreateInput) {
+export async function createCMSEvent(data: Record<string, unknown>) {
   return await prisma.event.create({
     data: {
-      day: data.day,
-      month: data.month,
-      title: data.title,
-      date: data.date,
-      location: data.location,
-      description: data.description,
-      image: data.image,
-      registrationUrl: data.registrationUrl,
+      day: data.day as string,
+      month: data.month as string,
+      title: data.title as Prisma.InputJsonValue,
+      date: data.date as string,
+      location: data.location as Prisma.InputJsonValue,
+      description: data.description as Prisma.InputJsonValue,
+      image: data.image as string,
+      registrationUrl: data.registrationUrl as string | undefined,
       status: (mapEnum('eventStatus', data.status as string) || 'DRAFT') as EventStatus,
-      createdBy: data.createdBy,
+      createdBy: data.createdBy as string,
     },
   });
 }
 
-export async function updateCMSEvent(id: string, updates: Prisma.EventUpdateInput) {
-  const cleanedUpdates: Prisma.EventUpdateInput = { ...updates };
+export async function updateCMSEvent(id: string, updates: Record<string, unknown>) {
+  const cleanedUpdates: Record<string, unknown> = { ...updates };
   if (typeof cleanedUpdates.status === 'string' && cleanedUpdates.status) {
     cleanedUpdates.status = mapEnum('eventStatus', cleanedUpdates.status) as EventStatus;
   }
   return await prisma.event.update({
     where: { id },
     data: {
-      ...cleanedUpdates,
+      ...(cleanedUpdates as Prisma.EventUpdateInput),
       updatedAt: new Date(),
     },
   });
@@ -318,24 +318,24 @@ export async function getCMSTeamMemberById(id: string) {
   return await prisma.teamMember.findUnique({ where: { id } });
 }
 
-export async function createCMSTeamMember(data: Prisma.TeamMemberCreateInput) {
+export async function createCMSTeamMember(data: Record<string, unknown>) {
   return await prisma.teamMember.create({
     data: {
-      name: data.name,
-      role: data.role,
-      university: data.university,
-      instagram: data.instagram,
-      image: data.image,
-      bio: data.bio,
+      name: data.name as string,
+      role: data.role as Prisma.InputJsonValue,
+      university: data.university as string,
+      instagram: data.instagram as string,
+      image: data.image as string,
+      bio: data.bio as Prisma.InputJsonValue,
       division: (mapEnum('division', data.division as string) || 'CORE') as Division,
-      order: data.order || 1,
+      order: (data.order as number) || 1,
       isActive: data.isActive !== false,
     },
   });
 }
 
-export async function updateCMSTeamMember(id: string, updates: Prisma.TeamMemberUpdateInput) {
-  const cleanedUpdates: Prisma.TeamMemberUpdateInput = { ...updates };
+export async function updateCMSTeamMember(id: string, updates: Record<string, unknown>) {
+  const cleanedUpdates: Record<string, unknown> = { ...updates };
   if (typeof cleanedUpdates.division === 'string' && cleanedUpdates.division) {
     cleanedUpdates.division = mapEnum('division', cleanedUpdates.division) as Division;
   }
@@ -343,7 +343,7 @@ export async function updateCMSTeamMember(id: string, updates: Prisma.TeamMember
   return await prisma.teamMember.update({
     where: { id },
     data: {
-      ...cleanedUpdates,
+      ...(cleanedUpdates as Prisma.TeamMemberUpdateInput),
       updatedAt: new Date(),
     },
   });
@@ -386,15 +386,15 @@ export async function getStaticContentByKey(key: string) {
   return await prisma.staticContent.findUnique({ where: { key } });
 }
 
-export async function createStaticContent(data: Prisma.StaticContentCreateInput) {
-  return await prisma.staticContent.create({ data });
+export async function createStaticContent(data: Record<string, unknown>) {
+  return await prisma.staticContent.create({ data: data as Prisma.StaticContentCreateInput });
 }
 
-export async function updateStaticContent(id: string, updates: Prisma.StaticContentUpdateInput) {
+export async function updateStaticContent(id: string, updates: Record<string, unknown>) {
   return await prisma.staticContent.update({
     where: { id },
     data: {
-      ...updates,
+      ...(updates as Prisma.StaticContentUpdateInput),
       updatedAt: new Date(),
     },
   });
@@ -423,15 +423,15 @@ export async function getFAQById(id: string) {
   return await prisma.fAQ.findUnique({ where: { id } });
 }
 
-export async function createFAQ(data: Prisma.FAQCreateInput) {
-  return await prisma.fAQ.create({ data });
+export async function createFAQ(data: Record<string, unknown>) {
+  return await prisma.fAQ.create({ data: data as Prisma.FAQCreateInput });
 }
 
-export async function updateFAQ(id: string, updates: Prisma.FAQUpdateInput) {
+export async function updateFAQ(id: string, updates: Record<string, unknown>) {
   return await prisma.fAQ.update({
     where: { id },
     data: {
-      ...updates,
+      ...(updates as Prisma.FAQUpdateInput),
       updatedAt: new Date(),
     },
   });
@@ -474,17 +474,17 @@ export async function getImageAssetById(id: string) {
   return await prisma.imageAsset.findUnique({ where: { id } });
 }
 
-export async function uploadImageAsset(data: Prisma.ImageAssetCreateInput) {
+export async function uploadImageAsset(data: Record<string, unknown>) {
   return await prisma.imageAsset.create({
     data: {
-      name: data.name,
-      description: data.description,
-      base64Data: data.base64Data,
-      mimeType: data.mimeType,
-      size: data.size,
+      name: data.name as string,
+      description: data.description as string | undefined,
+      base64Data: data.base64Data as string,
+      mimeType: data.mimeType as string,
+      size: data.size as number,
       category: (mapEnum('imageCategory', data.category as string) || 'GENERAL') as ImageCategory,
-      usedIn: data.usedIn || [],
-      uploadedBy: data.uploadedBy,
+      usedIn: (data.usedIn as Prisma.InputJsonValue) || [],
+      uploadedBy: data.uploadedBy as string,
     },
   });
 }
