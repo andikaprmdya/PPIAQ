@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/database/prisma';
-import { getUserByEmail, isAdmin } from '@/lib/database/db';
-import { cookies } from 'next/headers';
-
-async function checkAdmin() {
-  const cookieStore = await cookies();
-  const userEmail = cookieStore.get('userEmail')?.value;
-  if (!userEmail) return null;
-  const user = await getUserByEmail(userEmail);
-  if (!user || !(await isAdmin(user.id))) return null;
-  return user;
-}
+import { checkAdmin } from '@/lib/auth/check-admin';
 
 export async function GET() {
   try {
@@ -18,7 +8,7 @@ export async function GET() {
       orderBy: { order: 'asc' },
     });
     return NextResponse.json(announcements);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -31,7 +21,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const announcement = await prisma.communityAnnouncement.create({ data: body });
     return NextResponse.json(announcement, { status: 201 });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -48,7 +38,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const announcement = await prisma.communityAnnouncement.update({ where: { id }, data: body });
     return NextResponse.json(announcement);
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -64,7 +54,7 @@ export async function DELETE(request: NextRequest) {
 
     await prisma.communityAnnouncement.delete({ where: { id } });
     return NextResponse.json({ message: 'Deleted successfully' });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

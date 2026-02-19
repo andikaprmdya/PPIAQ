@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserByEmail, isAdmin, getAllUsers } from '@/lib/database/db';
-import { cookies } from 'next/headers';
+import { getAllUsers } from '@/lib/database/db';
+import { checkAdmin } from '@/lib/auth/check-admin';
 import * as XLSX from 'xlsx';
 
 export async function GET(request: NextRequest) {
   try {
-    // Get admin user from cookie
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const adminUser = await getUserByEmail(userEmail);
-
-    if (!adminUser || !(await isAdmin(adminUser.id))) {
+    const adminUser = await checkAdmin();
+    if (!adminUser) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 

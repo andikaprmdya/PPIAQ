@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { deleteImageAsset, getUserByEmail, isAdmin } from '@/lib/database/db';
+import { deleteImageAsset } from '@/lib/database/db';
+import { checkAdmin } from '@/lib/auth/check-admin';
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-    if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await checkAdmin();
+    if (!user) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const { id } = await params;
     const deleted = await deleteImageAsset(id);

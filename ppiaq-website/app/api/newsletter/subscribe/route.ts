@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { subscribeToNewsletter } from '@/lib/database/db';
 import { sendEmail, getNewsletterSubscriptionTemplate } from '@/lib/email/brevo';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: max 3 subscribe attempts per IP per minute
+    const ip = getClientIp(request);
+    const rl = rateLimit(`newsletter:${ip}`, { limit: 3, windowSec: 60 });
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: `Too many requests. Try again in ${rl.retryAfter}s.` },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } }
+      );
+    }
+
     const { email } = await request.json();
 
     if (!email) {

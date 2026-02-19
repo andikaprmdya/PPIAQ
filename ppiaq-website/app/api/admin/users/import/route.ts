@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserByEmail, isAdmin } from '@/lib/database/db';
 import { prisma } from '@/lib/database/prisma';
-import { cookies } from 'next/headers';
 import { MembershipType, UserStatus } from '@prisma/client';
+import { checkAdmin } from '@/lib/auth/check-admin';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import bcryptjs from 'bcryptjs';
@@ -24,15 +23,8 @@ interface ImportRow {
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const adminUser = await getUserByEmail(userEmail);
-    if (!adminUser || !(await isAdmin(adminUser.id))) {
+    const adminUser = await checkAdmin();
+    if (!adminUser) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 

@@ -1,21 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getUserByEmail, unrejectUser, isAdmin } from '@/lib/database/db';
+import { unrejectUser } from '@/lib/database/db';
 import { sendEmail, getUnrejectTemplate } from '@/lib/email/brevo';
-import { cookies } from 'next/headers';
+import { checkAdmin } from '@/lib/auth/check-admin';
 
 export async function POST(request: NextRequest) {
   try {
-    // Get admin user from cookie
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const adminUser = await getUserByEmail(userEmail);
-
-    if (!adminUser || !(await isAdmin(adminUser.id))) {
+    const adminUser = await checkAdmin();
+    if (!adminUser) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 

@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserStatus, Role } from '@prisma/client';
 import { loginUser } from '@/lib/database/db';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: max 10 login attempts per IP per minute
+    const ip = getClientIp(request);
+    const rl = rateLimit(`login:${ip}`, { limit: 10, windowSec: 60 });
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: `Too many login attempts. Try again in ${rl.retryAfter}s.` },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } }
+      );
+    }
+
     const { email, password } = await request.json();
 
     // Validation
@@ -61,6 +72,13 @@ export async function POST(request: NextRequest) {
     );
 
     response.cookies.set('userEmail', email, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    response.cookies.set('userRole', user.role, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

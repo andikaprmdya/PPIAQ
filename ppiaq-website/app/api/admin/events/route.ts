@@ -1,31 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { EventStatus } from '@prisma/client';
 import {
   getAllCMSEvents,
-  getCMSEventById,
   createCMSEvent,
   updateCMSEvent,
   deleteCMSEvent,
-  publishCMSEvent,
-  unpublishCMSEvent,
-  getUserByEmail,
-  isAdmin,
 } from '@/lib/database/db';
+import { checkAdmin } from '@/lib/auth/check-admin';
 
 // GET /api/admin/events - List all events with optional filters
 export async function GET(req: NextRequest) {
   try {
-    // Authentication check
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -52,16 +39,8 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/events - Create new event
 export async function POST(req: NextRequest) {
   try {
-    // Authentication check
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -99,16 +78,8 @@ export async function POST(req: NextRequest) {
 // PUT /api/admin/events?id=XXX - Update event
 export async function PUT(req: NextRequest) {
   try {
-    // Authentication check
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -141,16 +112,8 @@ export async function PUT(req: NextRequest) {
 // DELETE /api/admin/events?id=XXX - Delete event
 export async function DELETE(req: NextRequest) {
   try {
-    // Authentication check
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 

@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { registerUser, getUserByEmail } from '@/lib/database/db';
 import { sendEmail, getMembershipApplicationTemplate } from '@/lib/email/brevo';
+import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting: max 5 registrations per IP per minute
+    const ip = getClientIp(request);
+    const rl = rateLimit(`register:${ip}`, { limit: 5, windowSec: 60 });
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: `Too many registration attempts. Try again in ${rl.retryAfter}s.` },
+        { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } }
+      );
+    }
+
     const {
       firstName,
       lastName,
@@ -114,7 +125,7 @@ export async function POST(request: NextRequest) {
                 <p><strong>Registration Date:</strong> ${new Date().toLocaleString('en-US')}</p>
               </div>
               <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">
-                <a href="http://localhost:3000/admin/dashboard" style="display: inline-block; padding: 10px 20px; background-color: #B64847; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://ppiaqueensland.org'}/admin/dashboard" style="display: inline-block; padding: 10px 20px; background-color: #B64847; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
                   Review Application in Admin Panel
                 </a>
               </p>

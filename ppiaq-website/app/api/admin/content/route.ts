@@ -1,20 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import {
   getStaticContentByPage,
   createStaticContent,
-  getUserByEmail,
-  isAdmin,
 } from '@/lib/database/db';
+import { checkAdmin } from '@/lib/auth/check-admin';
 
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-    if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await checkAdmin();
+    if (!user) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const page = new URL(req.url).searchParams.get('page');
     if (!page) return NextResponse.json({ error: 'page parameter required' }, { status: 400 });
@@ -33,12 +27,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-    if (!userEmail) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    const user = await checkAdmin();
+    if (!user) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
 
     const body = await req.json();
     if (!body.key || !body.page || !body.type || !body.content) {

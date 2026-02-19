@@ -1,20 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { getCMSEventById, updateCMSEvent, deleteCMSEvent, getUserByEmail, isAdmin } from '@/lib/database/db';
+import { getCMSEventById, updateCMSEvent, deleteCMSEvent } from '@/lib/database/db';
+import { checkAdmin } from '@/lib/auth/check-admin';
 
 // GET /api/admin/events/[id]
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Authentication check
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -34,16 +26,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 // PUT /api/admin/events/[id]
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Authentication check
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -65,16 +49,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 // DELETE /api/admin/events/[id]
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // Authentication check
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 

@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail, getMembershipApplicationTemplate, getNewsletterSubscriptionTemplate } from '@/lib/email/brevo';
+import { checkAdmin } from '@/lib/auth/check-admin';
 
 export async function POST(request: NextRequest) {
   try {
+    // Admin-only: verify session
+    const adminUser = await checkAdmin();
+    if (!adminUser) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
     const { type, email } = await request.json();
 
     if (!email) {

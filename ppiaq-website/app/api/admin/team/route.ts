@@ -1,25 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import {
   getAllCMSTeamMembers,
   createCMSTeamMember,
   reorderCMSTeamMembers,
-  getUserByEmail,
-  isAdmin,
 } from '@/lib/database/db';
+import { checkAdmin } from '@/lib/auth/check-admin';
 
 // GET /api/admin/team - List all team members
 export async function GET(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -41,15 +32,8 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/team - Create new team member
 export async function POST(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
@@ -84,15 +68,8 @@ export async function POST(req: NextRequest) {
 // PUT /api/admin/team/reorder - Reorder team members
 export async function PUT(req: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-    if (!user || !(await isAdmin(user.id))) {
+    const user = await checkAdmin();
+    if (!user) {
       return NextResponse.json({ error: 'Access denied. Admin only.' }, { status: 403 });
     }
 
