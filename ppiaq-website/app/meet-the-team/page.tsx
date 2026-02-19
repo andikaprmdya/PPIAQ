@@ -17,127 +17,18 @@ interface TeamMember {
   isActive: boolean;
 }
 
-const TEAM_MEMBERS: TeamMember[] = [];  // Will be fetched from API
-
-const DIVISIONS = [
-  {
-    id: 'admin',
-    name: { id: 'Administrasi & Logistik', en: 'Administration & Logistics' },
-    color: '#B64847',
-    positions: [
-      {
-        title: { id: 'Direktur Administrasi & Logistik', en: 'Administration & Logistics Director' },
-        name: 'John Doe',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Memimpin divisi administrasi dan logistik', en: 'Leading the administration and logistics division' }
-      },
-      {
-        title: { id: 'Petugas Administrasi & Logistik', en: 'Administration & Logistics Officer' },
-        name: 'Jane Smith',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Mengelola administrasi organisasi', en: 'Managing organizational administration' }
-      },
-      {
-        title: { id: 'Petugas Administrasi & Logistik', en: 'Administration & Logistics Officer' },
-        name: 'Michael Johnson',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Koordinator logistik untuk acara', en: 'Event logistics coordinator' }
-      },
-    ]
-  },
-  {
-    id: 'education',
-    name: { id: 'Pendidikan & Pengembangan', en: 'Education & Development' },
-    color: '#886644',
-    positions: [
-      {
-        title: { id: 'Direktur Pendidikan & Pengembangan', en: 'Education & Development Director' },
-        name: 'Sarah Williams',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Mengarahkan program pendidikan dan pengembangan', en: 'Directing education and development programs' }
-      },
-      {
-        title: { id: 'Petugas Pendidikan & Pengembangan', en: 'Education & Development Officer' },
-        name: 'David Brown',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Mengelola workshop dan seminar', en: 'Managing workshops and seminars' }
-      },
-      {
-        title: { id: 'Petugas Pendidikan & Pengembangan', en: 'Education & Development Officer' },
-        name: 'Emma Davis',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Program pengembangan kepemimpinan', en: 'Leadership development programs' }
-      },
-    ]
-  },
-  {
-    id: 'sports',
-    name: { id: 'Olahraga, Seni & Budaya', en: 'Sports, Arts & Culture' },
-    color: '#FEB602',
-    positions: [
-      {
-        title: { id: 'Direktur Olahraga, Seni & Budaya', en: 'Sports, Arts & Culture Director' },
-        name: 'Lucas Martinez',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Memimpin acara olahraga dan budaya', en: 'Leading sports and cultural events' }
-      },
-      {
-        title: { id: 'Petugas Olahraga, Seni & Budaya', en: 'Sports, Arts & Culture Officer' },
-        name: 'Sophia Garcia',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Mengorganisir turnamen olahraga', en: 'Organizing sports tournaments' }
-      },
-      {
-        title: { id: 'Petugas Olahraga, Seni & Budaya', en: 'Sports, Arts & Culture Officer' },
-        name: 'Oliver Taylor',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Program seni dan budaya', en: 'Arts and culture programs' }
-      },
-    ]
-  },
-  {
-    id: 'media',
-    name: { id: 'Media & Komunikasi', en: 'Media & Communications' },
-    color: '#303030',
-    positions: [
-      {
-        title: { id: 'Direktur Media & Komunikasi', en: 'Media & Communications Director' },
-        name: 'Isabella Anderson',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Mengelola komunikasi dan media sosial', en: 'Managing communications and social media' }
-      },
-      {
-        title: { id: 'Petugas Media & Komunikasi', en: 'Media & Communications Officer' },
-        name: 'James Wilson',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Content creator dan photographer', en: 'Content creator and photographer' }
-      },
-      {
-        title: { id: 'Petugas Media & Komunikasi', en: 'Media & Communications Officer' },
-        name: 'Charlotte Moore',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Desain grafis dan branding', en: 'Graphic design and branding' }
-      },
-    ]
-  },
-  {
-    id: 'partnership',
-    name: { id: 'Kemitraan', en: 'Partnership' },
-    color: '#E4DBCA',
-    positions: [
-      {
-        title: { id: 'Petugas Kemitraan', en: 'Partnership Officer' },
-        name: 'Benjamin Lee',
-        image: '/images/placeholder.jpg',
-        bio: { id: 'Membangun hubungan kemitraan strategis', en: 'Building strategic partnerships' }
-      },
-    ]
-  },
+const DIVISION_META = [
+  { id: 'ADMIN',       name: { id: 'Administrasi & Logistik',    en: 'Administration & Logistics' } },
+  { id: 'EDUCATION',   name: { id: 'Pendidikan & Pengembangan',   en: 'Education & Development' } },
+  { id: 'SPORTS',      name: { id: 'Olahraga, Seni & Budaya',     en: 'Sports, Arts & Culture' } },
+  { id: 'MEDIA',       name: { id: 'Media & Komunikasi',          en: 'Media & Communications' } },
+  { id: 'PARTNERSHIP', name: { id: 'Kemitraan',                   en: 'Partnership' } },
 ];
 
 export default function MeetTheTeamPage() {
   const { language } = useLanguage();
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [coreMembers, setCoreMembers] = useState<TeamMember[]>([]);
+  const [divisionMembers, setDivisionMembers] = useState<Record<string, TeamMember[]>>({});
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -146,11 +37,22 @@ export default function MeetTheTeamPage() {
       try {
         const res = await fetch('/api/team');
         const data = await res.json();
-        // Filter core team members (first 5) and sort by order
-        const coreMembers = (data.data || [])
-          .filter((member: TeamMember) => member.division === 'core' && member.isActive)
-          .sort((a: TeamMember, b: TeamMember) => a.order - b.order);
-        setTeamMembers(coreMembers);
+        const all: TeamMember[] = (data.data || []).sort(
+          (a: TeamMember, b: TeamMember) => a.order - b.order
+        );
+
+        // Core team: division === 'CORE' (uppercase from DB)
+        setCoreMembers(all.filter((m) => m.division === 'CORE'));
+
+        // Group non-core members by division
+        const grouped: Record<string, TeamMember[]> = {};
+        all
+          .filter((m) => m.division !== 'CORE')
+          .forEach((m) => {
+            if (!grouped[m.division]) grouped[m.division] = [];
+            grouped[m.division].push(m);
+          });
+        setDivisionMembers(grouped);
       } catch (error) {
         console.error('Error fetching team members:', error);
       } finally {
@@ -160,7 +62,10 @@ export default function MeetTheTeamPage() {
     fetchTeamMembers();
   }, []);
 
-  const getTranslation = (obj: any) => language === 'id' ? obj.id : obj.en;
+  const getTranslation = (obj: { id: string; en: string } | string) => {
+    if (typeof obj === 'string') return obj;
+    return language === 'id' ? obj.id : obj.en;
+  };
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen overflow-x-hidden">
@@ -204,10 +109,10 @@ export default function MeetTheTeamPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {loading ? (
               <div className="col-span-full text-center py-8 text-[#886644]">Loading team members...</div>
-            ) : teamMembers.length === 0 ? (
+            ) : coreMembers.length === 0 ? (
               <div className="col-span-full text-center py-8 text-[#886644]">No team members available</div>
             ) : (
-              teamMembers.map((member) => (
+              coreMembers.map((member) => (
                 <div key={member.id} className="group relative">
                   <div className="bg-white rounded-3xl p-5 text-center border border-[#E4DBCA] shadow-sm group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500 flex flex-col h-full cursor-pointer" onClick={() => setSelectedMember(member)}>
                     <div className="relative w-16 h-16 mx-auto mb-5 rounded-2xl overflow-hidden shadow-md border border-white/20">
@@ -246,92 +151,88 @@ export default function MeetTheTeamPage() {
       {/* --- DIVISIONS GRID --- */}
       <section className="py-16 px-6 bg-white shadow-sm">
         <div className="max-w-6xl mx-auto">
-          {DIVISIONS.map((division, idx) => (
-            <div key={division.id} className="mb-16 last:mb-0">
-              {/* Division Header */}
-              <div className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-[#B64847] text-white rounded-lg font-bold text-sm">
-                    {String(idx + 1).padStart(2, '0')}
-                  </div>
-                  <h3 className="font-bold text-2xl text-[#B64847] flex-1">
-                    {getTranslation(division.name)}
-                  </h3>
-                </div>
-                <div className="h-1 w-12 bg-[#FEB602] rounded-full"></div>
-              </div>
-
-              {/* Members Grid for Division */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {division.positions.map((position, posIdx) => (
-                  <div
-                    key={posIdx}
-                    className="group relative cursor-pointer"
-                    onClick={() => setSelectedMember({
-                      ...position,
-                      role: position.title,
-                      instagram: '@ppiaqueensland',
-                      university: 'PPIA Queensland'
-                    } as any)}
-                  >
-                    <div className="bg-white rounded-3xl p-5 text-center border border-[#E4DBCA] shadow-sm group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
-                      {/* Image Container */}
-                      <div className="relative w-16 h-16 mx-auto mb-5 rounded-2xl overflow-hidden shadow-md border border-white/20 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
-                        {position.image && position.image.includes('placeholder') ? (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#B64847]/20 to-[#FEB602]/20">
-                            <span className="text-lg font-bold text-[#B64847] opacity-60">
-                              {position.name.split(' ').map(n => n[0]).join('')}
-                            </span>
-                          </div>
-                        ) : (
-                          <Image
-                            src={position.image}
-                            alt={position.name}
-                            fill
-                            className="object-cover"
-                          />
-                        )}
-                      </div>
-
-                      {/* Name */}
-                      <h3 className="font-bold text-sm text-[#303030] mb-0.5 group-hover:text-[#B64847] transition-colors leading-tight">
-                        {position.name}
-                      </h3>
-
-                      {/* Role */}
-                      <p className="text-[#886644] font-bold text-[9px] uppercase tracking-widest mb-3">
-                        {getTranslation(position.title)}
-                      </p>
-
-                      {/* Divider */}
-                      <div className="w-8 h-px bg-[#E4DBCA] mx-auto mb-3"></div>
-
-                      {/* Bio/Description */}
-                      <p className="text-[9px] text-gray-400 font-bold mb-4 grow flex items-center justify-center italic">
-                        {getTranslation(position.bio)}
-                      </p>
-
-                      {/* View Button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedMember({
-                            ...position,
-                            role: position.title,
-                            instagram: '@ppiaqueensland',
-                            university: 'PPIA Queensland'
-                          } as any);
-                        }}
-                        className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-[9px] font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-all shadow-sm"
-                      >
-                        {language === 'id' ? 'Lihat Info' : 'View'}
-                      </button>
+          {DIVISION_META.map((division, idx) => {
+            const members = divisionMembers[division.id] || [];
+            if (!loading && members.length === 0) return null;
+            return (
+              <div key={division.id} className="mb-16 last:mb-0">
+                {/* Division Header */}
+                <div className="mb-8">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 flex items-center justify-center bg-[#B64847] text-white rounded-lg font-bold text-sm">
+                      {String(idx + 1).padStart(2, '0')}
                     </div>
+                    <h3 className="font-bold text-2xl text-[#B64847] flex-1">
+                      {getTranslation(division.name)}
+                    </h3>
                   </div>
-                ))}
+                  <div className="h-1 w-12 bg-[#FEB602] rounded-full"></div>
+                </div>
+
+                {/* Members Grid for Division */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {loading ? (
+                    <div className="col-span-full text-center py-8 text-[#886644]">Loading...</div>
+                  ) : (
+                    members.map((member) => (
+                      <div
+                        key={member.id}
+                        className="group relative cursor-pointer"
+                        onClick={() => setSelectedMember(member)}
+                      >
+                        <div className="bg-white rounded-3xl p-5 text-center border border-[#E4DBCA] shadow-sm group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
+                          {/* Image Container */}
+                          <div className="relative w-16 h-16 mx-auto mb-5 rounded-2xl overflow-hidden shadow-md border border-white/20 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                            {member.image ? (
+                              <Image
+                                src={member.image}
+                                alt={member.name}
+                                fill
+                                className="object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#B64847]/20 to-[#FEB602]/20">
+                                <span className="text-lg font-bold text-[#B64847] opacity-60">
+                                  {member.name.split(' ').map((n: string) => n[0]).join('')}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Name */}
+                          <h3 className="font-bold text-sm text-[#303030] mb-0.5 group-hover:text-[#B64847] transition-colors leading-tight">
+                            {member.name}
+                          </h3>
+
+                          {/* Role */}
+                          <p className="text-[#886644] font-bold text-[9px] uppercase tracking-widest mb-3">
+                            {getTranslation(member.role)}
+                          </p>
+
+                          {/* Divider */}
+                          <div className="w-8 h-px bg-[#E4DBCA] mx-auto mb-3"></div>
+
+                          {/* University */}
+                          <p className="text-[9px] text-gray-400 font-bold mb-4 grow flex items-center justify-center italic">
+                            {member.university}
+                          </p>
+
+                          {/* Instagram */}
+                          <a
+                            href={`https://instagram.com/${member.instagram.replace('@', '')}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-[9px] font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-all shadow-sm"
+                          >
+                            {member.instagram}
+                          </a>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
