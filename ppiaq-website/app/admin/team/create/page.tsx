@@ -20,7 +20,7 @@ interface CreateTeamMemberData {
   isActive: boolean;
 }
 
-const divisions = ['core', 'admin', 'education', 'sports', 'media', 'partnership'];
+const divisions = ['CORE', 'ADMIN', 'EDUCATION', 'SPORTS', 'MEDIA', 'PARTNERSHIP'];
 
 export default function CreateTeamMemberPage() {
   const router = useRouter();
@@ -32,7 +32,7 @@ export default function CreateTeamMemberPage() {
     instagram: '',
     image: '',
     bio: { id: '', en: '' },
-    division: 'core',
+    division: 'CORE',
     order: 999,
     isActive: true,
   });
@@ -145,7 +145,7 @@ export default function CreateTeamMemberPage() {
           >
             {divisions.map((div) => (
               <option key={div} value={div}>
-                {div.charAt(0).toUpperCase() + div.slice(1)}
+                {div.charAt(0) + div.slice(1).toLowerCase()}
               </option>
             ))}
           </select>

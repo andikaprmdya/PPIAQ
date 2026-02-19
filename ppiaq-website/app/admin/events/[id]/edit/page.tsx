@@ -19,7 +19,7 @@ interface EventData {
   description: { id: string; en: string };
   image: string;
   registrationUrl?: string;
-  status: 'draft' | 'published';
+  status: 'DRAFT' | 'PUBLISHED';
 }
 
 export default function EditEventPage() {

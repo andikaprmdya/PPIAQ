@@ -280,8 +280,8 @@ export default function EditMemberPage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B64847]"
                 >
-                  <option value="ordinary">Ordinary</option>
-                  <option value="associate">Associate</option>
+                  <option value="ORDINARY">Ordinary</option>
+                  <option value="ASSOCIATE">Associate</option>
                 </select>
               </div>
               <div>
@@ -292,9 +292,9 @@ export default function EditMemberPage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B64847]"
                 >
-                  <option value="pending">Pending</option>
-                  <option value="approved">Approved</option>
-                  <option value="rejected">Rejected</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="APPROVED">Approved</option>
+                  <option value="REJECTED">Rejected</option>
                 </select>
               </div>
             </div>

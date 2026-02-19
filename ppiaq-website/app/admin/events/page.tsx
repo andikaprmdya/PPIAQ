@@ -12,7 +12,7 @@ interface Event {
   title: { id: string; en: string };
   date: string;
   location: { id: string; en: string };
-  status: 'draft' | 'published';
+  status: 'DRAFT' | 'PUBLISHED';
   createdAt: Date;
 }
 
@@ -20,7 +20,7 @@ export default function EventsManagementPage() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'draft' | 'published'>('all');
+  const [filter, setFilter] = useState<'all' | 'DRAFT' | 'PUBLISHED'>('all');
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; id: string | null }>({
     show: false,
     id: null,
@@ -77,7 +77,7 @@ export default function EventsManagementPage() {
 
       {/* Filters */}
       <div className="flex gap-2 mb-8">
-        {(['all', 'draft', 'published'] as const).map((status) => (
+        {(['all', 'DRAFT', 'PUBLISHED'] as const).map((status) => (
           <button
             key={status}
             onClick={() => setFilter(status)}
@@ -89,7 +89,7 @@ export default function EventsManagementPage() {
               }
             `}
           >
-            {status === 'all' ? 'All' : status === 'draft' ? '📝 Draft' : '✅ Published'}
+            {status === 'all' ? 'All' : status === 'DRAFT' ? '📝 Draft' : '✅ Published'}
           </button>
         ))}
       </div>
@@ -144,13 +144,13 @@ export default function EventsManagementPage() {
                     <span
                       className={`
                         inline-block px-3 py-1 rounded-full text-xs font-bold
-                        ${event.status === 'published'
+                        ${event.status === 'PUBLISHED'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-yellow-100 text-yellow-800'
                         }
                       `}
                     >
-                      {event.status === 'published' ? '✅ Published' : '📝 Draft'}
+                      {event.status === 'PUBLISHED' ? '✅ Published' : '📝 Draft'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-sm space-x-2 flex">

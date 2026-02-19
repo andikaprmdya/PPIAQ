@@ -21,7 +21,7 @@ export default function CreateEventPage() {
     description: { id: string; en: string };
     image: string;
     registrationUrl: string;
-    status: 'draft' | 'published';
+    status: 'DRAFT' | 'PUBLISHED';
   }>({
     day: '',
     month: '',
@@ -31,7 +31,7 @@ export default function CreateEventPage() {
     description: { id: '', en: '' },
     image: '',
     registrationUrl: '',
-    status: 'draft',
+    status: 'DRAFT',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {

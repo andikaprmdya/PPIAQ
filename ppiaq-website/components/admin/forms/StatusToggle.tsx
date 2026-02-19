@@ -1,8 +1,8 @@
 'use client';
 
 interface StatusToggleProps {
-  value: 'draft' | 'published';
-  onChange: (status: 'draft' | 'published') => void;
+  value: 'DRAFT' | 'PUBLISHED';
+  onChange: (status: 'DRAFT' | 'PUBLISHED') => void;
 }
 
 export default function StatusToggle({ value, onChange }: StatusToggleProps) {
@@ -14,10 +14,10 @@ export default function StatusToggle({ value, onChange }: StatusToggleProps) {
 
       <div className="flex gap-3">
         <button
-          onClick={() => onChange('draft')}
+          onClick={() => onChange('DRAFT')}
           className={`
             flex-1 px-4 py-3 rounded-xl font-bold uppercase text-sm transition-all
-            ${value === 'draft'
+            ${value === 'DRAFT'
               ? 'bg-[#E4DBCA] text-[#303030]'
               : 'border-2 border-[#E4DBCA] text-[#886644] hover:border-[#B64847]'
             }
@@ -27,10 +27,10 @@ export default function StatusToggle({ value, onChange }: StatusToggleProps) {
         </button>
 
         <button
-          onClick={() => onChange('published')}
+          onClick={() => onChange('PUBLISHED')}
           className={`
             flex-1 px-4 py-3 rounded-xl font-bold uppercase text-sm transition-all
-            ${value === 'published'
+            ${value === 'PUBLISHED'
               ? 'bg-[#B64847] text-white'
               : 'border-2 border-[#E4DBCA] text-[#886644] hover:border-[#B64847]'
             }

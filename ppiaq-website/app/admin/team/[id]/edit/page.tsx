@@ -21,7 +21,7 @@ interface TeamMemberData {
   isActive: boolean;
 }
 
-const divisions = ['core', 'admin', 'education', 'sports', 'media', 'partnership'];
+const divisions = ['CORE', 'ADMIN', 'EDUCATION', 'SPORTS', 'MEDIA', 'PARTNERSHIP'];
 
 export default function EditTeamMemberPage() {
   const router = useRouter();
@@ -156,7 +156,7 @@ export default function EditTeamMemberPage() {
           >
             {divisions.map((div) => (
               <option key={div} value={div}>
-                {div.charAt(0).toUpperCase() + div.slice(1)}
+                {div.charAt(0) + div.slice(1).toLowerCase()}
               </option>
             ))}
           </select>
