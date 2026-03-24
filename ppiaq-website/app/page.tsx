@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { FiMail } from 'react-icons/fi';
+import { FaInstagram, FaLinkedinIn } from 'react-icons/fa';
 import { useLanguage } from '@/lib/language-context';
 import { useFormSubmit } from '@/lib/hooks/useFormSubmit';
 import { API_ENDPOINTS } from '@/lib/constants';
@@ -284,15 +286,37 @@ export default function HomePage() {
               {language === 'id' ? 'Hubungi Kami' : 'Contact us'}
             </h3>
             <div className="space-y-6 text-lg text-gray-700">
-              <p className="font-medium leading-relaxed">
-                Perhimpunan Pelajar Indonesia di Australia, Queensland
+              <div className="space-y-1">
+                <p className="font-medium leading-relaxed">
+                  Perhimpunan Pelajar Indonesia di Australia Cabang Queensland
+                </p>
+                <p className="leading-relaxed">
+                  The Indonesian Student Association in Australia - Queensland Chapter
+                </p>
+                <p className="font-bold tracking-wide">ABN 82 422 047 615</p>
+              </div>
+              <p className="font-bold flex items-center gap-3">
+                <FiMail className="text-[#B64847] text-xl shrink-0" aria-hidden="true" />
+                <a href="mailto:qld@ppi-australia.org" className="text-[#B64847] hover:underline">qld@ppi-australia.org</a>
               </p>
-              <p className="font-bold">
-                Email: <a href="mailto:qld@ppi-australia.org" className="text-[#B64847] hover:underline">qld@ppi-australia.org</a>
-              </p>
-              <div className="pt-4">
-                <a href="https://instagram.com/ppiaqueensland" target="_blank" className="w-12 h-12 flex items-center justify-center border-2 border-black rounded-lg text-2xl hover:bg-[#B64847] hover:border-[#B64847] hover:text-white transition-all">
-                  📸
+              <div className="pt-4 flex items-center gap-3">
+                <a
+                  href="https://instagram.com/ppiaqueensland"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="w-12 h-12 flex items-center justify-center border-2 border-black rounded-lg text-2xl hover:bg-[#B64847] hover:border-[#B64847] hover:text-white transition-all"
+                >
+                  <FaInstagram />
+                </a>
+                <a
+                  href="https://www.linkedin.com/company/ppiaq"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                  className="w-12 h-12 flex items-center justify-center border-2 border-black rounded-lg text-2xl hover:bg-[#B64847] hover:border-[#B64847] hover:text-white transition-all"
+                >
+                  <FaLinkedinIn />
                 </a>
               </div>
             </div>
