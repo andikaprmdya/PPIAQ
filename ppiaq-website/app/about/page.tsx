@@ -207,9 +207,6 @@ export default function AboutPage() {
             <div className="bg-[#B64847] text-white p-10 md:w-1/2 flex flex-col justify-center relative">
                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#FEB602]/20 rounded-full blur-2xl"></div>
                <p className="font-nickainley font-bold text-3xl text-[#FEB602] mb-2 tracking-wide">Let&apos;s talk!</p>
-               <h3 className="font-tan-angleton font-bold text-4xl mb-6">
-                  {language === 'id' ? 'Ada Pertanyaan?' : 'Have Questions?'}
-               </h3>
                <p className="text-white/80 text-sm leading-relaxed mb-0 font-medium italic">
                   {language === 'id' 
                     ? 'Tim kami selalu siap membantu. Jangan ragu untuk menyapa atau menanyakan apa pun tentang kehidupan pelajar di Queensland.'
