@@ -16,9 +16,50 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteUrl = (() => {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (envUrl) {
+    return envUrl.startsWith("http://") || envUrl.startsWith("https://")
+      ? envUrl
+      : `https://${envUrl}`;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return "http://localhost:3000";
+})();
+
 export const metadata: Metadata = {
   title: "PPIA Queensland",
   description: "Indonesian Student Association in Australia - Queensland Chapter",
+  metadataBase: new URL(siteUrl),
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/apple-icon.png",
+  },
+  openGraph: {
+    title: "PPIA Queensland",
+    description: "Indonesian Student Association in Australia - Queensland Chapter",
+    url: "/",
+    siteName: "PPIA Queensland",
+    images: [
+      {
+        url: "/images/PPIAQ_logo.png",
+        width: 1044,
+        height: 1080,
+        alt: "PPIA Queensland Logo",
+      },
+    ],
+    type: "website",
+    locale: "en_AU",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PPIA Queensland",
+    description: "Indonesian Student Association in Australia - Queensland Chapter",
+    images: ["/images/PPIAQ_logo.png"],
+  },
 };
 
 export default function RootLayout({
