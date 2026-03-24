@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/language-context';
 
@@ -48,6 +48,8 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
+  const [agreeAssociateLimits, setAgreeAssociateLimits] = useState(false);
+  const [agreeDataUsage, setAgreeDataUsage] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -66,6 +68,13 @@ export default function RegisterPage() {
     membershipType: 'ordinary',
     paymentProofFile: null,
   });
+
+  useEffect(() => {
+    const typeFromQuery = new URLSearchParams(window.location.search).get('membershipType');
+    if (typeFromQuery === 'ordinary' || typeFromQuery === 'associate') {
+      setFormData((prev) => ({ ...prev, membershipType: typeFromQuery }));
+    }
+  }, []);
 
   // Track if Rubric link was clicked for UQ, QUT, Griffith, JCU
   const [rubricLinkClicked, setRubricLinkClicked] = useState(false);
@@ -190,6 +199,18 @@ export default function RegisterPage() {
       }
       if (!formData.paymentProofFile) {
         setError(language === 'id' ? 'Bukti pembayaran harus diunggah' : 'Payment proof must be uploaded');
+        return false;
+      }
+      if ((formData.membershipType === 'associate' || formData.nationality !== 'Indonesia') && !agreeAssociateLimits) {
+        setError(language === 'id'
+          ? 'Anda harus menyetujui batasan hak Associate/Non-Indonesian member'
+          : 'You must agree to the Associate/Non-Indonesian membership limitations');
+        return false;
+      }
+      if (!agreeDataUsage) {
+        setError(language === 'id'
+          ? 'Anda harus menyetujui penggunaan data untuk keadaan darurat dan pemasaran'
+          : 'You must agree to data use for emergency and marketing purposes');
         return false;
       }
     }
@@ -658,6 +679,36 @@ export default function RegisterPage() {
                       </option>
                     </select>
                   </div>
+
+                  {(formData.membershipType === 'associate' || formData.nationality !== 'Indonesia') && (
+                    <div className="rounded-2xl border border-[#FEB602] bg-[#FEB602]/10 p-4">
+                      <p className="text-xs text-[#303030] leading-relaxed">
+                        For non-Indonesian Citizen: this membership does not come with voting rights. Associate members are not able to run for President, Secretary, or Treasurer positions within PPIA Queensland.
+                      </p>
+                    </div>
+                  )}
+
+                  {(formData.membershipType === 'associate' || formData.nationality !== 'Indonesia') && (
+                    <label className="flex items-start gap-3 text-xs text-gray-700 leading-relaxed">
+                      <input
+                        type="checkbox"
+                        checked={agreeAssociateLimits}
+                        onChange={(e) => setAgreeAssociateLimits(e.target.checked)}
+                        className="mt-0.5 accent-[#B64847]"
+                      />
+                      I understand that Associate/Non-Indonesian membership has no voting rights and cannot run for President, Secretary, or Treasurer positions within PPIA Queensland.
+                    </label>
+                  )}
+
+                  <label className="flex items-start gap-3 text-xs text-gray-700 leading-relaxed">
+                    <input
+                      type="checkbox"
+                      checked={agreeDataUsage}
+                      onChange={(e) => setAgreeDataUsage(e.target.checked)}
+                      className="mt-0.5 accent-[#B64847]"
+                    />
+                    PPIA Queensland may use your information in case of emergency and for marketing purposes. We will not provide your information to a third party without your concern, or for any of our team&apos;s personal uses.
+                  </label>
 
                   <div className="group">
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-3 group-focus-within:text-[#B64847] transition-colors">

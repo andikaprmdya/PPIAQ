@@ -1,10 +1,16 @@
 'use client';
 
-import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/language-context';
 
 export default function MembershipPage() {
   const { language } = useLanguage();
+  const router = useRouter();
+  const [showSignupModal, setShowSignupModal] = useState(false);
+  const [selectedMembershipType, setSelectedMembershipType] = useState<'ordinary' | 'associate' | ''>('');
+  const [agreeAssociateLimits, setAgreeAssociateLimits] = useState(false);
+  const [agreePrivacyUse, setAgreePrivacyUse] = useState(false);
 
   const benefits = [
     { id: 'pricing', label: language === 'id' ? 'Harga Eksklusif' : 'Exclusive Pricing' },
@@ -33,6 +39,20 @@ export default function MembershipPage() {
       a: language === 'id' ? 'Gunakan fitur "Forgot Password" di halaman login untuk mengatur ulang kata sandi melalui email Anda.' : 'Use the "Forgot Password" feature on the login page to reset your password via email.'
     }
   ];
+
+  const openSignupModal = () => {
+    setSelectedMembershipType('');
+    setAgreeAssociateLimits(false);
+    setAgreePrivacyUse(false);
+    setShowSignupModal(true);
+  };
+
+  const continueToRegister = () => {
+    if (!selectedMembershipType) return;
+    const requiresAssociateAgreement = selectedMembershipType === 'associate';
+    if ((requiresAssociateAgreement && !agreeAssociateLimits) || !agreePrivacyUse) return;
+    router.push(`/auth/register?membershipType=${selectedMembershipType}`);
+  };
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen">
@@ -84,12 +104,11 @@ export default function MembershipPage() {
       {/* --- MEMBERSHIP PLANS --- */}
       <section className="py-8 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-            {/* Ordinary Member Card */}
+          <div className="max-w-2xl mx-auto mb-20">
             <div className="group">
               <div className="bg-white rounded-4xl border border-[#E4DBCA] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.25 transition-all duration-500">
                 <div className="bg-[#B64847] p-8 text-white text-center">
-                  <h2 className="font-tan-angleton font-bold text-2xl mb-2">Ordinary Member</h2>
+                  <h2 className="font-tan-angleton font-bold text-2xl mb-2">Member</h2>
                   <div className="flex items-center justify-center gap-1 font-tan-angleton">
                     <span className="text-3xl font-bold">$10</span>
                     <span className="text-lg font-bold tracking-tighter">AUD</span>
@@ -104,35 +123,13 @@ export default function MembershipPage() {
                       </div>
                     ))}
                   </div>
-                  <Link href="/auth/register" className="block w-full text-center bg-[#B64847] text-white py-3 rounded-xl hover:bg-[#303030] transition-colors font-bold uppercase tracking-widest text-xs">
+                  <button
+                    type="button"
+                    onClick={openSignupModal}
+                    className="block w-full text-center bg-[#B64847] text-white py-3 rounded-xl hover:bg-[#303030] transition-colors font-bold uppercase tracking-widest text-xs"
+                  >
                     Sign Up Now
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Associate Member Card */}
-            <div className="group">
-              <div className="bg-white rounded-4xl border border-[#E4DBCA] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.25 transition-all duration-500">
-                <div className="bg-[#FEB602] p-8 text-[#303030] text-center">
-                  <h2 className="font-tan-angleton font-bold text-2xl mb-2">Associate Member</h2>
-                  <div className="flex items-center justify-center gap-1 font-tan-angleton">
-                    <span className="text-3xl font-bold">$10</span>
-                    <span className="text-lg font-bold tracking-tighter">AUD</span>
-                  </div>
-                </div>
-                <div className="p-8">
-                  <div className="space-y-3 mb-8">
-                    {benefits.map((benefit) => (
-                      <div key={benefit.id} className="flex items-center gap-3">
-                        <span className="w-5 h-5 flex items-center justify-center bg-[#B64847]/10 text-[#B64847] rounded-full text-[10px] font-bold">✓</span>
-                        <span className="text-sm text-gray-700 font-medium">{benefit.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <Link href="/auth/register" className="block w-full text-center border-2 border-[#303030] text-[#303030] py-3 rounded-xl hover:bg-[#303030] hover:text-white transition-all font-bold uppercase tracking-widest text-xs">
-                    Sign Up Now
-                  </Link>
+                  </button>
                 </div>
               </div>
             </div>
@@ -146,15 +143,13 @@ export default function MembershipPage() {
                 <thead>
                   <tr className="border-b border-[#E4DBCA]">
                     <th className="text-left py-4 px-4 text-[#886644] font-bold uppercase tracking-widest text-[10px]">Benefit</th>
-                    <th className="text-center py-4 px-4 text-[#B64847] font-bold uppercase tracking-widest text-[10px]">Ordinary</th>
-                    <th className="text-center py-4 px-4 text-[#B64847] font-bold uppercase tracking-widest text-[10px]">Associate</th>
+                    <th className="text-center py-4 px-4 text-[#B64847] font-bold uppercase tracking-widest text-[10px]">Member</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E4DBCA]/20">
                   {[{ n: 'Event Pricing', v: '✓' }, { n: 'Early Access', v: '✓' }, { n: 'Community Board', v: '✓' }, { n: 'Newsletter', v: '✓' }, { n: 'Partner Discounts', v: '✓' }].map((r, i) => (
                     <tr key={i} className="group hover:bg-[#FFFAF5] transition-colors italic">
                       <td className="py-4 px-4 text-xs font-medium text-gray-600">{r.n}</td>
-                      <td className="py-4 px-4 text-center text-[#B64847] font-bold text-lg">{r.v}</td>
                       <td className="py-4 px-4 text-center text-[#B64847] font-bold text-lg">{r.v}</td>
                     </tr>
                   ))}
@@ -181,6 +176,113 @@ export default function MembershipPage() {
           </div>
         </div>
       </section>
+
+      {showSignupModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 px-6 py-10 overflow-y-auto">
+          <div className="max-w-2xl mx-auto bg-white rounded-3xl border border-[#E4DBCA] shadow-2xl p-8">
+            <div className="mb-6">
+              <h3 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">
+                {language === 'id' ? 'Pilih Jenis Keanggotaan' : 'Choose Membership Type'}
+              </h3>
+              <p className="text-sm text-gray-600">
+                {language === 'id'
+                  ? 'Pilih kategori keanggotaan Anda sebelum melanjutkan pendaftaran.'
+                  : 'Choose your membership category before continuing to registration.'}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <button
+                type="button"
+                onClick={() => setSelectedMembershipType('ordinary')}
+                className={`text-left p-5 rounded-2xl border transition-all ${
+                  selectedMembershipType === 'ordinary'
+                    ? 'border-[#B64847] bg-[#B64847]/5'
+                    : 'border-[#E4DBCA] hover:border-[#B64847]/60'
+                }`}
+              >
+                <p className="font-bold text-[#B64847] mb-1">Ordinary Member</p>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  {language === 'id'
+                    ? 'Untuk mahasiswa Indonesia yang memenuhi syarat keanggotaan penuh.'
+                    : 'For Indonesian students who meet full membership eligibility.'}
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedMembershipType('associate')}
+                className={`text-left p-5 rounded-2xl border transition-all ${
+                  selectedMembershipType === 'associate'
+                    ? 'border-[#B64847] bg-[#B64847]/5'
+                    : 'border-[#E4DBCA] hover:border-[#B64847]/60'
+                }`}
+              >
+                <p className="font-bold text-[#B64847] mb-1">Associate Member</p>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  {language === 'id'
+                    ? 'Untuk non-WNI atau pendukung komunitas.'
+                    : 'For non-Indonesian citizens or community supporters.'}
+                </p>
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-8">
+              {selectedMembershipType === 'associate' && (
+                <div className="rounded-2xl border border-[#FEB602] bg-[#FEB602]/10 p-4">
+                  <p className="text-xs text-[#303030] leading-relaxed">
+                    For non-Indonesian citizen: this membership does not come with voting rights. Associate members are not able to run for President, Secretary, or Treasurer positions within PPIA Queensland.
+                  </p>
+                </div>
+              )}
+
+              {selectedMembershipType === 'associate' && (
+                <label className="flex items-start gap-3 text-xs text-gray-700 leading-relaxed">
+                  <input
+                    type="checkbox"
+                    checked={agreeAssociateLimits}
+                    onChange={(e) => setAgreeAssociateLimits(e.target.checked)}
+                    className="mt-0.5 accent-[#B64847]"
+                  />
+                  I understand that Associate membership has no voting rights and is not eligible for President, Secretary, or Treasurer roles.
+                </label>
+              )}
+
+              <label className="flex items-start gap-3 text-xs text-gray-700 leading-relaxed">
+                <input
+                  type="checkbox"
+                  checked={agreePrivacyUse}
+                  onChange={(e) => setAgreePrivacyUse(e.target.checked)}
+                  className="mt-0.5 accent-[#B64847]"
+                />
+                PPIA Queensland may use your information in case of emergency and for marketing purposes. We will not provide your information to a third party without your concern, or for any of our team&apos;s personal uses.
+              </label>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => setShowSignupModal(false)}
+                className="w-full sm:w-auto px-6 py-3 rounded-xl border-2 border-[#B64847] text-[#B64847] font-bold uppercase tracking-widest text-xs hover:bg-[#B64847] hover:text-white transition-all"
+              >
+                {language === 'id' ? 'Batal' : 'Cancel'}
+              </button>
+              <button
+                type="button"
+                onClick={continueToRegister}
+                disabled={
+                  !selectedMembershipType ||
+                  !agreePrivacyUse ||
+                  (selectedMembershipType === 'associate' && !agreeAssociateLimits)
+                }
+                className="w-full sm:flex-1 px-6 py-3 rounded-xl bg-[#B64847] text-white font-bold uppercase tracking-widest text-xs hover:bg-[#303030] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {language === 'id' ? 'Lanjut Daftar' : 'Continue to Register'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
