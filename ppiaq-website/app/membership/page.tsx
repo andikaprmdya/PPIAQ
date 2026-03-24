@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useLanguage } from '@/lib/language-context';
-import { getTranslation, translations } from '@/lib/translations';
 
 export default function MembershipPage() {
   const { language } = useLanguage();
@@ -28,10 +27,6 @@ export default function MembershipPage() {
     {
       q: language === 'id' ? 'Bagaimana cara memperbarui keanggotaan saya?' : 'How do I renew my membership?',
       a: language === 'id' ? 'Anda akan menerima notifikasi email sebulan sebelum masa berlaku habis untuk melakukan pembaruan melalui dashboard anggota.' : 'You will receive an email notification a month before expiry to renew through the member dashboard.'
-    },
-    {
-      q: language === 'id' ? 'Apakah non-mahasiswa boleh mendaftar?' : 'Can non-students join?',
-      a: language === 'id' ? 'Boleh! Anda bisa mendaftar sebagai Associate Member jika Anda bukan mahasiswa aktif namun ingin mendukung komunitas kami.' : 'Yes! You can join as an Associate Member if you are not an active student but wish to support our community.'
     },
     {
       q: language === 'id' ? 'Saya lupa password akun saya, apa yang harus dilakukan?' : 'I forgot my password, what should I do?',

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { SiInstagram, SiLinkedin, SiTiktok } from 'react-icons/si';
 import { useLanguage } from '@/lib/language-context';
 import { useFormSubmit } from '@/lib/hooks/useFormSubmit';
 import { API_ENDPOINTS } from '@/lib/constants';
@@ -114,11 +115,11 @@ export default function ContactPage() {
                   <div className="space-y-3">
                     <div className="flex flex-col">
                        <p className="text-[8px] font-bold uppercase tracking-widest text-[#FEB602]/80">{language === 'id' ? 'Pertanyaan Resmi' : 'Official Inquiry'}</p>
-                       <p className="text-sm font-medium">info@ppiaq.org</p>
+                       <p className="text-sm font-medium">qld@ppi-australia.org</p>
                     </div>
                     <div className="flex flex-col">
                        <p className="text-[8px] font-bold uppercase tracking-widest text-[#FEB602]/80">{language === 'id' ? 'Lokasi Saat Ini' : 'Current Base'}</p>
-                       <p className="text-sm font-medium uppercase tracking-tighter">Queensland, Australia</p>
+                       <p className="text-sm font-medium uppercase tracking-tighter">Brisbane</p>
                     </div>
                   </div>
                </div>
@@ -126,16 +127,19 @@ export default function ContactPage() {
                {/* VERTICAL SOCIAL LOGOS */}
                <div className="relative z-10 flex flex-col gap-3 pl-6 border-l border-white/10">
                   {[
-                    { name: 'IG', icon: '📱' },
-                    { name: 'FB', icon: '👥' },
-                    { name: 'LI', icon: '🔗' }
+                    { name: 'Instagram', href: 'https://instagram.com/ppiaqueensland', icon: SiInstagram },
+                    { name: 'TikTok', href: 'https://www.tiktok.com/@ppiaqueensland', icon: SiTiktok },
+                    { name: 'LinkedIn', href: 'https://www.linkedin.com/company/ppiaq', icon: SiLinkedin },
                   ].map((social) => (
                     <a 
                       key={social.name}
-                      href="#" 
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.name}
                       className="w-10 h-10 rounded-2xl border border-white/20 flex items-center justify-center bg-white/5 hover:bg-[#FEB602] hover:text-[#B64847] hover:-translate-x-1 transition-all duration-300 shadow-lg"
                     >
-                      <span className="text-base">{social.icon}</span>
+                      <social.icon className="text-base" aria-hidden="true" />
                     </a>
                   ))}
                </div>

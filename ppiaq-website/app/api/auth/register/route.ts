@@ -24,6 +24,8 @@ export async function POST(request: NextRequest) {
       educationLevel,
       university,
       major,
+      expectedGraduationSemester,
+      expectedGraduationYear,
       birthDate,
       membershipType,
       paymentProofUrl,
@@ -41,6 +43,8 @@ export async function POST(request: NextRequest) {
       !educationLevel ||
       !university ||
       !major ||
+      !expectedGraduationSemester ||
+      !expectedGraduationYear ||
       !birthDate ||
       !membershipType ||
       !paymentProofUrl
@@ -119,6 +123,7 @@ export async function POST(request: NextRequest) {
                 <p><strong>University:</strong> ${university}</p>
                 <p><strong>Major:</strong> ${major}</p>
                 <p><strong>Education Level:</strong> ${educationLevel}</p>
+                <p><strong>Expected Graduation:</strong> ${expectedGraduationSemester} ${expectedGraduationYear}</p>
                 <p><strong>Nationality:</strong> ${nationality}</p>
                 <p><strong>Birth Date:</strong> ${birthDate}</p>
                 <p><strong>Membership Type:</strong> ${membershipType}</p>
@@ -141,7 +146,8 @@ export async function POST(request: NextRequest) {
     });
 
     // Return user data without password
-    const { password: _, ...userWithoutPassword } = user;
+    const { password, ...userWithoutPassword } = user;
+    void password;
 
     return NextResponse.json(
       {

@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/language-context';
 
 interface FormData {
@@ -18,6 +17,8 @@ interface FormData {
   educationLevel: string;
   university: string;
   major: string;
+  expectedGraduationSemester: string;
+  expectedGraduationYear: string;
 
   // Step 3: Account & Payment
   email: string;
@@ -36,12 +37,13 @@ const UNIVERSITIES = [
 ];
 
 const EDUCATION_LEVELS = ['S1 (Bachelor)', 'S2 (Master)', 'S3 (Doctorate)'];
+const GRADUATION_SEMESTERS = ['Semester 1', 'Semester 2'];
+const GRADUATION_YEARS = Array.from({ length: 10 }, (_, i) => String(new Date().getFullYear() + i));
 
 const NATIONALITIES = ['Indonesia', 'Other'];
 
 export default function RegisterPage() {
   const { language } = useLanguage();
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,6 +58,8 @@ export default function RegisterPage() {
     educationLevel: '',
     university: '',
     major: '',
+    expectedGraduationSemester: '',
+    expectedGraduationYear: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -145,6 +149,14 @@ export default function RegisterPage() {
         setError(language === 'id' ? 'Jurusan harus diisi' : 'Major is required');
         return false;
       }
+      if (!formData.expectedGraduationSemester) {
+        setError(language === 'id' ? 'Semester kelulusan harus dipilih' : 'Graduation semester is required');
+        return false;
+      }
+      if (!formData.expectedGraduationYear) {
+        setError(language === 'id' ? 'Tahun kelulusan harus dipilih' : 'Graduation year is required');
+        return false;
+      }
       // Check if Rubric link was clicked for UQ, QUT, Griffith, JCU
       const rubricUniversities = ['University of Queensland', 'Queensland University of Technology', 'Griffith University', 'James Cook University'];
       if (rubricUniversities.includes(formData.university) && !rubricLinkClicked) {
@@ -227,6 +239,8 @@ export default function RegisterPage() {
             educationLevel: formData.educationLevel,
             university: formData.university,
             major: formData.major.trim(),
+            expectedGraduationSemester: formData.expectedGraduationSemester,
+            expectedGraduationYear: formData.expectedGraduationYear,
             birthDate: formData.birthDate,
             phoneNumber: formData.phoneNumber.trim(),
             studentId: formData.studentId.trim(),
@@ -244,7 +258,7 @@ export default function RegisterPage() {
 
         setIsComplete(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (err) {
+      } catch {
         setError(language === 'id' ? 'Terjadi kesalahan jaringan' : 'Network error. Please try again.');
       } finally {
         setIsLoading(false);
@@ -482,6 +496,41 @@ export default function RegisterPage() {
                       className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
                       placeholder={language === 'id' ? 'Jurusan' : 'Your major'}
                     />
+                  </div>
+
+                  <div className="group">
+                    <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                      {language === 'id' ? 'Perkiraan Kelulusan' : 'Expected Graduation'} *
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <select
+                        name="expectedGraduationSemester"
+                        value={formData.expectedGraduationSemester}
+                        onChange={handleInputChange}
+                        className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium appearance-none cursor-pointer"
+                      >
+                        <option value="">{language === 'id' ? 'Pilih semester' : 'Select semester'}</option>
+                        {GRADUATION_SEMESTERS.map((semester) => (
+                          <option key={semester} value={semester}>
+                            {semester}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        name="expectedGraduationYear"
+                        value={formData.expectedGraduationYear}
+                        onChange={handleInputChange}
+                        className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium appearance-none cursor-pointer"
+                      >
+                        <option value="">{language === 'id' ? 'Pilih tahun' : 'Select year'}</option>
+                        {GRADUATION_YEARS.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
 
                   {/* University-specific registration link */}
