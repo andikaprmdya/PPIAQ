@@ -25,28 +25,17 @@ export default function Footer() {
                 PPIA <span className="text-[#FEB602]">Queensland</span>
               </h2>
               <p className="text-[10px] uppercase tracking-[0.4em] text-[#FEB602] font-bold mt-2">
-                Brisbane Chapter • Est. 1988
+                Est. 1988
               </p>
             </Link>
-            <p className="text-white/60 text-sm leading-relaxed max-w-sm italic font-medium">
-              {language === 'id'
-                ? 'Menghubungkan komunitas pelajar Indonesia di Queensland melalui semangat kebersamaan dan kekayaan budaya.'
-                : 'Connecting the Indonesian student community across Queensland through the spirit of togetherness and cultural richness.'}
-            </p>
-            
-            {/* Social Pill Links */}
-            <div className="flex gap-3 pt-2">
-              {['Instagram', 'Facebook'].map((platform) => (
-                <a
-                  key={platform}
-                  href={`https://${platform.toLowerCase()}.com/ppiaqueensland`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-xl border border-white/10 text-[9px] uppercase font-bold tracking-[0.2em] hover:bg-[#FEB602] hover:text-[#B64847] hover:border-[#FEB602] transition-all duration-300"
-                >
-                  {platform}
-                </a>
-              ))}
+
+            <div className="max-w-md">
+              <p className="text-[#FEB602] text-[10px] uppercase tracking-[0.3em] font-bold mb-3">
+                Acknowledgement of Country
+              </p>
+              <p className="text-white/70 text-sm leading-relaxed font-medium">
+                PPIA Queensland acknowledges the Traditional Owners and their custodianship. We pay our respects to Elders past, present, and emerging.
+              </p>
             </div>
           </div>
 
