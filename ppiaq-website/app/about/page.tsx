@@ -1,12 +1,14 @@
 'use client';
 
 import Image from 'next/image';
+import { FaInstagram } from 'react-icons/fa';
+import { SiGmail } from 'react-icons/si';
 import { useLanguage } from '@/lib/language-context';
 import { getTranslation, translations } from '@/lib/translations';
 
 const UNIVERSITIES = [
   { name: 'PPIA Griffith University - ISAGU', email: 'griffith@ppi-australia.org', instagram: '@ppiagriffith.isagu', logo: '/images/Isagu_Logo.png' },
-  { name: 'PPIA James Cook University - JCU ISA', email: 'jcu.isa@yahoo.com', instagram: '@jcuisa,tsv', logo: '/images/jcuisa_logo.png' },
+  { name: 'PPIA James Cook University - JCU ISA', email: 'ppia.jcu.tc@gmail.com', instagram: '@jcuisa_tsv', logo: '/images/jcuisa_logo.png' },
   { name: 'PPIA University of Queensland - UQISA', email: 'uqisa.info@gmail.com', instagram: '@uqisa', logo: '/images/uqisa_logo.png' },
   { name: 'PPIA Queensland University of Technology - ISAQ', email: 'isaq.qut@gmail.com', instagram: '@ppiaqut', logo: '/images/ISAQ_Logo.png' },
 ];
@@ -113,11 +115,15 @@ export default function AboutPage() {
                 </div>
                 <div className="space-y-2 text-[#886644] font-bold text-sm">
                   <p className="flex items-center gap-3 tracking-tight">
-                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">📧</span>
+                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">
+                      <SiGmail className="text-[12px]" aria-hidden="true" />
+                    </span>
                     {uni.email}
                   </p>
                   <p className="flex items-center gap-3 tracking-tight">
-                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">📱</span>
+                    <span className="w-7 h-7 flex items-center justify-center bg-[#FEB602] text-[#B64847] rounded-full text-xs">
+                      <FaInstagram className="text-[12px]" aria-hidden="true" />
+                    </span>
                     {uni.instagram}
                   </p>
                 </div>
