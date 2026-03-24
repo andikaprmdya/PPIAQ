@@ -72,11 +72,11 @@ export default function Footer() {
             <div className="space-y-6">
               <div className="group cursor-pointer">
                 <p className="text-white/30 text-[9px] uppercase font-bold tracking-widest mb-1">Email</p>
-                <p className="text-white group-hover:text-[#FEB602] transition-colors font-medium">info@ppiaq.org</p>
+                <p className="text-white group-hover:text-[#FEB602] transition-colors font-medium">qld@ppi-australia.org</p>
               </div>
               <div className="group cursor-pointer">
                 <p className="text-white/30 text-[9px] uppercase font-bold tracking-widest mb-1">Location</p>
-                <p className="text-white leading-relaxed font-medium">Queensland, Australia</p>
+                <p className="text-white leading-relaxed font-medium">HQ Brisbane, Australia</p>
               </div>
             </div>
           </div>
