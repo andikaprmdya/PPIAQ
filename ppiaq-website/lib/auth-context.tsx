@@ -14,7 +14,7 @@ export interface User {
   birthDate: string;
   membershipType: 'ORDINARY' | 'ASSOCIATE';
   paymentProofUrl: string;
-  role: 'USER' | 'ADMIN';
+  role: 'USER' | 'ADMIN' | 'CURATOR';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: Date;
   approvedAt?: Date;
@@ -28,6 +28,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isCurator: boolean;
+  isEventManager: boolean;
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; message: string; redirectTo?: string }>;
   logout: () => void;
@@ -125,6 +127,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'ADMIN',
+    isCurator: user?.role === 'CURATOR',
+    isEventManager: user?.role === 'ADMIN' || user?.role === 'CURATOR',
     loading,
     login,
     logout,

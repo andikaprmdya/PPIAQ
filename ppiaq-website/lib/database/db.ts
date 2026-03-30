@@ -16,6 +16,7 @@ const ENUM_MAPS = {
   role: {
     'user': 'USER',
     'admin': 'ADMIN',
+    'curator': 'CURATOR',
   },
   userStatus: {
     'pending': 'PENDING',

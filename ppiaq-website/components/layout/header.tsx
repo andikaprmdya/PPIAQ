@@ -9,7 +9,7 @@ import { useState, useEffect } from 'react';
 
 export default function Header() {
   const { language, setLanguage } = useLanguage();
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isCurator, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isContentDropdownOpen, setIsContentDropdownOpen] = useState(false);
@@ -45,6 +45,10 @@ export default function Header() {
     { label: language === 'id' ? 'Dashboard Admin' : 'Admin Dashboard', href: '/admin/dashboard' },
   ];
 
+  const curatorNavItems = [
+    { label: language === 'id' ? 'Dashboard Kurator' : 'Curator Dashboard', href: '/curator/events' },
+  ];
+
   const contentMenuItems = [
     { label: language === 'id' ? 'Home' : 'Home', href: '/admin/content/home' },
     { label: language === 'id' ? 'About' : 'About', href: '/admin/content/about' },
@@ -52,7 +56,9 @@ export default function Header() {
     { label: getTranslation(translations.navigation.pestaRakyat, language), href: '/admin/content/pesta-rakyat' },
   ];
 
-  const navItems = isAuthenticated ? (isAdmin ? adminNavItems : userNavItems) : [...baseNavItems, ...publicNavItems];
+  const navItems = isAuthenticated
+    ? (isAdmin ? adminNavItems : isCurator ? curatorNavItems : userNavItems)
+    : [...baseNavItems, ...publicNavItems];
 
   return (
     <>

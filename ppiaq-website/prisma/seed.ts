@@ -46,6 +46,30 @@ async function main() {
 
   console.log(`Created admin user: ${admin.email}`);
 
+  // Create curator user (upcoming events manager)
+  const curator = await prisma.user.create({
+    data: {
+      firstName: 'Curator',
+      lastName: 'Events',
+      email: 'curator@ppiaq.org',
+      password: bcryptjs.hashSync('Curator123!', 10),
+      nationality: 'Indonesia',
+      educationLevel: 'S1 (Bachelor)',
+      university: 'Queensland University of Technology',
+      major: 'Communication',
+      birthDate: '1998-07-20',
+      membershipType: MembershipType.ORDINARY,
+      paymentProofUrl: '',
+      role: Role.CURATOR,
+      status: 'APPROVED',
+      createdAt: new Date('2024-01-10'),
+      approvedAt: new Date('2024-01-10'),
+      approvedBy: admin.id,
+    },
+  });
+
+  console.log(`Created curator user: ${curator.email}`);
+
   // Create test user
   const testUser = await prisma.user.create({
     data: {

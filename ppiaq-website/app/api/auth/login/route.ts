@@ -59,7 +59,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Determine redirect URL based on role
-    const redirectTo = user.role === Role.ADMIN ? '/admin/dashboard' : '/community-board';
+    let redirectTo = '/community-board';
+    if (user.role === Role.ADMIN) {
+      redirectTo = '/admin/dashboard';
+    } else if ((user.role as string) === 'CURATOR') {
+      redirectTo = '/curator/events';
+    }
 
     // Set cookie for session
     const response = NextResponse.json(

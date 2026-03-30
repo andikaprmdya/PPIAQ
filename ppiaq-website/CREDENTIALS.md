@@ -2,7 +2,7 @@
 
 ## ✅ System Implementation Complete!
 
-Semua fitur authentication dan member management sudah terimplementasi dengan baik. Berikut adalah 2 credentials untuk testing:
+Semua fitur authentication dan member management sudah terimplementasi dengan baik. Berikut adalah 3 credentials untuk testing:
 
 ---
 
@@ -34,7 +34,27 @@ Password: Admin123!
 
 ---
 
-## 2️⃣ **MEMBER ACCOUNT** (Pre-Approved)
+## 2️⃣ **CURATOR ACCOUNT**
+
+**Role:** Curator - Manage Acara Mendatang / Upcoming Events (view, add, edit, delete)
+
+```
+Email:    curator@ppiaq.org
+Password: Curator123!
+```
+
+### Akses Curator:
+- ✅ Login ke sistem
+- ✅ Akses Curator Dashboard (`/curator/events`)
+- ✅ Lihat daftar upcoming events
+- ✅ Tambah event baru
+- ✅ Edit event
+- ✅ Delete event
+- ✅ Publish/Draft event
+
+---
+
+## 3️⃣ **MEMBER ACCOUNT** (Pre-Approved)
 
 **Role:** User - Regular member with full community access
 
@@ -120,6 +140,7 @@ Password: Test12345
 **User Roles:**
 - `user` - Regular member
 - `admin` - Administrator
+- `curator` - Upcoming events curator
 
 ---
 
@@ -148,6 +169,7 @@ npm run dev
 
 **Test All Features:**
 - Admin: admin@ppiaq.org / Admin123!
+- Curator: curator@ppiaq.org / Curator123!
 - Member: budi@example.com / Test12345
 
 ---
