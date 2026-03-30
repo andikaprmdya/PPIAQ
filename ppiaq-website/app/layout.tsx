@@ -6,6 +6,15 @@ import { AuthProvider } from "@/lib/auth-context";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
 
+const normalizeSiteUrl = (rawUrl: string) => {
+  const withProtocol =
+    rawUrl.startsWith("http://") || rawUrl.startsWith("https://")
+      ? rawUrl
+      : `https://${rawUrl}`;
+
+  return withProtocol.replace(/\/+$/, "");
+};
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -17,14 +26,15 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl = (() => {
-  const envUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (envUrl) {
-    return envUrl.startsWith("http://") || envUrl.startsWith("https://")
-      ? envUrl
-      : `https://${envUrl}`;
+    return normalizeSiteUrl(envUrl);
+  }
+  if (process.env.NODE_ENV === "production") {
+    return "https://ppiaqueensland.org";
   }
   if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+    return normalizeSiteUrl(process.env.VERCEL_URL);
   }
   return "http://localhost:3000";
 })();
@@ -33,6 +43,9 @@ export const metadata: Metadata = {
   title: "PPIA Queensland",
   description: "Indonesian Student Association in Australia - Queensland Chapter",
   metadataBase: new URL(siteUrl),
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
