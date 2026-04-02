@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const CANONICAL_HOST = 'ppiaqueensland.org';
+const CANONICAL_URL = `https://${CANONICAL_HOST}`;
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const host = request.headers.get('host') ?? '';
+
+  // Consolidate public traffic onto the custom domain so crawlers pick up
+  // the correct favicon, metadata, and canonical URL instead of the Vercel host.
+  if (
+    process.env.NODE_ENV === 'production' &&
+    host.endsWith('.vercel.app')
+  ) {
+    const redirectUrl = new URL(request.nextUrl.pathname + request.nextUrl.search, CANONICAL_URL);
+    return NextResponse.redirect(redirectUrl, 308);
+  }
 
   // Get user session cookies
   const userEmail = request.cookies.get('userEmail')?.value;
@@ -43,5 +57,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/curator/:path*', '/profile', '/community-board'],
+  matcher: [
+    '/((?!api|_next/static|_next/image).*)',
+  ],
 };
