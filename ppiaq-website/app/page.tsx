@@ -15,12 +15,31 @@ interface FAQItem {
   answer: { id: string; en: string };
 }
 
+interface EventItem {
+  id: string;
+  day: string;
+  month: string;
+  title: { id: string; en: string };
+  date: string;
+  location: { id: string; en: string };
+  image: string;
+  registrationUrl?: string;
+}
+
+const eventDetailRoutes: Record<string, string> = {
+  'Pre-Departure Briefing - Semester 1, 2026': '/events/pre-departure-briefing',
+  'QUT Market Day - Join ISAQ / PPIA QUT': '/events/qut-market-day',
+  'UQ St. Lucia Market Day - Join UQISA / PPIA UQ': '/events/uq-market-day',
+};
+
 export default function HomePage() {
   const { language } = useLanguage();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
   const [faqData, setFaqData] = useState<FAQItem[]>([]);
   const [faqLoading, setFaqLoading] = useState(true);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [currentBg, setCurrentBg] = useState(0);
   const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
 
@@ -34,6 +53,22 @@ export default function HomePage() {
     '/images/qutmarketday.jpg',
     '/images/uqmarketday.jpg',
   ];
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await fetch('/api/events');
+        const data = await res.json();
+        setEvents(data.data || []);
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   useEffect(() => {
     const fetchFAQ = async () => {
@@ -50,11 +85,10 @@ export default function HomePage() {
     fetchFAQ();
   }, []);
 
-  // Slideshow effect
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
-    }, 5000); // Change image every 5 seconds
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -76,13 +110,11 @@ export default function HomePage() {
   };
 
   const displayFAQ = getFAQDisplay();
+  const upcomingEvents = events.slice(0, 3);
 
   return (
     <main className="font-montserrat text-[#303030] bg-[#FFFAF5] overflow-x-hidden">
-      
-      {/* --- SECTION 1: HERO (Berdasarkan image_9e5455.jpg) --- */}
       <section className="text-white py-20 px-6 min-h-[70vh] flex items-center relative overflow-hidden">
-        {/* Image Carousel Background */}
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           {backgroundImages.map((image, index) => (
             <Image
@@ -98,11 +130,9 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="absolute inset-0 bg-black/40" />
 
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 relative z-10">
-          {/* Cendrawasih Image */}
           <Image
             src="/images/Cendrawasih_Up.png"
             alt="Cendrawasih Bird Decoration"
@@ -117,7 +147,7 @@ export default function HomePage() {
               Welcome to PPIA Queensland!
             </h1>
             <p className="text-lg md:text-xl mb-10 opacity-90 leading-relaxed italic">
-              {language === 'id' 
+              {language === 'id'
                 ? 'Selamat datang! Kami menghubungkan pelajar Indonesia di seluruh Queensland dengan berbagai peluang, dan satu sama lain.'
                 : 'Selamat datang! We connect Indonesian students all over Queensland to opportunities, and to each other.'}
             </p>
@@ -133,10 +163,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- SECTION 2: INTRO & ACTION (Berdasarkan image_9df675.png) --- */}
       <section className="py-24 px-6 text-center">
         <div className="max-w-5xl mx-auto">
-          {/* Logo PPIAQ */}
           <Image
             src="/images/PPIAQ_logo.png"
             alt="PPIA Queensland Logo"
@@ -144,15 +172,15 @@ export default function HomePage() {
             height={96}
             className="mx-auto mb-8"
           />
-          
+
           <h2 className="font-tan-angleton font-bold text-3xl md:text-5xl text-[#B64847] mb-8">
             {language === 'id' ? 'Kami ada untuk pelajar Indonesia di Queensland' : "We're here for Indonesian students in Queensland"}
           </h2>
-          
+
           <p className="text-gray-600 text-lg mb-12 italic leading-relaxed max-w-3xl mx-auto">
             {language === 'id'
               ? 'Baik ini pertama kalinya Anda jauh dari rumah, atau Anda adalah mahasiswa internasional kawakan, kami di sini untuk menjadi komunitas Anda. Sekarang, bagaimana kami bisa membantu Anda hari ini?'
-              : 'Whether this is your first time away from home, or you\'re a seasoned international student, we\'re here for you to be your community. Now, how can we help you today?'}
+              : "Whether this is your first time away from home, or you're a seasoned international student, we're here for you to be your community. Now, how can we help you today?"}
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-1 gap-4 max-w-md mx-auto">
@@ -173,49 +201,65 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- SECTION 3: UPCOMING EVENTS (Berdasarkan image_9df63a.jpg) --- */}
       <section className="py-24 px-6 bg-[#E4DBCA]/20">
         <div className="max-w-6xl mx-auto">
           <h2 className="font-tan-angleton font-bold text-4xl text-[#B64847] text-center mb-16">
             {language === 'id' ? 'Acara Mendatang' : 'Upcoming events'}
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { day: '5', month: 'FEB', title: 'Pre-Departure Briefing - Semester 1, 2026', date: 'Thursday, February 5, 2026', loc: 'Zoom', image: '/images/predeparture.jpg', href: '/events/pre-departure-briefing' },
-              { day: '16', month: 'FEB', title: 'QUT Market Day - Join ISAQ / PPIA QUT', date: 'Monday, February 16, 2026', loc: 'QUT', image: '/images/qutmarketday.jpg', href: '/events/qut-market-day' },
-              { day: '18', month: 'FEB', title: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ', date: 'Wednesday, February 18, 2026', loc: 'UQ St. Lucia', image: '/images/uqmarketday.jpg', href: '/events/uq-market-day' },
-            ].map((event, i) => (
-              <Link key={i} href={event.href} className="block">
-                <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-[#E4DBCA] group hover:-translate-y-1.25 h-full cursor-pointer">
-                  <div className="h-48 bg-gray-200 relative flex items-center justify-center text-gray-400 italic overflow-hidden">
-                    <Image
-                      src={event.image}
-                      alt={event.title}
-                      width={300}
-                      height={192}
-                      className="object-cover w-full h-full"
-                    />
-                    <div className="absolute top-4 left-4 bg-[#B64847] text-white p-2 min-w-12 text-center rounded-md">
-                      <p className="text-xl font-bold leading-none">{event.day}</p>
-                      <p className="text-xs">{event.month}</p>
+          {eventsLoading ? (
+            <div className="text-center py-8 text-[#886644]">Loading events...</div>
+          ) : upcomingEvents.length === 0 ? (
+            <div className="text-center py-8 text-[#886644]">No upcoming events available</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {upcomingEvents.map((event) => {
+                const title = language === 'id' ? event.title.id : event.title.en;
+                const location = language === 'id' ? event.location.id : event.location.en;
+                const href = eventDetailRoutes[event.title.en] || event.registrationUrl || '#';
+                const imageSrc = event.image || '/images/PPIAQ_logo.png';
+
+                const card = (
+                  <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all border border-[#E4DBCA] group hover:-translate-y-1.25 h-full cursor-pointer">
+                    <div className="h-48 bg-gray-200 relative flex items-center justify-center text-gray-400 italic overflow-hidden">
+                      <Image
+                        src={imageSrc}
+                        alt={title}
+                        width={300}
+                        height={192}
+                        className="object-cover w-full h-full"
+                        unoptimized={imageSrc.startsWith('data:')}
+                      />
+                      <div className="absolute top-4 left-4 bg-[#B64847] text-white p-2 min-w-12 text-center rounded-md">
+                        <p className="text-xl font-bold leading-none">{event.day}</p>
+                        <p className="text-xs">{event.month}</p>
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <h3 className="font-bold text-lg mb-4 group-hover:text-[#B64847] transition-colors">{title}</h3>
+                      <div className="space-y-1 text-sm text-gray-500 font-medium">
+                        <p>Date: {event.date}</p>
+                        <p>Location: {location}</p>
+                      </div>
                     </div>
                   </div>
-                  <div className="p-6">
-                    <h3 className="font-bold text-lg mb-4 group-hover:text-[#B64847] transition-colors">{event.title}</h3>
-                    <div className="space-y-1 text-sm text-gray-500 font-medium">
-                      <p>📅 {event.date}</p>
-                      <p>📍 {event.loc}</p>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                );
+
+                if (href === '#') {
+                  return <div key={event.id}>{card}</div>;
+                }
+
+                return (
+                  <Link key={event.id} href={href} className="block">
+                    {card}
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* --- SECTION 4: FAQ (Berdasarkan image_9df619.png) --- */}
       <section className="py-24 px-6">
         <div className="max-w-4xl mx-auto">
           <h2 className="font-tan-angleton font-bold text-4xl text-[#B64847] mb-12">
@@ -249,11 +293,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- SECTION 5: STAY IN TOUCH & CONTACT (Berdasarkan image_9df5fb.png) --- */}
       <section className="py-24 px-6 bg-[#FFFAF5]">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-20">
-          
-          {/* Newsletter Form */}
           <div className="flex-1">
             <h3 className="font-tan-angleton font-bold text-5xl text-[#B64847] mb-8">
               {language === 'id' ? 'Tetap Terhubung' : 'Stay in touch'}
@@ -272,15 +313,14 @@ export default function HomePage() {
                     : 'I agree to receiving marketing and promotional materials'} <span className="text-[#B64847]">*</span>
                 </label>
               </div>
-              {newsletterSuccess && <p className="text-green-600 text-xs font-bold">✓ {language === 'id' ? 'Berhasil berlangganan!' : 'Successfully subscribed!'}</p>}
-              {newsletterError && <p className="text-red-600 text-xs font-bold">✗ {newsletterError}</p>}
+              {newsletterSuccess && <p className="text-green-600 text-xs font-bold">Success! {language === 'id' ? 'Berhasil berlangganan!' : 'Successfully subscribed!'}</p>}
+              {newsletterError && <p className="text-red-600 text-xs font-bold">Error: {newsletterError}</p>}
               <button type="submit" disabled={newsletterLoading} className="px-10 py-4 border border-black text-black font-bold uppercase tracking-widest text-sm hover:bg-black hover:text-white transition-all disabled:opacity-50">
                 {newsletterLoading ? (language === 'id' ? 'Mengirim...' : 'Sending...') : (language === 'id' ? 'Berlangganan Newsletter' : 'Subscribe to Newsletter')}
               </button>
             </form>
           </div>
 
-          {/* Contact Details */}
           <div className="flex-1">
             <h3 className="font-tan-angleton font-bold text-5xl text-[#B64847] mb-8">
               {language === 'id' ? 'Hubungi Kami' : 'Contact us'}
@@ -321,10 +361,8 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-
         </div>
       </section>
-
     </main>
   );
 }
