@@ -216,13 +216,13 @@ export default function AboutPage() {
             
             {/* Action Side (Logo Placeholder Deleted) */}
             <div className="p-10 md:w-1/2 flex flex-col justify-center gap-6 bg-white relative">
-               <a href="mailto:info@ppiaq.org" className="group flex items-center gap-5 p-4 rounded-3xl border border-[#E4DBCA] hover:border-[#FEB602] hover:bg-[#FFFAF5] transition-all duration-300 shadow-sm">
+               <a href="mailto:qld@ppi-australia.org" className="group flex items-center gap-5 p-4 rounded-3xl border border-[#E4DBCA] hover:border-[#FEB602] hover:bg-[#FFFAF5] transition-all duration-300 shadow-sm">
                   <div className="w-12 h-12 bg-[#B64847] text-[#FEB602] rounded-2xl flex items-center justify-center text-2xl shadow-lg group-hover:rotate-6 transition-transform">
                     <SiGmail aria-hidden="true" />
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-[#886644] uppercase tracking-widest">Email Us</p>
-                    <p className="text-lg font-bold text-[#303030]">info@ppiaq.org</p>
+                    <p className="text-lg font-bold text-[#303030]">qld@ppi-australia.org</p>
                   </div>
                </a>
 

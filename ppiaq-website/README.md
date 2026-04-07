@@ -211,7 +211,7 @@ When ready to move from dummy to real database:
 ## 📞 Support
 
 For questions or issues, contact PPIA Queensland:
-- 📧 Email: info@ppiaq.org
+- 📧 Email: qld@ppi-australia.org
 - 📱 Instagram: @ppiaqueensland
 - 📍 Location: Queensland, Australia
 

@@ -129,7 +129,7 @@ export default function ContactPage() {
                   {[
                     { name: 'Instagram', href: 'https://instagram.com/ppiaqueensland', icon: SiInstagram },
                     { name: 'TikTok', href: 'https://www.tiktok.com/@ppiaqueensland', icon: SiTiktok },
-                    { name: 'LinkedIn', href: 'https://www.linkedin.com/company/ppiaq', icon: SiLinkedin },
+                    { name: 'LinkedIn', href: 'https://www.linkedin.com/company/ppia-queensland/', icon: SiLinkedin },
                   ].map((social) => (
                     <a 
                       key={social.name}
