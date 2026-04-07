@@ -350,7 +350,7 @@ export default function HomePage() {
                   <FaInstagram />
                 </a>
                 <a
-                  href="https://www.linkedin.com/company/ppiaq"
+                  href="https://www.linkedin.com/company/ppia-queensland/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="LinkedIn"
