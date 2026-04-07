@@ -103,7 +103,7 @@ export default function ProfilePage() {
           </h2>
 
           <div className="relative h-[250px] sm:h-[300px] md:h-[360px] rounded-3xl text-white shadow-2xl border-2 border-[#FEB602] overflow-hidden">
-            <div className="absolute inset-0 bg-[url('/images/ppiaq-2026-membership-card-design.png')] bg-cover bg-center" />
+            <div className="absolute inset-0 bg-[url('/images/membership/ppiaq-2026-membership-card-design.png')] bg-cover bg-center" />
             <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/50" />
 
             <div className="relative z-10 h-full p-4 sm:p-6 md:p-8">
