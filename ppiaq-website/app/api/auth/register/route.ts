@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { registerUser, getUserByEmail } from '@/lib/database/db';
 import { sendEmail, getMembershipApplicationTemplate } from '@/lib/email/brevo';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import {
+  isAssociateNationality,
+  ORDINARY_NATIONALITY,
+} from '@/lib/countries';
 
 export async function POST(request: NextRequest) {
   try {
@@ -33,26 +37,61 @@ export async function POST(request: NextRequest) {
       studentId,
     } = await request.json();
 
+    const normalizedMembershipTypeRaw = String(membershipType || '').toLowerCase();
+    const normalizedNationality = String(nationality || '').trim();
+
     // Validation
     if (
       !firstName ||
       !lastName ||
       !email ||
       !password ||
-      !nationality ||
+      !normalizedNationality ||
       !educationLevel ||
       !university ||
       !major ||
       !expectedGraduationSemester ||
       !expectedGraduationYear ||
       !birthDate ||
-      !membershipType ||
+      !normalizedMembershipTypeRaw ||
       !paymentProofUrl
     ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
+    }
+
+    if (!['ordinary', 'associate'].includes(normalizedMembershipTypeRaw)) {
+      return NextResponse.json(
+        { error: 'Invalid membership type' },
+        { status: 400 }
+      );
+    }
+
+    const normalizedMembershipType = normalizedMembershipTypeRaw as 'ordinary' | 'associate';
+
+    if (normalizedMembershipType === 'ordinary' && normalizedNationality !== ORDINARY_NATIONALITY) {
+      return NextResponse.json(
+        { error: 'Ordinary membership is only available for Indonesian nationality' },
+        { status: 400 }
+      );
+    }
+
+    if (normalizedMembershipType === 'associate') {
+      if (normalizedNationality === ORDINARY_NATIONALITY) {
+        return NextResponse.json(
+          { error: 'Associate membership must use non-Indonesian nationality' },
+          { status: 400 }
+        );
+      }
+
+      if (!isAssociateNationality(normalizedNationality)) {
+        return NextResponse.json(
+          { error: 'Invalid nationality for associate membership' },
+          { status: 400 }
+        );
+      }
     }
 
     // Validate email format
@@ -86,12 +125,12 @@ export async function POST(request: NextRequest) {
       lastName,
       email,
       password,
-      nationality,
+      normalizedNationality,
       educationLevel,
       university,
       major,
       birthDate,
-      membershipType,
+      normalizedMembershipType,
       paymentProofUrl,
       phoneNumber,
       studentId
@@ -124,9 +163,9 @@ export async function POST(request: NextRequest) {
                 <p><strong>Major:</strong> ${major}</p>
                 <p><strong>Education Level:</strong> ${educationLevel}</p>
                 <p><strong>Expected Graduation:</strong> ${expectedGraduationSemester} ${expectedGraduationYear}</p>
-                <p><strong>Nationality:</strong> ${nationality}</p>
+                <p><strong>Nationality:</strong> ${normalizedNationality}</p>
                 <p><strong>Birth Date:</strong> ${birthDate}</p>
-                <p><strong>Membership Type:</strong> ${membershipType}</p>
+                <p><strong>Membership Type:</strong> ${normalizedMembershipType}</p>
                 <p><strong>Registration Date:</strong> ${new Date().toLocaleString('en-US')}</p>
               </div>
               <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd;">

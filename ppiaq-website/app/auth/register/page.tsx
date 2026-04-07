@@ -3,6 +3,10 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useLanguage } from '@/lib/language-context';
+import {
+  ASSOCIATE_NATIONALITY_OPTIONS,
+  ORDINARY_NATIONALITY,
+} from '@/lib/countries';
 
 interface FormData {
   // Step 1: Personal
@@ -40,8 +44,6 @@ const EDUCATION_LEVELS = ['S1 (Bachelor)', 'S2 (Master)', 'S3 (Doctorate)'];
 const GRADUATION_SEMESTERS = ['Semester 1', 'Semester 2'];
 const GRADUATION_YEARS = Array.from({ length: 10 }, (_, i) => String(new Date().getFullYear() + i));
 
-const NATIONALITIES = ['Indonesia', 'Other'];
-
 export default function RegisterPage() {
   const { language } = useLanguage();
   const [currentStep, setCurrentStep] = useState(0);
@@ -53,7 +55,7 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
-    nationality: '',
+    nationality: ORDINARY_NATIONALITY,
     birthDate: '',
     phoneNumber: '',
     studentId: '',
@@ -72,7 +74,18 @@ export default function RegisterPage() {
   useEffect(() => {
     const typeFromQuery = new URLSearchParams(window.location.search).get('membershipType');
     if (typeFromQuery === 'ordinary' || typeFromQuery === 'associate') {
-      setFormData((prev) => ({ ...prev, membershipType: typeFromQuery }));
+      setFormData((prev) => ({
+        ...prev,
+        membershipType: typeFromQuery,
+        nationality: typeFromQuery === 'ordinary'
+          ? ORDINARY_NATIONALITY
+          : prev.nationality === ORDINARY_NATIONALITY
+            ? ''
+            : prev.nationality,
+      }));
+      if (typeFromQuery === 'ordinary') {
+        setAgreeAssociateLimits(false);
+      }
     }
   }, []);
 
@@ -99,6 +112,34 @@ export default function RegisterPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+
+    if (name === 'membershipType') {
+      const nextMembershipType = value as FormData['membershipType'];
+      setFormData((prev) => ({
+        ...prev,
+        membershipType: nextMembershipType,
+        nationality: nextMembershipType === 'ordinary'
+          ? ORDINARY_NATIONALITY
+          : prev.nationality === ORDINARY_NATIONALITY
+            ? ''
+            : prev.nationality,
+      }));
+
+      if (nextMembershipType === 'ordinary') {
+        setAgreeAssociateLimits(false);
+      }
+
+      return;
+    }
+
+    if (name === 'nationality') {
+      setFormData((prev) => ({
+        ...prev,
+        nationality: prev.membershipType === 'ordinary' ? ORDINARY_NATIONALITY : value,
+      }));
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -138,6 +179,18 @@ export default function RegisterPage() {
       }
       if (!formData.nationality) {
         setError(language === 'id' ? 'Kewarganegaraan harus dipilih' : 'Nationality is required');
+        return false;
+      }
+      if (formData.membershipType === 'ordinary' && formData.nationality !== ORDINARY_NATIONALITY) {
+        setError(language === 'id'
+          ? 'Keanggotaan biasa hanya untuk kewarganegaraan Indonesia'
+          : 'Ordinary membership is only for Indonesian nationality');
+        return false;
+      }
+      if (formData.membershipType === 'associate' && formData.nationality === ORDINARY_NATIONALITY) {
+        setError(language === 'id'
+          ? 'Keanggotaan asosiasi harus menggunakan kewarganegaraan non-Indonesia'
+          : 'Associate membership must use non-Indonesian nationality');
         return false;
       }
       if (!formData.birthDate) {
@@ -201,7 +254,25 @@ export default function RegisterPage() {
         setError(language === 'id' ? 'Bukti pembayaran harus diunggah' : 'Payment proof must be uploaded');
         return false;
       }
-      if ((formData.membershipType === 'associate' || formData.nationality !== 'Indonesia') && !agreeAssociateLimits) {
+      if (formData.membershipType === 'ordinary' && formData.nationality !== ORDINARY_NATIONALITY) {
+        setError(language === 'id'
+          ? 'Keanggotaan biasa hanya untuk kewarganegaraan Indonesia'
+          : 'Ordinary membership is only for Indonesian nationality');
+        return false;
+      }
+      if (formData.membershipType === 'associate' && !formData.nationality) {
+        setError(language === 'id'
+          ? 'Untuk keanggotaan asosiasi, kembali ke langkah sebelumnya dan pilih kewarganegaraan'
+          : 'For associate membership, go back to the previous step and select nationality');
+        return false;
+      }
+      if (formData.membershipType === 'associate' && formData.nationality === ORDINARY_NATIONALITY) {
+        setError(language === 'id'
+          ? 'Keanggotaan asosiasi harus menggunakan kewarganegaraan non-Indonesia'
+          : 'Associate membership must use non-Indonesian nationality');
+        return false;
+      }
+      if (formData.membershipType === 'associate' && !agreeAssociateLimits) {
         setError(language === 'id'
           ? 'Anda harus menyetujui batasan hak Associate/Non-Indonesian member'
           : 'You must agree to the Associate/Non-Indonesian membership limitations');
@@ -295,6 +366,9 @@ export default function RegisterPage() {
   };
 
   const progress = ((currentStep + 1) / steps.length) * 100;
+  const availableNationalities = formData.membershipType === 'ordinary'
+    ? [ORDINARY_NATIONALITY]
+    : [...ASSOCIATE_NATIONALITY_OPTIONS];
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6 overflow-x-hidden">
@@ -411,12 +485,21 @@ export default function RegisterPage() {
                       className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium appearance-none cursor-pointer"
                     >
                       <option value="">{language === 'id' ? 'Pilih kewarganegaraan' : 'Select nationality'}</option>
-                      {NATIONALITIES.map((nat) => (
+                      {availableNationalities.map((nat) => (
                         <option key={nat} value={nat}>
                           {nat}
                         </option>
                       ))}
                     </select>
+                    <p className="mt-2 text-[11px] text-[#886644]">
+                      {formData.membershipType === 'ordinary'
+                        ? (language === 'id'
+                            ? 'Untuk anggota biasa, kewarganegaraan dikunci ke Indonesia.'
+                            : 'For ordinary members, nationality is fixed to Indonesia.')
+                        : (language === 'id'
+                            ? 'Untuk anggota asosiasi, pilih kewarganegaraan selain Indonesia (tersedia semua negara + Other).'
+                            : 'For associate members, choose any non-Indonesian nationality (all countries + Other are available).')}
+                    </p>
                   </div>
 
                   <div className="group">
@@ -680,7 +763,7 @@ export default function RegisterPage() {
                     </select>
                   </div>
 
-                  {(formData.membershipType === 'associate' || formData.nationality !== 'Indonesia') && (
+                  {formData.membershipType === 'associate' && (
                     <div className="rounded-2xl border border-[#FEB602] bg-[#FEB602]/10 p-4">
                       <p className="text-xs text-[#303030] leading-relaxed">
                         For non-Indonesian Citizen: this membership does not come with voting rights. Associate members are not able to run for President, Secretary, or Treasurer positions within PPIA Queensland.
@@ -688,7 +771,7 @@ export default function RegisterPage() {
                     </div>
                   )}
 
-                  {(formData.membershipType === 'associate' || formData.nationality !== 'Indonesia') && (
+                  {formData.membershipType === 'associate' && (
                     <label className="flex items-start gap-3 text-xs text-gray-700 leading-relaxed">
                       <input
                         type="checkbox"
@@ -698,6 +781,14 @@ export default function RegisterPage() {
                       />
                       I understand that Associate/Non-Indonesian membership has no voting rights and cannot run for President, Secretary, or Treasurer positions within PPIA Queensland.
                     </label>
+                  )}
+
+                  {formData.membershipType === 'associate' && !formData.nationality && (
+                    <p className="text-xs text-[#B64847] font-semibold">
+                      {language === 'id'
+                        ? 'Silakan kembali ke langkah Informasi Pribadi untuk memilih kewarganegaraan.'
+                        : 'Please go back to Personal Information step to choose nationality.'}
+                    </p>
                   )}
 
                   <label className="flex items-start gap-3 text-xs text-gray-700 leading-relaxed">
