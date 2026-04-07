@@ -72,6 +72,15 @@ export default function ProfilePage() {
   const isActiveMember = isApprovedMember && remainingMs > 0;
   const countdown = formatCountdown(Math.abs(remainingMs));
   const displayMemberId = user.memberNo || user.id.padStart(6, '0');
+  const membershipTypeLabel =
+    user.membershipType === 'ORDINARY'
+      ? language === 'id'
+        ? 'Anggota Biasa'
+        : 'Ordinary Member'
+      : language === 'id'
+      ? 'Anggota Asosiasi'
+      : 'Associate Member';
+  const locale = language === 'id' ? 'id-ID' : 'en-US';
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6 overflow-x-hidden">
@@ -93,74 +102,57 @@ export default function ProfilePage() {
             {language === 'id' ? 'Kartu Anggota' : 'Membership Card'}
           </h2>
 
-          <div className="bg-gradient-to-br from-[#B64847] to-[#303030] rounded-3xl p-8 md:p-12 text-white shadow-2xl border-2 border-[#FEB602] relative overflow-hidden">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none">
-              <div className="absolute top-0 right-0 w-40 h-40 border-4 border-white rounded-full -mr-20 -mt-20"></div>
-              <div className="absolute bottom-0 left-0 w-32 h-32 border-4 border-white rounded-full -ml-16 -mb-16"></div>
-            </div>
+          <div className="relative h-[250px] sm:h-[300px] md:h-[360px] rounded-3xl text-white shadow-2xl border-2 border-[#FEB602] overflow-hidden">
+            <div className="absolute inset-0 bg-[url('/images/ppiaq-2026-membership-card-design.png')] bg-cover bg-center" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/50" />
 
-            <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-              {/* Left Side - Info */}
-              <div className="flex-1">
-                <p className="font-nickainley text-3xl mb-4 opacity-90">
-                  PPIA Queensland
+            <div className="relative z-10 h-full p-4 sm:p-6 md:p-8">
+              <div className="pt-[23%] sm:pt-[20%] md:pt-[18%] max-w-[90%] sm:max-w-[76%]">
+                <h3 className="font-tan-angleton text-xl sm:text-2xl md:text-4xl font-bold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]">
+                  {user.firstName} {user.lastName}
+                </h3>
+                <p className="mt-1 text-[10px] sm:text-xs uppercase tracking-[0.16em] font-semibold text-white/95">
+                  {membershipTypeLabel}
                 </p>
-                <h3 className="font-tan-angleton text-3xl font-bold mb-6">{user.firstName} {user.lastName}</h3>
 
-                <div className="space-y-3 text-sm">
+                <div className="mt-3 sm:mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-[10px] sm:text-xs">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">
+                    <p className="uppercase tracking-widest text-white/70">
                       {language === 'id' ? 'ID Anggota' : 'Member ID'}
                     </p>
-                    <p className="text-xl font-bold font-mono">{displayMemberId}</p>
+                    <p className="font-bold font-mono truncate">{displayMemberId}</p>
                   </div>
-
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">
+                    <p className="uppercase tracking-widest text-white/70">
                       {language === 'id' ? 'Universitas' : 'University'}
                     </p>
-                    <p className="font-medium">{user.university}</p>
+                    <p className="font-semibold truncate">{user.university || '-'}</p>
                   </div>
-
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">
-                      {language === 'id' ? 'Jenis Keanggotaan' : 'Membership Type'}
+                    <p className="uppercase tracking-widest text-white/70">
+                      {language === 'id' ? 'Jurusan' : 'Major'}
                     </p>
-                    <p className="font-medium">
-                      {user.membershipType === 'ORDINARY'
-                        ? language === 'id'
-                          ? 'Anggota Biasa'
-                          : 'Ordinary Member'
-                        : language === 'id'
-                        ? 'Anggota Asosiasi'
-                        : 'Associate Member'}
+                    <p className="font-semibold truncate">{user.major || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="uppercase tracking-widest text-white/70">
+                      {language === 'id' ? 'Domisili / Kampus' : 'Domicile / Campus'}
                     </p>
+                    <p className="font-semibold truncate">{user.domicileCampus || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="uppercase tracking-widest text-white/70">
+                      {language === 'id' ? 'Berlaku Sejak' : 'Valid From'}
+                    </p>
+                    <p className="font-semibold">{membershipStart.toLocaleDateString(locale)}</p>
+                  </div>
+                  <div>
+                    <p className="uppercase tracking-widest text-white/70">
+                      {language === 'id' ? 'Berlaku Hingga' : 'Valid Until'}
+                    </p>
+                    <p className="font-semibold">{membershipEnd.toLocaleDateString(locale)}</p>
                   </div>
                 </div>
-              </div>
-
-              {/* Right Side - Validity */}
-              <div className="space-y-4 text-right md:text-left">
-                <div className="bg-white/10 rounded-2xl p-4 backdrop-blur">
-                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">
-                    {language === 'id' ? 'Berlaku Sejak' : 'Valid From'}
-                  </p>
-                  <p className="text-lg font-bold">
-                    {membershipStart.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
-                  </p>
-                </div>
-
-                <div className="bg-white/10 rounded-2xl p-4 backdrop-blur">
-                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">
-                    {language === 'id' ? 'Berlaku Hingga' : 'Valid Until'}
-                  </p>
-                  <p className="text-lg font-bold">
-                    {membershipEnd.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
-                  </p>
-                </div>
-
-                <div className="text-3xl">🎓</div>
               </div>
             </div>
           </div>
