@@ -1,7 +1,58 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllUsers } from '@/lib/database/db';
+import { getAllNewsletterSubscribers, getAllUsers, getUsersByStatus } from '@/lib/database/db';
 import { checkAdmin } from '@/lib/auth/check-admin';
 import * as XLSX from 'xlsx';
+import { UserStatus } from '@prisma/client';
+
+type ExportScope = 'all' | 'pending' | 'approved' | 'rejected' | 'newsletter';
+const USER_HEADERS = [
+  'Member No',
+  'Nama Lengkap',
+  'Email address',
+  'Telephone #',
+  'Ranting',
+  'Domisili / Kampus',
+  'Jenjang Studi',
+  'Universitas',
+  'Jurusan',
+  'Intake',
+  'Expected Graduation',
+  'Membership term ends',
+] as const;
+const NEWSLETTER_HEADERS = ['Email address', 'Subscribed at'] as const;
+
+const toCsvDate = (value: Date | string | null | undefined): string => {
+  if (!value) return '';
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+};
+
+const getMembershipTermEnds = (
+  user: {
+    membershipTermEnds?: Date | null;
+    dateJoined?: Date | null;
+    approvedAt?: Date | null;
+    createdAt: Date;
+    status: UserStatus;
+  }
+): Date | null => {
+  if (user.membershipTermEnds) return user.membershipTermEnds;
+
+  const base =
+    user.dateJoined ||
+    user.approvedAt ||
+    (user.status === UserStatus.APPROVED ? user.createdAt : null);
+
+  if (!base) return null;
+  const end = new Date(base);
+  end.setFullYear(end.getFullYear() + 1);
+  return end;
+};
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,37 +61,55 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 });
     }
 
-    // Get query param for format (csv or excel)
+    // Get query params
     const format = request.nextUrl.searchParams.get('format') || 'excel';
+    const rawScope = (request.nextUrl.searchParams.get('scope') || 'all').toLowerCase();
+    const scope: ExportScope = ['pending', 'approved', 'rejected', 'newsletter', 'all'].includes(rawScope)
+      ? rawScope as ExportScope
+      : 'all';
 
-    // Get all users
-    const users = await getAllUsers();
+    let exportData: Array<Record<string, string>> = [];
+    let headers: readonly string[] = [];
+    let filenameBase = 'ppiaq-members';
 
-    // Transform data for export (exclude password)
-    const exportData = users.map((user) => ({
-      'First Name': user.firstName,
-      'Last Name': user.lastName,
-      Email: user.email,
-      'Phone Number': user.phoneNumber || '',
-      'Student ID': user.studentId || '',
-      Nationality: user.nationality,
-      'Education Level': user.educationLevel,
-      University: user.university,
-      Major: user.major,
-      'Birth Date': user.birthDate,
-      'Membership Type': user.membershipType,
-      Role: user.role,
-      Status: user.status,
-      'Created At': user.createdAt.toISOString(),
-      'Date Joined': user.dateJoined ? user.dateJoined.toISOString() : '',
-      'Approved At': user.approvedAt ? user.approvedAt.toISOString() : '',
-      'Rejected At': user.rejectedAt ? user.rejectedAt.toISOString() : '',
-      'Rejection Reason': user.rejectionReason || '',
-    }));
+    if (scope === 'newsletter') {
+      headers = NEWSLETTER_HEADERS;
+      const subscribers = await getAllNewsletterSubscribers();
+      exportData = subscribers.map((subscriber) => ({
+        'Email address': subscriber.email,
+        'Subscribed at': toCsvDate(subscriber.subscribedAt),
+      }));
+      filenameBase = 'ppiaq-newsletter';
+    } else {
+      headers = USER_HEADERS;
+      const users =
+        scope === 'pending' || scope === 'approved' || scope === 'rejected'
+          ? await getUsersByStatus(scope)
+          : await getAllUsers();
+
+      exportData = users.map((user) => ({
+        'Member No': user.memberNo || '',
+        'Nama Lengkap': `${user.firstName} ${user.lastName}`.trim(),
+        'Email address': user.email,
+        'Telephone #': user.phoneNumber || '',
+        Ranting: user.branch || '',
+        'Domisili / Kampus': user.domicileCampus || '',
+        'Jenjang Studi': user.educationLevel || '',
+        Universitas: user.university || '',
+        Jurusan: user.major || '',
+        Intake: user.intake || '',
+        'Expected Graduation': user.expectedGraduation || '',
+        'Membership term ends': toCsvDate(getMembershipTermEnds(user)),
+      }));
+
+      filenameBase =
+        scope === 'all'
+          ? 'ppiaq-members'
+          : `ppiaq-${scope}-members`;
+    }
 
     if (format === 'csv') {
-      // Convert to CSV
-      const headers = Object.keys(exportData[0] || {});
+      // Convert to CSV and keep headers even when there is no row data.
       const csvContent = [
         headers.join(','),
         ...exportData.map((row) =>
@@ -57,36 +126,20 @@ export async function GET(request: NextRequest) {
         status: 200,
         headers: {
           'Content-Type': 'text/csv;charset=utf-8',
-          'Content-Disposition': 'attachment; filename="ppiaq-members.csv"',
+          'Content-Disposition': `attachment; filename="${filenameBase}.csv"`,
         },
       });
     } else {
       // Convert to Excel
-      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const worksheet =
+        exportData.length > 0
+          ? XLSX.utils.json_to_sheet(exportData, { header: [...headers] })
+          : XLSX.utils.aoa_to_sheet([[...headers]]);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Members');
 
-      // Set column widths
-      worksheet['!cols'] = [
-        { wch: 12 }, // First Name
-        { wch: 12 }, // Last Name
-        { wch: 20 }, // Email
-        { wch: 15 }, // Phone Number
-        { wch: 15 }, // Student ID
-        { wch: 12 }, // Nationality
-        { wch: 15 }, // Education Level
-        { wch: 20 }, // University
-        { wch: 12 }, // Major
-        { wch: 12 }, // Birth Date
-        { wch: 15 }, // Membership Type
-        { wch: 10 }, // Role
-        { wch: 10 }, // Status
-        { wch: 20 }, // Created At
-        { wch: 20 }, // Date Joined
-        { wch: 20 }, // Approved At
-        { wch: 20 }, // Rejected At
-        { wch: 30 }, // Rejection Reason
-      ];
+      // Set column widths dynamically
+      worksheet['!cols'] = headers.map((header) => ({ wch: Math.max(16, header.length + 2) }));
 
       const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
 
@@ -94,7 +147,7 @@ export async function GET(request: NextRequest) {
         status: 200,
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'Content-Disposition': 'attachment; filename="ppiaq-members.xlsx"',
+          'Content-Disposition': `attachment; filename="${filenameBase}.xlsx"`,
         },
       });
     }

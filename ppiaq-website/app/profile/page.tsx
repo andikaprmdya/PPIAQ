@@ -3,18 +3,45 @@
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/language-context';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+const parseDateValue = (value: string | Date | undefined): Date | null => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const addOneYear = (date: Date): Date => {
+  const result = new Date(date);
+  result.setFullYear(result.getFullYear() + 1);
+  return result;
+};
+
+const formatCountdown = (milliseconds: number) => {
+  const totalSeconds = Math.floor(Math.max(milliseconds, 0) / 1000);
+  const days = Math.floor(totalSeconds / (60 * 60 * 24));
+  const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
+  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+  const seconds = totalSeconds % 60;
+  return { days, hours, minutes, seconds };
+};
 
 export default function ProfilePage() {
   const { user, isAuthenticated } = useAuth();
   const { language } = useLanguage();
   const router = useRouter();
+  const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/auth/login');
     }
   }, [isAuthenticated, router]);
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (!user) {
     return (
@@ -26,9 +53,25 @@ export default function ProfilePage() {
     );
   }
 
-  const memberSince = new Date(user.createdAt);
-  const validUntil = new Date(memberSince);
-  validUntil.setFullYear(validUntil.getFullYear() + 1);
+  const membershipStart = useMemo(
+    () =>
+      parseDateValue(user.dateJoined) ||
+      parseDateValue(user.approvedAt) ||
+      parseDateValue(user.createdAt) ||
+      new Date(),
+    [user.dateJoined, user.approvedAt, user.createdAt]
+  );
+
+  const membershipEnd = useMemo(
+    () => parseDateValue(user.membershipTermEnds) || addOneYear(membershipStart),
+    [user.membershipTermEnds, membershipStart]
+  );
+
+  const remainingMs = membershipEnd.getTime() - now;
+  const isApprovedMember = user.status === 'APPROVED';
+  const isActiveMember = isApprovedMember && remainingMs > 0;
+  const countdown = formatCountdown(Math.abs(remainingMs));
+  const displayMemberId = user.memberNo || user.id.padStart(6, '0');
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6 overflow-x-hidden">
@@ -70,7 +113,7 @@ export default function ProfilePage() {
                     <p className="text-[10px] font-bold uppercase tracking-widest opacity-70">
                       {language === 'id' ? 'ID Anggota' : 'Member ID'}
                     </p>
-                    <p className="text-xl font-bold font-mono">{user.id.padStart(6, '0')}</p>
+                    <p className="text-xl font-bold font-mono">{displayMemberId}</p>
                   </div>
 
                   <div>
@@ -104,7 +147,7 @@ export default function ProfilePage() {
                     {language === 'id' ? 'Berlaku Sejak' : 'Valid From'}
                   </p>
                   <p className="text-lg font-bold">
-                    {memberSince.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
+                    {membershipStart.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
                   </p>
                 </div>
 
@@ -113,7 +156,7 @@ export default function ProfilePage() {
                     {language === 'id' ? 'Berlaku Hingga' : 'Valid Until'}
                   </p>
                   <p className="text-lg font-bold">
-                    {validUntil.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
+                    {membershipEnd.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
                   </p>
                 </div>
 
@@ -195,16 +238,40 @@ export default function ProfilePage() {
           </h3>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-green-50 rounded-xl border border-green-200">
+            <div className={`flex items-center justify-between p-4 rounded-xl border ${
+              user.status === 'APPROVED'
+                ? isActiveMember
+                  ? 'bg-green-50 border-green-200'
+                  : 'bg-gray-50 border-gray-200'
+                : user.status === 'PENDING'
+                ? 'bg-yellow-50 border-yellow-200'
+                : 'bg-red-50 border-red-200'
+            }`}>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-green-700 mb-1">
+                <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${
+                  user.status === 'APPROVED'
+                    ? isActiveMember ? 'text-green-700' : 'text-gray-700'
+                    : user.status === 'PENDING'
+                    ? 'text-yellow-700'
+                    : 'text-red-700'
+                }`}>
                   {language === 'id' ? 'Status' : 'Status'}
                 </p>
-                <p className="font-bold text-green-700">
+                <p className={`font-bold ${
+                  user.status === 'APPROVED'
+                    ? isActiveMember ? 'text-green-700' : 'text-gray-700'
+                    : user.status === 'PENDING'
+                    ? 'text-yellow-700'
+                    : 'text-red-700'
+                }`}>
                   {user.status === 'APPROVED'
-                    ? language === 'id'
-                      ? '✓ Disetujui'
-                      : '✓ Approved'
+                    ? isActiveMember
+                      ? language === 'id'
+                        ? '✓ Disetujui · Anggota Aktif'
+                        : '✓ Approved · Active Member'
+                      : language === 'id'
+                        ? '⚠ Disetujui · Non-Aktif'
+                        : '⚠ Approved · Non-Active'
                     : user.status === 'PENDING'
                     ? language === 'id'
                       ? '⏳ Menunggu'
@@ -214,14 +281,45 @@ export default function ProfilePage() {
                     : '✗ Rejected'}
                 </p>
               </div>
-              <span className="text-3xl">🎉</span>
+              <span className="text-3xl">
+                {user.status === 'APPROVED' ? (isActiveMember ? '🎉' : '⏰') : user.status === 'PENDING' ? '⏳' : '⚠️'}
+              </span>
             </div>
+
+            {isApprovedMember && (
+              <div className={`p-4 rounded-xl border ${
+                isActiveMember
+                  ? 'bg-emerald-50 border-emerald-200'
+                  : 'bg-amber-50 border-amber-200'
+              }`}>
+                <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${
+                  isActiveMember ? 'text-emerald-700' : 'text-amber-700'
+                }`}>
+                  {language === 'id' ? 'Hitung Mundur Keanggotaan' : 'Membership Countdown'}
+                </p>
+                <p className={`font-bold ${
+                  isActiveMember ? 'text-emerald-700' : 'text-amber-700'
+                }`}>
+                  {isActiveMember
+                    ? (language === 'id'
+                        ? `Berakhir dalam ${countdown.days} hari ${countdown.hours} jam ${countdown.minutes} menit ${countdown.seconds} detik`
+                        : `Expires in ${countdown.days}d ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s`)
+                    : (language === 'id'
+                        ? `Kedaluwarsa ${countdown.days} hari ${countdown.hours} jam ${countdown.minutes} menit ${countdown.seconds} detik lalu`
+                        : `Expired ${countdown.days}d ${countdown.hours}h ${countdown.minutes}m ${countdown.seconds}s ago`)}
+                </p>
+              </div>
+            )}
 
             <p className="text-sm text-gray-600 italic">
               {user.status === 'APPROVED' && (
-                language === 'id'
-                  ? 'Anda adalah anggota aktif PPIA Queensland. Nikmati semua manfaat keanggotaan!'
-                  : 'You are an active member of PPIA Queensland. Enjoy all member benefits!'
+                isActiveMember
+                  ? language === 'id'
+                    ? 'Anda adalah anggota aktif PPIA Queensland. Nikmati semua manfaat keanggotaan!'
+                    : 'You are an active member of PPIA Queensland. Enjoy all member benefits!'
+                  : language === 'id'
+                    ? 'Keanggotaan Anda sudah tidak aktif. Silakan perpanjang untuk kembali menikmati manfaat anggota.'
+                    : 'Your membership is no longer active. Please renew to continue enjoying member benefits.'
               )}
               {user.status === 'PENDING' && (
                 language === 'id'

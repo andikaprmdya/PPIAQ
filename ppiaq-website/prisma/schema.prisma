@@ -21,6 +21,9 @@ model User {
   password        String    // Hashed with bcryptjs
   phoneNumber     String?
   studentId       String?
+  memberNo        String?
+  branch          String?
+  domicileCampus  String?
 
   // Educational Info
   nationality     String
@@ -28,10 +31,13 @@ model User {
   university      String
   major           String
   birthDate       String
+  intake          String?
+  expectedGraduation String?
 
   // Membership
   membershipType  MembershipType
   paymentProofUrl String    @db.Text // Base64 image
+  membershipTermEnds DateTime?
 
   // Auth & Status
   role            Role      @default(USER)
@@ -52,6 +58,7 @@ model User {
 
   @@index([email])
   @@index([status])
+  @@index([memberNo])
   @@map("users")
 }
 

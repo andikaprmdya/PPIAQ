@@ -118,12 +118,26 @@ export async function getUserById(userId: string) {
 }
 
 export async function approveUser(userId: string, adminId: string) {
+  const existingUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { dateJoined: true, membershipTermEnds: true },
+  });
+
+  const dateJoined = existingUser?.dateJoined || new Date();
+  const membershipTermEnds = existingUser?.membershipTermEnds || (() => {
+    const end = new Date(dateJoined);
+    end.setFullYear(end.getFullYear() + 1);
+    return end;
+  })();
+
   return await prisma.user.update({
     where: { id: userId },
     data: {
       status: 'APPROVED',
       approvedAt: new Date(),
       approvedBy: adminId,
+      dateJoined,
+      membershipTermEnds,
     },
   });
 }
@@ -183,11 +197,18 @@ export async function updateUser(userId: string, updates: Record<string, unknown
     'email',
     'phoneNumber',
     'studentId',
+    'memberNo',
+    'branch',
+    'domicileCampus',
     'nationality',
     'educationLevel',
     'university',
     'major',
     'birthDate',
+    'intake',
+    'expectedGraduation',
+    'dateJoined',
+    'membershipTermEnds',
     'membershipType',
     'status',
   ];
@@ -205,6 +226,12 @@ export async function updateUser(userId: string, updates: Record<string, unknown
   }
   if (cleanedUpdates.status) {
     cleanedUpdates.status = mapEnum('userStatus', cleanedUpdates.status as string);
+  }
+  if (typeof cleanedUpdates.dateJoined === 'string' && cleanedUpdates.dateJoined) {
+    cleanedUpdates.dateJoined = new Date(cleanedUpdates.dateJoined);
+  }
+  if (typeof cleanedUpdates.membershipTermEnds === 'string' && cleanedUpdates.membershipTermEnds) {
+    cleanedUpdates.membershipTermEnds = new Date(cleanedUpdates.membershipTermEnds);
   }
 
   return await prisma.user.update({

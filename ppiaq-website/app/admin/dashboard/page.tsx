@@ -12,14 +12,22 @@ interface User {
   email: string;
   phoneNumber?: string;
   studentId?: string;
+  memberNo?: string;
+  branch?: string;
+  domicileCampus?: string;
   nationality: string;
   educationLevel: string;
   university: string;
   major: string;
+  intake?: string;
+  expectedGraduation?: string;
   birthDate: string;
-  membershipType: 'ordinary' | 'associate';
+  membershipType: 'ordinary' | 'associate' | 'ORDINARY' | 'ASSOCIATE';
   status: 'PENDING' | 'APPROVED' | 'REJECTED';
   createdAt: string;
+  dateJoined?: string;
+  approvedAt?: string;
+  membershipTermEnds?: string;
   rejectionReason?: string;
   paymentProofUrl?: string;
 }
@@ -29,6 +37,34 @@ interface NewsletterSubscriber {
   email: string;
   subscribedAt: string;
 }
+
+const parseDateValue = (value?: string | null): Date | null => {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const getMembershipEndDate = (member: User): Date | null => {
+  const explicitEnd = parseDateValue(member.membershipTermEnds);
+  if (explicitEnd) return explicitEnd;
+
+  const base =
+    parseDateValue(member.dateJoined) ||
+    parseDateValue(member.approvedAt) ||
+    (member.status === 'APPROVED' ? parseDateValue(member.createdAt) : null);
+
+  if (!base) return null;
+  const oneYearLater = new Date(base);
+  oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+  return oneYearLater;
+};
+
+const isMembershipActive = (member: User): boolean => {
+  if (member.status !== 'APPROVED') return false;
+  const endDate = getMembershipEndDate(member);
+  if (!endDate) return false;
+  return endDate.getTime() > Date.now();
+};
 
 export default function AdminDashboardPage() {
   const { user, isAdmin } = useAuth();
@@ -221,9 +257,9 @@ export default function AdminDashboardPage() {
   };
 
   const handleDownloadTemplate = () => {
-    const headers = ['First Name', 'Last Name', 'Email', 'Phone Number', 'Student ID', 'Membership Type', 'Status', 'Date Joined', 'Nationality', 'Education Level', 'University', 'Major'];
-    const exampleRow1 = ['John', 'Doe', 'john.doe@email.com', '+61400000000', 'S1234567', 'ordinary', 'approved', '2025-01-01', 'Indonesia', 'S1 (Bachelor)', 'University of Queensland', 'Computer Science'];
-    const exampleRow2 = ['Jane', 'Smith', 'jane.smith@email.com', '+61411111111', 'S7654321', 'associate', 'pending', '', 'Other', 'S2 (Master)', 'Griffith University', 'Business'];
+    const headers = ['Member No', 'Nama Lengkap', 'Email address', 'Telephone #', 'Ranting', 'Domisili / Kampus', 'Jenjang Studi', 'Universitas', 'Jurusan', 'Intake', 'Expected Graduation', 'Membership term ends'];
+    const exampleRow1 = ['426000001', 'John Doe', 'john.doe@email.com', '0400000000', 'UQISA', 'Brisbane', 'Undergraduate', 'University of Queensland', 'Computer Science', 'Sem 1 2026', 'Nov 2028', '31 January 2027'];
+    const exampleRow2 = ['426000002', 'Jane Smith', 'jane.smith@email.com', '0411111111', 'ISAQ', 'Brisbane', 'Postgraduate', 'Queensland University of Technology', 'Business', 'Sem 2 2025', 'Dec 2027', '31 January 2027'];
     const csvContent = [headers.join(','), exampleRow1.join(','), exampleRow2.join(',')].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
@@ -236,13 +272,16 @@ export default function AdminDashboardPage() {
 
   const handleExport = async (format: 'csv' | 'excel') => {
     try {
-      const response = await fetch(`/api/admin/users/export?format=${format}`);
+      const scope = activeTab === 'newsletter' ? 'newsletter' : activeTab.toLowerCase();
+      const response = await fetch(`/api/admin/users/export?format=${format}&scope=${scope}`);
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = format === 'csv' ? 'ppiaq-members.csv' : 'ppiaq-members.xlsx';
+        const contentDisposition = response.headers.get('content-disposition');
+        const filenameMatch = contentDisposition?.match(/filename=\"([^\"]+)\"/i);
+        a.download = filenameMatch?.[1] || (format === 'csv' ? 'ppiaq-members.csv' : 'ppiaq-members.xlsx');
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -261,13 +300,19 @@ export default function AdminDashboardPage() {
         lastName: user.lastName,
         phoneNumber: user.phoneNumber || '',
         studentId: user.studentId || '',
+        memberNo: user.memberNo || '',
+        branch: user.branch || '',
+        domicileCampus: user.domicileCampus || '',
         email: user.email,
         nationality: user.nationality,
         educationLevel: user.educationLevel,
         university: user.university,
         major: user.major,
+        intake: user.intake || '',
+        expectedGraduation: user.expectedGraduation || '',
+        membershipTermEnds: user.membershipTermEnds || '',
         birthDate: user.birthDate,
-        membershipType: user.membershipType,
+        membershipType: String(user.membershipType).toLowerCase() as User['membershipType'],
         status: user.status,
       });
     }
@@ -374,6 +419,11 @@ export default function AdminDashboardPage() {
           >
             📥 Export Excel
           </button>
+          <p className="text-xs text-[#886644] font-semibold self-center">
+            {language === 'id'
+              ? 'Export mengikuti tab yang sedang dipilih'
+              : 'Export follows the currently selected tab'}
+          </p>
         </div>
 
         {/* Import Modal */}
@@ -420,14 +470,19 @@ export default function AdminDashboardPage() {
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">Required Columns</p>
                   <div className="flex flex-wrap gap-1">
-                    {['First Name', 'Last Name', 'Email'].map(col => (
+                    {['Nama Lengkap', 'Email address'].map(col => (
                       <span key={col} className="px-2 py-0.5 bg-[#B64847]/10 text-[#B64847] rounded text-[10px] font-bold">{col} *</span>
                     ))}
-                    {['Phone Number', 'Student ID', 'Membership Type', 'Status', 'Date Joined', 'Nationality', 'Education Level', 'University', 'Major'].map(col => (
+                    {['Member No', 'Telephone #', 'Ranting', 'Domisili / Kampus', 'Jenjang Studi', 'Universitas', 'Jurusan', 'Intake', 'Expected Graduation', 'Membership term ends'].map(col => (
                       <span key={col} className="px-2 py-0.5 bg-gray-200 text-gray-600 rounded text-[10px] font-medium">{col}</span>
                     ))}
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-2">Membership Type: <code>ordinary</code> or <code>associate</code> · Status: <code>pending</code>, <code>approved</code>, or <code>rejected</code> · New users get temp password: <code>TempPass123!</code></p>
+                  <p className="text-[10px] text-gray-400 mt-2">
+                    {language === 'id'
+                      ? 'Format ini cocok dengan file financial members. Member baru otomatis dibuat dengan password sementara:'
+                      : 'This format matches your financial members file. New users are created with temporary password:'}{' '}
+                    <code>TempPass123!</code>
+                  </p>
                 </div>
 
                 {/* Step 2: Upload File */}
@@ -508,6 +563,17 @@ export default function AdminDashboardPage() {
           ))}
         </div>
 
+        {activeTab === 'APPROVED' && (
+          <div className="mb-8 flex flex-wrap gap-3">
+            <span className="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-widest">
+              {language === 'id' ? 'Aktif' : 'Active'} ({approvedUsers.filter(isMembershipActive).length})
+            </span>
+            <span className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-widest">
+              {language === 'id' ? 'Non-Aktif' : 'Non-Active'} ({approvedUsers.filter((u) => !isMembershipActive(u)).length})
+            </span>
+          </div>
+        )}
+
         {/* Users Grid / Newsletter List */}
         {activeTab === 'newsletter' ? (
           // Newsletter Subscribers
@@ -581,7 +647,7 @@ export default function AdminDashboardPage() {
                   </p>
                   <p>
                     <span className="font-bold text-[#886644]">{language === 'id' ? 'Keanggotaan:' : 'Type:'}</span>{' '}
-                    {appUser.membershipType === 'ordinary'
+                    {String(appUser.membershipType).toLowerCase() === 'ordinary'
                       ? language === 'id'
                         ? 'Biasa'
                         : 'Ordinary'
@@ -592,27 +658,42 @@ export default function AdminDashboardPage() {
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-[#E4DBCA]">
-                  <span
-                    className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
-                      appUser.status === 'PENDING'
-                        ? 'bg-yellow-100 text-yellow-700'
+                  <div className="flex gap-2">
+                    <span
+                      className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
+                        appUser.status === 'PENDING'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : appUser.status === 'APPROVED'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {appUser.status === 'PENDING'
+                        ? language === 'id'
+                          ? 'Menunggu'
+                          : 'Pending'
                         : appUser.status === 'APPROVED'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {appUser.status === 'PENDING'
-                      ? language === 'id'
-                        ? 'Menunggu'
-                        : 'Pending'
-                      : appUser.status === 'APPROVED'
-                      ? language === 'id'
-                        ? 'Disetujui'
-                        : 'Approved'
-                      : language === 'id'
-                      ? 'Ditolak'
-                      : 'Rejected'}
-                  </span>
+                        ? language === 'id'
+                          ? 'Disetujui'
+                          : 'Approved'
+                        : language === 'id'
+                        ? 'Ditolak'
+                        : 'Rejected'}
+                    </span>
+                    {appUser.status === 'APPROVED' && (
+                      <span
+                        className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
+                          isMembershipActive(appUser)
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-gray-200 text-gray-700'
+                        }`}
+                      >
+                        {isMembershipActive(appUser)
+                          ? (language === 'id' ? 'Aktif' : 'Active')
+                          : (language === 'id' ? 'Non-Aktif' : 'Non-Active')}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] text-gray-400">
                     {new Date(appUser.createdAt).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
                   </span>
@@ -641,6 +722,12 @@ export default function AdminDashboardPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      Member No
+                    </p>
+                    <p className="text-sm font-medium">{selectedUser.memberNo || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
                       {language === 'id' ? 'Kewarganegaraan' : 'Nationality'}
                     </p>
                     <p className="text-sm font-medium">{selectedUser.nationality}</p>
@@ -661,6 +748,18 @@ export default function AdminDashboardPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      {language === 'id' ? 'Ranting' : 'Branch'}
+                    </p>
+                    <p className="text-sm font-medium">{selectedUser.branch || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      {language === 'id' ? 'Domisili / Kampus' : 'Domicile / Campus'}
+                    </p>
+                    <p className="text-sm font-medium">{selectedUser.domicileCampus || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
                       {language === 'id' ? 'Jurusan' : 'Major'}
                     </p>
                     <p className="text-sm font-medium">{selectedUser.major}</p>
@@ -676,13 +775,48 @@ export default function AdminDashboardPage() {
                       {language === 'id' ? 'Jenis Keanggotaan' : 'Membership Type'}
                     </p>
                     <p className="text-sm font-medium">
-                      {selectedUser.membershipType === 'ordinary'
+                      {String(selectedUser.membershipType).toLowerCase() === 'ordinary'
                         ? language === 'id'
                           ? 'Anggota Biasa'
                           : 'Ordinary Member'
                         : language === 'id'
                         ? 'Anggota Asosiasi'
                         : 'Associate Member'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      Intake
+                    </p>
+                    <p className="text-sm font-medium">{selectedUser.intake || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      {language === 'id' ? 'Perkiraan Lulus' : 'Expected Graduation'}
+                    </p>
+                    <p className="text-sm font-medium">{selectedUser.expectedGraduation || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      {language === 'id' ? 'Masa Berlaku Keanggotaan' : 'Membership Term Ends'}
+                    </p>
+                    <p className="text-sm font-medium">
+                      {(() => {
+                        const endDate = getMembershipEndDate(selectedUser);
+                        return endDate
+                          ? endDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')
+                          : '-';
+                      })()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      {language === 'id' ? 'Status Keanggotaan' : 'Membership Activity'}
+                    </p>
+                    <p className={`text-sm font-bold ${isMembershipActive(selectedUser) ? 'text-emerald-600' : 'text-gray-600'}`}>
+                      {isMembershipActive(selectedUser)
+                        ? (language === 'id' ? 'Aktif' : 'Active')
+                        : (language === 'id' ? 'Non-Aktif' : 'Non-Active')}
                     </p>
                   </div>
                 </div>
@@ -714,6 +848,69 @@ export default function AdminDashboardPage() {
                   )}
 
                   <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Member No</label>
+                        <input
+                          type="text"
+                          value={editFormData.memberNo || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, memberNo: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Branch</label>
+                        <input
+                          type="text"
+                          value={editFormData.branch || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, branch: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Domicile / Campus</label>
+                        <input
+                          type="text"
+                          value={editFormData.domicileCampus || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, domicileCampus: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Intake</label>
+                        <input
+                          type="text"
+                          value={editFormData.intake || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, intake: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Expected Graduation</label>
+                        <input
+                          type="text"
+                          value={editFormData.expectedGraduation || ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, expectedGraduation: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">Membership Term Ends</label>
+                        <input
+                          type="date"
+                          value={editFormData.membershipTermEnds ? String(editFormData.membershipTermEnds).slice(0, 10) : ''}
+                          onChange={(e) => setEditFormData({ ...editFormData, membershipTermEnds: e.target.value })}
+                          className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                        />
+                      </div>
+                    </div>
+
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-600 mb-1 block">First Name</label>
