@@ -7,6 +7,8 @@ import ImageUploader from '@/components/admin/ImageUploader';
 import FormField from '@/components/admin/forms/FormField';
 import FormSection from '@/components/admin/forms/FormSection';
 import FormActions from '@/components/admin/forms/FormActions';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator } from '@/lib/translations';
 
 interface TeamMemberData {
   id: string;
@@ -25,6 +27,8 @@ const divisions = ['CORE', 'ADMIN', 'EDUCATION', 'SPORTS', 'MEDIA', 'PARTNERSHIP
 
 export default function EditTeamMemberPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const params = useParams();
   const memberId = params.id;
   const [loading, setLoading] = useState(true);
@@ -40,7 +44,7 @@ export default function EditTeamMemberPage() {
           setFormData(data.data);
         }
       } catch (error) {
-        alert('Failed to load member');
+        alert(t('admin.team.failedToLoadMember', 'Failed to load member'));
         router.back();
       } finally {
         setLoading(false);
@@ -64,13 +68,13 @@ export default function EditTeamMemberPage() {
       });
 
       if (res.ok) {
-        alert('Member updated successfully!');
+        alert(t('admin.team.memberUpdatedSuccessfully', 'Member updated successfully!'));
         router.push('/admin/team');
       } else {
-        alert('Failed to update member');
+        alert(t('admin.team.failedToUpdateMember', 'Failed to update member'));
       }
     } catch (error) {
-      alert('Error updating member');
+      alert(t('admin.team.errorUpdatingMember', 'Error updating member'));
     } finally {
       setSubmitting(false);
     }
@@ -79,15 +83,15 @@ export default function EditTeamMemberPage() {
   if (loading || !formData) {
     return (
       <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-        <p className="text-[#886644] font-bold">Loading member...</p>
+        <p className="text-[#886644] font-bold">{t('admin.team.loadingMember', 'Loading member...')}</p>
       </div>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl">
-      <FormSection title="Personal Information">
-        <FormField label="Full Name" required>
+      <FormSection title={t('admin.team.personalInformation', 'Personal Information')}>
+        <FormField label={t('admin.team.fullName', 'Full Name')} required>
           <input
             type="text"
             value={formData.name}
@@ -98,7 +102,7 @@ export default function EditTeamMemberPage() {
         </FormField>
 
         <BilingualInput
-          label="Role/Position"
+          label={t('admin.team.rolePosition', 'Role/Position')}
           required
           valueId={formData.role.id}
           valueEn={formData.role.en}
@@ -106,7 +110,7 @@ export default function EditTeamMemberPage() {
           onChangeEn={(v) => setFormData({ ...formData, role: { ...formData.role, en: v } })}
         />
 
-        <FormField label="University" required>
+        <FormField label={t('admin.team.university', 'University')} required>
           <input
             type="text"
             value={formData.university}
@@ -116,7 +120,7 @@ export default function EditTeamMemberPage() {
           />
         </FormField>
 
-        <FormField label="Instagram">
+        <FormField label={t('admin.team.instagram', 'Instagram')}>
           <input
             type="text"
             value={formData.instagram}
@@ -126,9 +130,9 @@ export default function EditTeamMemberPage() {
         </FormField>
       </FormSection>
 
-      <FormSection title="Biography">
+      <FormSection title={t('admin.team.biography', 'Biography')}>
         <BilingualInput
-          label="Bio"
+          label={t('admin.team.biography', 'Biography')}
           type="textarea"
           valueId={formData.bio.id}
           valueEn={formData.bio.en}
@@ -138,7 +142,7 @@ export default function EditTeamMemberPage() {
         />
       </FormSection>
 
-      <FormSection title="Photo">
+      <FormSection title={t('admin.team.photo', 'Photo')}>
         <ImageUploader
           value={formData.image}
           onChange={(base64) => setFormData({ ...formData, image: base64 })}
@@ -146,8 +150,8 @@ export default function EditTeamMemberPage() {
         />
       </FormSection>
 
-      <FormSection title="Organization">
-        <FormField label="Division" required>
+      <FormSection title={t('admin.team.organization', 'Organization')}>
+        <FormField label={t('admin.team.division', 'Division')} required>
           <select
             value={formData.division}
             onChange={(e) => setFormData({ ...formData, division: e.target.value })}
@@ -162,7 +166,7 @@ export default function EditTeamMemberPage() {
           </select>
         </FormField>
 
-        <FormField label="Display Order">
+        <FormField label={t('admin.team.displayOrder', 'Display Order')}>
           <input
             type="number"
             value={formData.order}
@@ -179,7 +183,7 @@ export default function EditTeamMemberPage() {
               onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
               className="w-5 h-5 accent-[#B64847]"
             />
-            <span className="font-bold text-sm text-[#B64847]">Active Member</span>
+            <span className="font-bold text-sm text-[#B64847]">{t('admin.team.activeMember', 'Active Member')}</span>
           </label>
         </div>
       </FormSection>
@@ -187,7 +191,7 @@ export default function EditTeamMemberPage() {
       <FormActions
         onCancel={() => router.back()}
         onSubmit={() => document.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true }))}
-        submitText="Update Member"
+        submitText={t('admin.team.updateMember', 'Update Member')}
         isLoading={submitting}
       />
     </form>

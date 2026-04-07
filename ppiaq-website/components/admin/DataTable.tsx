@@ -1,5 +1,9 @@
 'use client';
 
+import type { ReactNode } from 'react';
+import { useLanguage } from '@/lib/language-context';
+import { getTranslation, translations } from '@/lib/translations';
+
 interface Column {
   key: string;
   label: string;
@@ -7,11 +11,13 @@ interface Column {
   width?: string;
 }
 
+type TableRow = Record<string, ReactNode>;
+
 interface DataTableProps {
   columns: Column[];
-  data: any[];
-  onEdit?: (item: any) => void;
-  onDelete?: (item: any) => void;
+  data: TableRow[];
+  onEdit?: (item: TableRow) => void;
+  onDelete?: (item: TableRow) => void;
   rowKey?: string;
   loading?: boolean;
   emptyMessage?: string;
@@ -24,12 +30,15 @@ export default function DataTable({
   onDelete,
   rowKey = 'id',
   loading = false,
-  emptyMessage = 'No data available',
+  emptyMessage,
 }: DataTableProps) {
+  const { language } = useLanguage();
+  const emptyLabel = emptyMessage || getTranslation(translations.dataTable.empty, language);
+
   if (loading) {
     return (
       <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-        <p className="text-[#886644] font-bold">⏳ Loading...</p>
+        <p className="text-[#886644] font-bold">⏳ {getTranslation(translations.dataTable.loading, language)}</p>
       </div>
     );
   }
@@ -37,7 +46,7 @@ export default function DataTable({
   if (data.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-        <p className="text-[#886644] font-bold">{emptyMessage}</p>
+        <p className="text-[#886644] font-bold">{emptyLabel}</p>
       </div>
     );
   }
@@ -58,7 +67,7 @@ export default function DataTable({
             ))}
             {(onEdit || onDelete) && (
               <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-[#886644]">
-                Actions
+                {getTranslation(translations.dataTable.actions, language)}
               </th>
             )}
           </tr>
@@ -66,7 +75,14 @@ export default function DataTable({
 
         <tbody className="divide-y divide-[#E4DBCA]">
           {data.map((row, idx) => (
-            <tr key={row[rowKey] || idx} className="hover:bg-[#FFFAF5] transition-all">
+            <tr
+              key={
+                typeof row[rowKey] === 'string' || typeof row[rowKey] === 'number'
+                  ? row[rowKey] as string | number
+                  : idx
+              }
+              className="hover:bg-[#FFFAF5] transition-all"
+            >
               {columns.map((col) => (
                 <td key={col.key} className="px-6 py-4 text-sm text-[#303030]">
                   {row[col.key]}
@@ -80,7 +96,7 @@ export default function DataTable({
                       onClick={() => onEdit(row)}
                       className="px-3 py-1 bg-[#B64847] text-white rounded-lg hover:bg-[#303030] transition-all text-xs font-bold"
                     >
-                      ✏️ Edit
+                      ✏️ {getTranslation(translations.dataTable.edit, language)}
                     </button>
                   )}
 
@@ -89,7 +105,7 @@ export default function DataTable({
                       onClick={() => onDelete(row)}
                       className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-xs font-bold"
                     >
-                      🗑️ Delete
+                      🗑️ {getTranslation(translations.dataTable.delete, language)}
                     </button>
                   )}
                 </td>

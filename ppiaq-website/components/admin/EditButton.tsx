@@ -1,5 +1,8 @@
 'use client';
 
+import { useLanguage } from '@/lib/language-context';
+import { getTranslation, translations } from '@/lib/translations';
+
 interface EditButtonProps {
   onClick: () => void;
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
@@ -13,8 +16,11 @@ export default function EditButton({
   position = 'top-right',
   size = 'md',
   variant = 'icon',
-  title = 'Edit content',
+  title,
 }: EditButtonProps) {
+  const { language } = useLanguage();
+  const buttonTitle = title || getTranslation(translations.admin.content.modal.editContent, language);
+
   const positionClasses = {
     'top-right': 'top-4 right-4',
     'top-left': 'top-4 left-4',
@@ -31,7 +37,7 @@ export default function EditButton({
   return (
     <button
       onClick={onClick}
-      title={title}
+      title={buttonTitle}
       className={`
         absolute ${positionClasses[position]} ${sizeClasses[size]}
         z-20
@@ -45,7 +51,7 @@ export default function EditButton({
         font-bold
       `}
     >
-      {variant === 'icon' ? '✏️' : 'Edit'}
+      {variant === 'icon' ? '✏️' : getTranslation(translations.common.edit, language)}
     </button>
   );
 }

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator, getTranslation, translations } from '@/lib/translations';
 
 type BilingualField = { id: string; en: string };
 
@@ -9,19 +11,33 @@ const inputClass = 'w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm 
 const labelClass = 'block text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1';
 
 function BilingualInput({
-  label, value, onChange,
-}: { label: string; value: BilingualField; onChange: (v: BilingualField) => void }) {
+  label,
+  value,
+  onChange,
+  englishLabel,
+  indonesianLabel,
+  englishPlaceholder,
+  indonesianPlaceholder,
+}: {
+  label: string;
+  value: BilingualField;
+  onChange: (v: BilingualField) => void;
+  englishLabel: string;
+  indonesianLabel: string;
+  englishPlaceholder: string;
+  indonesianPlaceholder: string;
+}) {
   return (
     <div className="space-y-2">
       <p className={labelClass}>{label}</p>
       <div className="grid grid-cols-2 gap-2">
         <div>
-          <p className="text-[9px] font-bold text-[#886644] mb-1">English</p>
-          <input className={inputClass} placeholder="English" value={value.en} onChange={e => onChange({ ...value, en: e.target.value })} />
+          <p className="text-[9px] font-bold text-[#886644] mb-1">{englishLabel}</p>
+          <input className={inputClass} placeholder={englishPlaceholder} value={value.en} onChange={e => onChange({ ...value, en: e.target.value })} />
         </div>
         <div>
-          <p className="text-[9px] font-bold text-[#886644] mb-1">Indonesia</p>
-          <input className={inputClass} placeholder="Indonesia" value={value.id} onChange={e => onChange({ ...value, id: e.target.value })} />
+          <p className="text-[9px] font-bold text-[#886644] mb-1">{indonesianLabel}</p>
+          <input className={inputClass} placeholder={indonesianPlaceholder} value={value.id} onChange={e => onChange({ ...value, id: e.target.value })} />
         </div>
       </div>
     </div>
@@ -61,6 +77,8 @@ type Tab = 'discounts' | 'resources' | 'announcements';
 const emptyBilingual = (): BilingualField => ({ id: '', en: '' });
 
 export default function AdminCommunityBoardPage() {
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const [activeTab, setActiveTab] = useState<Tab>('discounts');
 
   // Discounts state
@@ -139,11 +157,11 @@ export default function AdminCommunityBoardPage() {
           body: JSON.stringify(discountForm),
         });
         if (res.ok) {
-          showMessage('success', 'Discount updated!');
+          showMessage('success', t('admin.communityBoard.discount.updated', 'Discount updated!'));
           fetchDiscounts();
           setEditingDiscount(null);
           setDiscountForm({ name: emptyBilingual(), description: emptyBilingual(), code: '', validUntil: '', isActive: true, order: 0 });
-        } else showMessage('error', 'Failed to update');
+        } else showMessage('error', t('admin.crud.failedToUpdate', 'Failed to update data'));
       } else {
         const res = await fetch('/api/admin/community-board/discounts', {
           method: 'POST',
@@ -151,10 +169,10 @@ export default function AdminCommunityBoardPage() {
           body: JSON.stringify(discountForm),
         });
         if (res.ok) {
-          showMessage('success', 'Discount added!');
+          showMessage('success', t('admin.communityBoard.discount.added', 'Discount added!'));
           fetchDiscounts();
           setDiscountForm({ name: emptyBilingual(), description: emptyBilingual(), code: '', validUntil: '', isActive: true, order: 0 });
-        } else showMessage('error', 'Failed to add');
+        } else showMessage('error', t('admin.crud.failedToCreate', 'Failed to create data'));
       }
     } finally {
       setLoading(false);
@@ -162,10 +180,10 @@ export default function AdminCommunityBoardPage() {
   };
 
   const handleDeleteDiscount = async (id: string) => {
-    if (!confirm('Delete this discount?')) return;
+    if (!confirm(t('admin.communityBoard.discount.deleteConfirm', 'Delete this discount?'))) return;
     const res = await fetch(`/api/admin/community-board/discounts?id=${id}`, { method: 'DELETE' });
-    if (res.ok) { showMessage('success', 'Deleted!'); fetchDiscounts(); }
-    else showMessage('error', 'Failed to delete');
+    if (res.ok) { showMessage('success', t('admin.communityBoard.discount.deleted', 'Discount deleted!')); fetchDiscounts(); }
+    else showMessage('error', t('admin.crud.failedToDelete', 'Failed to delete data'));
   };
 
   const startEditDiscount = (d: Discount) => {
@@ -185,11 +203,11 @@ export default function AdminCommunityBoardPage() {
           body: JSON.stringify(resourceForm),
         });
         if (res.ok) {
-          showMessage('success', 'Resource updated!');
+          showMessage('success', t('admin.communityBoard.resource.updated', 'Resource updated!'));
           fetchResources();
           setEditingResource(null);
           setResourceForm({ category: emptyBilingual(), name: emptyBilingual(), location: '', isActive: true, order: 0 });
-        } else showMessage('error', 'Failed to update');
+        } else showMessage('error', t('admin.crud.failedToUpdate', 'Failed to update data'));
       } else {
         const res = await fetch('/api/admin/community-board/resources', {
           method: 'POST',
@@ -197,10 +215,10 @@ export default function AdminCommunityBoardPage() {
           body: JSON.stringify(resourceForm),
         });
         if (res.ok) {
-          showMessage('success', 'Resource added!');
+          showMessage('success', t('admin.communityBoard.resource.added', 'Resource added!'));
           fetchResources();
           setResourceForm({ category: emptyBilingual(), name: emptyBilingual(), location: '', isActive: true, order: 0 });
-        } else showMessage('error', 'Failed to add');
+        } else showMessage('error', t('admin.crud.failedToCreate', 'Failed to create data'));
       }
     } finally {
       setLoading(false);
@@ -208,10 +226,10 @@ export default function AdminCommunityBoardPage() {
   };
 
   const handleDeleteResource = async (id: string) => {
-    if (!confirm('Delete this resource?')) return;
+    if (!confirm(t('admin.communityBoard.resource.deleteConfirm', 'Delete this resource?'))) return;
     const res = await fetch(`/api/admin/community-board/resources?id=${id}`, { method: 'DELETE' });
-    if (res.ok) { showMessage('success', 'Deleted!'); fetchResources(); }
-    else showMessage('error', 'Failed to delete');
+    if (res.ok) { showMessage('success', t('admin.communityBoard.resource.deleted', 'Resource deleted!')); fetchResources(); }
+    else showMessage('error', t('admin.crud.failedToDelete', 'Failed to delete data'));
   };
 
   const startEditResource = (r: Resource) => {
@@ -231,11 +249,11 @@ export default function AdminCommunityBoardPage() {
           body: JSON.stringify(announcementForm),
         });
         if (res.ok) {
-          showMessage('success', 'Announcement updated!');
+          showMessage('success', t('admin.communityBoard.announcement.updated', 'Announcement updated!'));
           fetchAnnouncements();
           setEditingAnnouncement(null);
           setAnnouncementForm({ title: emptyBilingual(), description: emptyBilingual(), date: '', isActive: true, order: 0 });
-        } else showMessage('error', 'Failed to update');
+        } else showMessage('error', t('admin.crud.failedToUpdate', 'Failed to update data'));
       } else {
         const res = await fetch('/api/admin/community-board/announcements', {
           method: 'POST',
@@ -243,10 +261,10 @@ export default function AdminCommunityBoardPage() {
           body: JSON.stringify(announcementForm),
         });
         if (res.ok) {
-          showMessage('success', 'Announcement added!');
+          showMessage('success', t('admin.communityBoard.announcement.added', 'Announcement added!'));
           fetchAnnouncements();
           setAnnouncementForm({ title: emptyBilingual(), description: emptyBilingual(), date: '', isActive: true, order: 0 });
-        } else showMessage('error', 'Failed to add');
+        } else showMessage('error', t('admin.crud.failedToCreate', 'Failed to create data'));
       }
     } finally {
       setLoading(false);
@@ -254,10 +272,10 @@ export default function AdminCommunityBoardPage() {
   };
 
   const handleDeleteAnnouncement = async (id: string) => {
-    if (!confirm('Delete this announcement?')) return;
+    if (!confirm(t('admin.communityBoard.announcement.deleteConfirm', 'Delete this announcement?'))) return;
     const res = await fetch(`/api/admin/community-board/announcements?id=${id}`, { method: 'DELETE' });
-    if (res.ok) { showMessage('success', 'Deleted!'); fetchAnnouncements(); }
-    else showMessage('error', 'Failed to delete');
+    if (res.ok) { showMessage('success', t('admin.communityBoard.announcement.deleted', 'Announcement deleted!')); fetchAnnouncements(); }
+    else showMessage('error', t('admin.crud.failedToDelete', 'Failed to delete data'));
   };
 
   const startEditAnnouncement = (a: Announcement) => {
@@ -284,7 +302,11 @@ export default function AdminCommunityBoardPage() {
               activeTab === tab ? 'bg-[#B64847] text-white' : 'border-2 border-[#E4DBCA] text-[#B64847] hover:border-[#B64847]'
             }`}
           >
-            {tab === 'discounts' ? `Discounts (${discounts.length})` : tab === 'resources' ? `Resources (${resources.length})` : `Announcements (${announcements.length})`}
+            {tab === 'discounts'
+              ? `${t('admin.communityBoard.tabs.discounts', 'Discounts')} (${discounts.length})`
+              : tab === 'resources'
+                ? `${t('admin.communityBoard.tabs.resources', 'Resources')} (${resources.length})`
+                : `${t('admin.communityBoard.tabs.announcements', 'Announcements')} (${announcements.length})`}
           </button>
         ))}
       </div>
@@ -295,31 +317,47 @@ export default function AdminCommunityBoardPage() {
           {/* Form */}
           <div className="bg-white rounded-2xl border border-[#E4DBCA] p-6">
             <h3 className="font-bold text-lg text-[#B64847] mb-4">
-              {editingDiscount ? 'Edit Discount' : 'Add Discount'}
+              {editingDiscount ? t('admin.communityBoard.discount.edit', 'Edit Discount') : t('admin.communityBoard.discount.add', 'Add Discount')}
             </h3>
             <form onSubmit={handleDiscountSubmit} className="space-y-4">
-              <BilingualInput label="Name" value={discountForm.name} onChange={v => setDiscountForm(f => ({ ...f, name: v }))} />
-              <BilingualInput label="Description" value={discountForm.description} onChange={v => setDiscountForm(f => ({ ...f, description: v }))} />
+              <BilingualInput
+                label={getTranslation(translations.common.name, language)}
+                value={discountForm.name}
+                onChange={v => setDiscountForm(f => ({ ...f, name: v }))}
+                englishLabel={getTranslation(translations.bilingualInput.english, language)}
+                indonesianLabel={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+                englishPlaceholder={getTranslation(translations.bilingualInput.english, language)}
+                indonesianPlaceholder={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+              />
+              <BilingualInput
+                label={getTranslation(translations.common.description, language)}
+                value={discountForm.description}
+                onChange={v => setDiscountForm(f => ({ ...f, description: v }))}
+                englishLabel={getTranslation(translations.bilingualInput.english, language)}
+                indonesianLabel={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+                englishPlaceholder={getTranslation(translations.bilingualInput.english, language)}
+                indonesianPlaceholder={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+              />
               <div>
-                <label className={labelClass}>Discount Code</label>
-                <input className={inputClass} placeholder="e.g. PPIA20" value={discountForm.code} onChange={e => setDiscountForm(f => ({ ...f, code: e.target.value }))} required />
+                <label className={labelClass}>{t('admin.communityBoard.discount.code', 'Discount Code')}</label>
+                <input className={inputClass} placeholder={t('admin.communityBoard.discount.codePlaceholder', 'e.g. PPIA20')} value={discountForm.code} onChange={e => setDiscountForm(f => ({ ...f, code: e.target.value }))} required />
               </div>
               <div>
-                <label className={labelClass}>Valid Until</label>
+                <label className={labelClass}>{t('admin.communityBoard.discount.validUntil', 'Valid Until')}</label>
                 <input type="date" className={inputClass} value={discountForm.validUntil} onChange={e => setDiscountForm(f => ({ ...f, validUntil: e.target.value }))} required />
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="discountActive" checked={discountForm.isActive} onChange={e => setDiscountForm(f => ({ ...f, isActive: e.target.checked }))} />
-                <label htmlFor="discountActive" className="text-sm font-bold text-[#886644]">Active</label>
+                <label htmlFor="discountActive" className="text-sm font-bold text-[#886644]">{t('admin.communityBoard.activeLabel', 'Active')}</label>
               </div>
               <div className="flex gap-2">
                 <button type="submit" disabled={loading} className="flex-1 px-4 py-2 bg-[#B64847] text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-[#303030] transition-all disabled:opacity-50">
-                  {loading ? 'Saving...' : editingDiscount ? 'Update' : 'Add'}
+                  {loading ? getTranslation(translations.common.processing, language) : editingDiscount ? getTranslation(translations.common.update, language) : getTranslation(translations.common.add, language)}
                 </button>
                 {editingDiscount && (
                   <button type="button" onClick={() => { setEditingDiscount(null); setDiscountForm({ name: emptyBilingual(), description: emptyBilingual(), code: '', validUntil: '', isActive: true, order: 0 }); }}
                     className="px-4 py-2 border-2 border-[#E4DBCA] text-[#886644] font-bold rounded-xl text-xs uppercase hover:border-[#B64847] transition-all">
-                    Cancel
+                    {getTranslation(translations.common.cancel, language)}
                   </button>
                 )}
               </div>
@@ -328,20 +366,20 @@ export default function AdminCommunityBoardPage() {
 
           {/* List */}
           <div className="space-y-3">
-            {discounts.length === 0 && <p className="text-gray-400 text-sm">No discounts yet. Add one!</p>}
+            {discounts.length === 0 && <p className="text-gray-400 text-sm">{t('admin.communityBoard.discount.noData', 'No discounts yet. Add one!')}</p>}
             {discounts.map(d => (
               <div key={d.id} className={`bg-white rounded-2xl border p-4 ${d.isActive ? 'border-[#FEB602]' : 'border-[#E4DBCA] opacity-60'}`}>
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <p className="font-bold text-[#B64847]">{d.name.en}</p>
-                    <p className="text-xs text-gray-500">{d.description.en}</p>
+                    <p className="font-bold text-[#B64847]">{language === 'id' ? d.name.id : d.name.en}</p>
+                    <p className="text-xs text-gray-500">{language === 'id' ? d.description.id : d.description.en}</p>
                   </div>
                   <span className="font-mono font-bold text-sm bg-[#FEB602]/20 text-[#B64847] px-2 py-1 rounded-lg">{d.code}</span>
                 </div>
-                <p className="text-[10px] text-gray-400 mb-3">Valid until: {d.validUntil} · {d.isActive ? '✅ Active' : '❌ Inactive'}</p>
+                <p className="text-[10px] text-gray-400 mb-3">{t('admin.communityBoard.discount.validUntilLabel', 'Valid until:')} {d.validUntil} · {d.isActive ? `✅ ${t('admin.communityBoard.statusActive', 'Active')}` : `❌ ${t('admin.communityBoard.statusInactive', 'Inactive')}`}</p>
                 <div className="flex gap-2">
-                  <button onClick={() => startEditDiscount(d)} className="px-3 py-1 bg-[#FFFAF5] border border-[#E4DBCA] text-[#B64847] font-bold rounded-lg text-xs hover:border-[#B64847] transition-all">Edit</button>
-                  <button onClick={() => handleDeleteDiscount(d.id)} className="px-3 py-1 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-all">Delete</button>
+                  <button onClick={() => startEditDiscount(d)} className="px-3 py-1 bg-[#FFFAF5] border border-[#E4DBCA] text-[#B64847] font-bold rounded-lg text-xs hover:border-[#B64847] transition-all">{getTranslation(translations.common.edit, language)}</button>
+                  <button onClick={() => handleDeleteDiscount(d.id)} className="px-3 py-1 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-all">{getTranslation(translations.common.delete, language)}</button>
                 </div>
               </div>
             ))}
@@ -355,27 +393,43 @@ export default function AdminCommunityBoardPage() {
           {/* Form */}
           <div className="bg-white rounded-2xl border border-[#E4DBCA] p-6">
             <h3 className="font-bold text-lg text-[#B64847] mb-4">
-              {editingResource ? 'Edit Resource' : 'Add Resource'}
+              {editingResource ? t('admin.communityBoard.resource.edit', 'Edit Resource') : t('admin.communityBoard.resource.add', 'Add Resource')}
             </h3>
             <form onSubmit={handleResourceSubmit} className="space-y-4">
-              <BilingualInput label="Category" value={resourceForm.category} onChange={v => setResourceForm(f => ({ ...f, category: v }))} />
-              <BilingualInput label="Name" value={resourceForm.name} onChange={v => setResourceForm(f => ({ ...f, name: v }))} />
+              <BilingualInput
+                label={t('admin.communityBoard.resource.category', 'Category')}
+                value={resourceForm.category}
+                onChange={v => setResourceForm(f => ({ ...f, category: v }))}
+                englishLabel={getTranslation(translations.bilingualInput.english, language)}
+                indonesianLabel={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+                englishPlaceholder={getTranslation(translations.bilingualInput.english, language)}
+                indonesianPlaceholder={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+              />
+              <BilingualInput
+                label={getTranslation(translations.common.name, language)}
+                value={resourceForm.name}
+                onChange={v => setResourceForm(f => ({ ...f, name: v }))}
+                englishLabel={getTranslation(translations.bilingualInput.english, language)}
+                indonesianLabel={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+                englishPlaceholder={getTranslation(translations.bilingualInput.english, language)}
+                indonesianPlaceholder={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+              />
               <div>
-                <label className={labelClass}>Location</label>
-                <input className={inputClass} placeholder="e.g. South Bank" value={resourceForm.location} onChange={e => setResourceForm(f => ({ ...f, location: e.target.value }))} required />
+                <label className={labelClass}>{getTranslation(translations.common.location, language)}</label>
+                <input className={inputClass} placeholder={t('admin.communityBoard.resource.locationPlaceholder', 'e.g. South Bank')} value={resourceForm.location} onChange={e => setResourceForm(f => ({ ...f, location: e.target.value }))} required />
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="resourceActive" checked={resourceForm.isActive} onChange={e => setResourceForm(f => ({ ...f, isActive: e.target.checked }))} />
-                <label htmlFor="resourceActive" className="text-sm font-bold text-[#886644]">Active</label>
+                <label htmlFor="resourceActive" className="text-sm font-bold text-[#886644]">{t('admin.communityBoard.activeLabel', 'Active')}</label>
               </div>
               <div className="flex gap-2">
                 <button type="submit" disabled={loading} className="flex-1 px-4 py-2 bg-[#B64847] text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-[#303030] transition-all disabled:opacity-50">
-                  {loading ? 'Saving...' : editingResource ? 'Update' : 'Add'}
+                  {loading ? getTranslation(translations.common.processing, language) : editingResource ? getTranslation(translations.common.update, language) : getTranslation(translations.common.add, language)}
                 </button>
                 {editingResource && (
                   <button type="button" onClick={() => { setEditingResource(null); setResourceForm({ category: emptyBilingual(), name: emptyBilingual(), location: '', isActive: true, order: 0 }); }}
                     className="px-4 py-2 border-2 border-[#E4DBCA] text-[#886644] font-bold rounded-xl text-xs uppercase hover:border-[#B64847] transition-all">
-                    Cancel
+                    {getTranslation(translations.common.cancel, language)}
                   </button>
                 )}
               </div>
@@ -384,17 +438,17 @@ export default function AdminCommunityBoardPage() {
 
           {/* List */}
           <div className="space-y-3">
-            {resources.length === 0 && <p className="text-gray-400 text-sm">No resources yet. Add one!</p>}
+            {resources.length === 0 && <p className="text-gray-400 text-sm">{t('admin.communityBoard.resource.noData', 'No resources yet. Add one!')}</p>}
             {resources.map(r => (
               <div key={r.id} className={`bg-white rounded-2xl border p-4 ${r.isActive ? 'border-[#E4DBCA]' : 'border-[#E4DBCA] opacity-60'}`}>
                 <div className="mb-1">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644]">{r.category.en}</p>
-                  <p className="font-bold text-[#B64847]">{r.name.en}</p>
-                  <p className="text-xs text-gray-500">📍 {r.location} · {r.isActive ? '✅ Active' : '❌ Inactive'}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644]">{language === 'id' ? r.category.id : r.category.en}</p>
+                  <p className="font-bold text-[#B64847]">{language === 'id' ? r.name.id : r.name.en}</p>
+                  <p className="text-xs text-gray-500">📍 {r.location} · {r.isActive ? `✅ ${t('admin.communityBoard.statusActive', 'Active')}` : `❌ ${t('admin.communityBoard.statusInactive', 'Inactive')}`}</p>
                 </div>
                 <div className="flex gap-2 mt-3">
-                  <button onClick={() => startEditResource(r)} className="px-3 py-1 bg-[#FFFAF5] border border-[#E4DBCA] text-[#B64847] font-bold rounded-lg text-xs hover:border-[#B64847] transition-all">Edit</button>
-                  <button onClick={() => handleDeleteResource(r.id)} className="px-3 py-1 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-all">Delete</button>
+                  <button onClick={() => startEditResource(r)} className="px-3 py-1 bg-[#FFFAF5] border border-[#E4DBCA] text-[#B64847] font-bold rounded-lg text-xs hover:border-[#B64847] transition-all">{getTranslation(translations.common.edit, language)}</button>
+                  <button onClick={() => handleDeleteResource(r.id)} className="px-3 py-1 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-all">{getTranslation(translations.common.delete, language)}</button>
                 </div>
               </div>
             ))}
@@ -408,27 +462,43 @@ export default function AdminCommunityBoardPage() {
           {/* Form */}
           <div className="bg-white rounded-2xl border border-[#E4DBCA] p-6">
             <h3 className="font-bold text-lg text-[#B64847] mb-4">
-              {editingAnnouncement ? 'Edit Announcement' : 'Add Announcement'}
+              {editingAnnouncement ? t('admin.communityBoard.announcement.edit', 'Edit Announcement') : t('admin.communityBoard.announcement.add', 'Add Announcement')}
             </h3>
             <form onSubmit={handleAnnouncementSubmit} className="space-y-4">
-              <BilingualInput label="Title" value={announcementForm.title} onChange={v => setAnnouncementForm(f => ({ ...f, title: v }))} />
-              <BilingualInput label="Description" value={announcementForm.description} onChange={v => setAnnouncementForm(f => ({ ...f, description: v }))} />
+              <BilingualInput
+                label={getTranslation(translations.common.title, language)}
+                value={announcementForm.title}
+                onChange={v => setAnnouncementForm(f => ({ ...f, title: v }))}
+                englishLabel={getTranslation(translations.bilingualInput.english, language)}
+                indonesianLabel={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+                englishPlaceholder={getTranslation(translations.bilingualInput.english, language)}
+                indonesianPlaceholder={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+              />
+              <BilingualInput
+                label={getTranslation(translations.common.description, language)}
+                value={announcementForm.description}
+                onChange={v => setAnnouncementForm(f => ({ ...f, description: v }))}
+                englishLabel={getTranslation(translations.bilingualInput.english, language)}
+                indonesianLabel={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+                englishPlaceholder={getTranslation(translations.bilingualInput.english, language)}
+                indonesianPlaceholder={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+              />
               <div>
-                <label className={labelClass}>Date</label>
+                <label className={labelClass}>{getTranslation(translations.common.date, language)}</label>
                 <input type="date" className={inputClass} value={announcementForm.date} onChange={e => setAnnouncementForm(f => ({ ...f, date: e.target.value }))} required />
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="announcementActive" checked={announcementForm.isActive} onChange={e => setAnnouncementForm(f => ({ ...f, isActive: e.target.checked }))} />
-                <label htmlFor="announcementActive" className="text-sm font-bold text-[#886644]">Active</label>
+                <label htmlFor="announcementActive" className="text-sm font-bold text-[#886644]">{t('admin.communityBoard.activeLabel', 'Active')}</label>
               </div>
               <div className="flex gap-2">
                 <button type="submit" disabled={loading} className="flex-1 px-4 py-2 bg-[#B64847] text-white font-bold rounded-xl text-xs uppercase tracking-widest hover:bg-[#303030] transition-all disabled:opacity-50">
-                  {loading ? 'Saving...' : editingAnnouncement ? 'Update' : 'Add'}
+                  {loading ? getTranslation(translations.common.processing, language) : editingAnnouncement ? getTranslation(translations.common.update, language) : getTranslation(translations.common.add, language)}
                 </button>
                 {editingAnnouncement && (
                   <button type="button" onClick={() => { setEditingAnnouncement(null); setAnnouncementForm({ title: emptyBilingual(), description: emptyBilingual(), date: '', isActive: true, order: 0 }); }}
                     className="px-4 py-2 border-2 border-[#E4DBCA] text-[#886644] font-bold rounded-xl text-xs uppercase hover:border-[#B64847] transition-all">
-                    Cancel
+                    {getTranslation(translations.common.cancel, language)}
                   </button>
                 )}
               </div>
@@ -437,18 +507,18 @@ export default function AdminCommunityBoardPage() {
 
           {/* List */}
           <div className="space-y-3">
-            {announcements.length === 0 && <p className="text-gray-400 text-sm">No announcements yet. Add one!</p>}
+            {announcements.length === 0 && <p className="text-gray-400 text-sm">{t('admin.communityBoard.announcement.noData', 'No announcements yet. Add one!')}</p>}
             {announcements.map(a => (
               <div key={a.id} className={`bg-white rounded-2xl border p-4 ${a.isActive ? 'border-[#E4DBCA]' : 'border-[#E4DBCA] opacity-60'}`}>
                 <div className="flex justify-between items-start mb-1">
-                  <p className="font-bold text-[#B64847]">{a.title.en}</p>
+                  <p className="font-bold text-[#B64847]">{language === 'id' ? a.title.id : a.title.en}</p>
                   <span className="text-[10px] text-gray-400 whitespace-nowrap ml-2">{a.date}</span>
                 </div>
-                <p className="text-xs text-gray-500 mb-1">{a.description.en}</p>
-                <p className="text-[10px] text-gray-400">{a.isActive ? '✅ Active' : '❌ Inactive'}</p>
+                <p className="text-xs text-gray-500 mb-1">{language === 'id' ? a.description.id : a.description.en}</p>
+                <p className="text-[10px] text-gray-400">{a.isActive ? `✅ ${t('admin.communityBoard.statusActive', 'Active')}` : `❌ ${t('admin.communityBoard.statusInactive', 'Inactive')}`}</p>
                 <div className="flex gap-2 mt-3">
-                  <button onClick={() => startEditAnnouncement(a)} className="px-3 py-1 bg-[#FFFAF5] border border-[#E4DBCA] text-[#B64847] font-bold rounded-lg text-xs hover:border-[#B64847] transition-all">Edit</button>
-                  <button onClick={() => handleDeleteAnnouncement(a.id)} className="px-3 py-1 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-all">Delete</button>
+                  <button onClick={() => startEditAnnouncement(a)} className="px-3 py-1 bg-[#FFFAF5] border border-[#E4DBCA] text-[#B64847] font-bold rounded-lg text-xs hover:border-[#B64847] transition-all">{getTranslation(translations.common.edit, language)}</button>
+                  <button onClick={() => handleDeleteAnnouncement(a.id)} className="px-3 py-1 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-all">{getTranslation(translations.common.delete, language)}</button>
                 </div>
               </div>
             ))}

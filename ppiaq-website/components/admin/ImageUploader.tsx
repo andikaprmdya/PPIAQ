@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { useLanguage } from '@/lib/language-context';
+import { getTranslation, translations } from '@/lib/translations';
 
 interface ImageUploaderProps {
   value: string;
@@ -19,6 +21,7 @@ export default function ImageUploader({
   showLibrary = false,
   onLibraryClick,
 }: ImageUploaderProps) {
+  const { language } = useLanguage();
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -31,14 +34,14 @@ export default function ImageUploader({
       // Validate file size
       const maxBytes = maxSizeMB * 1024 * 1024;
       if (file.size > maxBytes) {
-        setError(`File size must not exceed ${maxSizeMB}MB`);
+        setError(`${getTranslation(translations.imageUploader.fileSizeError, language)} ${maxSizeMB}MB`);
         return;
       }
 
       // Validate file type
       const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
       if (!validTypes.includes(file.type)) {
-        setError('File must be JPEG, PNG, or WebP');
+        setError(getTranslation(translations.imageUploader.fileTypeError, language));
         return;
       }
 
@@ -51,7 +54,7 @@ export default function ImageUploader({
       };
       reader.readAsDataURL(file);
     } catch (err) {
-      setError('Error processing file');
+      setError(getTranslation(translations.imageUploader.processError, language));
       setIsLoading(false);
     }
   };
@@ -75,7 +78,7 @@ export default function ImageUploader({
   return (
     <div className="mb-6">
       <label className="block text-sm font-bold uppercase tracking-widest text-[#886644] mb-3">
-        Image
+        {getTranslation(translations.imageUploader.imageLabel, language)}
       </label>
 
       {/* Preview */}
@@ -118,10 +121,12 @@ export default function ImageUploader({
         <label htmlFor="image-upload" className="cursor-pointer">
           <div className="text-3xl mb-2">📸</div>
           <p className="font-bold text-[#B64847] mb-1">
-            {isLoading ? 'Uploading...' : 'Drag image here or click to select'}
+            {isLoading
+              ? getTranslation(translations.imageUploader.uploading, language)
+              : getTranslation(translations.imageUploader.dragOrClick, language)}
           </p>
           <p className="text-xs text-[#886644]">
-            JPG, PNG or WebP up to {maxSizeMB}MB
+            {getTranslation(translations.imageUploader.formatHint, language)} {maxSizeMB}MB
           </p>
         </label>
       </div>
@@ -138,7 +143,7 @@ export default function ImageUploader({
           onClick={onLibraryClick}
           className="mt-3 w-full px-4 py-2 border-2 border-[#B64847] text-[#B64847] font-bold rounded-xl hover:bg-[#B64847] hover:text-white transition-all text-sm"
         >
-          📚 Select from Library
+          📚 {getTranslation(translations.imageUploader.selectFromLibrary, language)}
         </button>
       )}
     </div>

@@ -7,6 +7,8 @@ import ImageUploader from '@/components/admin/ImageUploader';
 import FormField from '@/components/admin/forms/FormField';
 import FormSection from '@/components/admin/forms/FormSection';
 import FormActions from '@/components/admin/forms/FormActions';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator } from '@/lib/translations';
 
 interface CreateContentData {
   page: string;
@@ -23,6 +25,8 @@ const types = ['text', 'richtext', 'image', 'url'];
 
 export default function CreateContentPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreateContentData>({
     page: 'home',
@@ -45,13 +49,13 @@ export default function CreateContentPage() {
       });
 
       if (res.ok) {
-        alert('Content created successfully!');
+        alert(t('admin.content.contentCreatedSuccessfully', 'Content created successfully!'));
         router.push('/admin/content');
       } else {
-        alert('Failed to create content');
+        alert(t('admin.content.failedToCreateContent', 'Failed to create content'));
       }
     } catch (error) {
-      alert('Error creating content');
+      alert(t('admin.content.errorCreatingContent', 'Error creating content'));
     } finally {
       setLoading(false);
     }
@@ -68,10 +72,10 @@ export default function CreateContentPage() {
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl">
       <FormSection
-        title="Content Information"
-        subtitle="Create new static page content"
+        title={t('admin.content.contentInformation', 'Content Information')}
+        subtitle={t('admin.content.contentInformationSubtitle', 'Create new static page content')}
       >
-        <FormField label="Page" required>
+        <FormField label={t('common.page', 'Page')} required>
           <select
             value={formData.page}
             onChange={(e) => setFormData({ ...formData, page: e.target.value })}
@@ -80,20 +84,28 @@ export default function CreateContentPage() {
           >
             {pages.map((p) => (
               <option key={p} value={p}>
-                {p.charAt(0).toUpperCase() + p.slice(1).replace('-', ' ')}
+                {p === 'home'
+                  ? t('admin.content.pages.home', 'Home')
+                  : p === 'about'
+                    ? t('admin.content.pages.about', 'About')
+                    : p === 'membership'
+                      ? t('admin.content.pages.membership', 'Membership')
+                      : p === 'visi-misi'
+                        ? t('admin.content.pages.visiMisi', 'Visi Misi')
+                        : t('admin.content.pages.contact', 'Contact')}
               </option>
             ))}
           </select>
         </FormField>
 
-        <FormField label="Section" required>
+        <FormField label={t('common.section', 'Section')} required>
           <select
             value={formData.section}
             onChange={(e) => setFormData({ ...formData, section: e.target.value })}
             required
             className="w-full px-4 py-3 border border-[#E4DBCA] rounded-xl focus:outline-none focus:border-[#B64847]"
           >
-            <option value="">Select a section...</option>
+            <option value="">{t('admin.content.sectionPlaceholder', 'Select a section...')}</option>
             {sections.map((s) => (
               <option key={s} value={s}>
                 {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -102,7 +114,7 @@ export default function CreateContentPage() {
           </select>
         </FormField>
 
-        <FormField label="Key">
+        <FormField label={t('common.key', 'Key')}>
           <input
             type="text"
             value={formData.key || generateKey()}
@@ -110,10 +122,10 @@ export default function CreateContentPage() {
             placeholder={generateKey() || 'Auto-generated from page and section'}
             className="w-full px-4 py-3 border border-[#E4DBCA] rounded-xl focus:outline-none focus:border-[#B64847] text-xs font-mono"
           />
-          <p className="text-xs text-[#886644] mt-2">Unique identifier for this content (auto-generated)</p>
+          <p className="text-xs text-[#886644] mt-2">{t('admin.content.keyHelp', 'Unique identifier for this content (auto-generated)')}</p>
         </FormField>
 
-        <FormField label="Content Type" required>
+        <FormField label={t('admin.content.contentType', 'Content Type')} required>
           <select
             value={formData.type}
             onChange={(e) => setFormData({ ...formData, type: e.target.value })}
@@ -130,9 +142,11 @@ export default function CreateContentPage() {
       </FormSection>
 
       {(formData.type === 'text' || formData.type === 'richtext') && (
-        <FormSection title="Content">
+        <FormSection title={t('admin.content.content', 'Content')}>
           <BilingualInput
-            label={formData.type === 'richtext' ? 'Rich Text Content' : 'Text Content'}
+            label={formData.type === 'richtext'
+              ? t('admin.content.richTextContent', 'Rich Text Content')
+              : t('admin.content.textContent', 'Text Content')}
             type={formData.type === 'richtext' ? 'textarea' : 'text'}
             required
             valueId={formData.content.id}
@@ -146,7 +160,7 @@ export default function CreateContentPage() {
       )}
 
       {formData.type === 'image' && (
-        <FormSection title="Image">
+        <FormSection title={t('admin.content.image', 'Image')}>
           <ImageUploader
             value={formData.content.en}
             onChange={(base64) => setFormData({ ...formData, content: { id: '', en: base64 } })}
@@ -157,7 +171,7 @@ export default function CreateContentPage() {
       )}
 
       {formData.type === 'url' && (
-        <FormSection title="URL">
+        <FormSection title={t('admin.content.url', 'URL')}>
           <BilingualInput
             label="URL"
             type="text"
@@ -171,8 +185,8 @@ export default function CreateContentPage() {
         </FormSection>
       )}
 
-      <FormSection title="Organization">
-        <FormField label="Display Order">
+      <FormSection title={t('admin.content.organization', 'Organization')}>
+        <FormField label={t('admin.content.displayOrder', 'Display Order')}>
           <input
             type="number"
             value={formData.order}
@@ -185,7 +199,7 @@ export default function CreateContentPage() {
       <FormActions
         onCancel={() => router.back()}
         onSubmit={() => document.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true }))}
-        submitText="Create Content"
+        submitText={t('admin.content.createContent', 'Create Content')}
         isLoading={loading}
       />
     </form>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import ConfirmDialog from '@/components/admin/forms/ConfirmDialog';
 import ImageUploader from '@/components/admin/ImageUploader';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator, getTranslation, translations } from '@/lib/translations';
 
 interface ImageAsset {
   id: string;
@@ -16,6 +18,8 @@ interface ImageAsset {
 }
 
 export default function ImageLibraryPage() {
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const [images, setImages] = useState<ImageAsset[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
@@ -36,7 +40,7 @@ export default function ImageLibraryPage() {
       setImages(data.data || []);
     } catch (error) {
       console.error('Error fetching images:', error);
-      alert('Failed to fetch images');
+      alert(t('admin.images.failedToFetchImages', 'Failed to fetch images'));
     } finally {
       setLoading(false);
     }
@@ -63,12 +67,12 @@ export default function ImageLibraryPage() {
       if (res.ok) {
         const data = await res.json();
         setImages([...images, data.data]);
-        alert('Image uploaded successfully!');
+        alert(t('admin.images.imageUploadedSuccessfully', 'Image uploaded successfully!'));
       } else {
-        alert('Failed to upload image');
+        alert(t('admin.images.failedToUploadImage', 'Failed to upload image'));
       }
     } catch (error) {
-      alert('Error uploading image');
+      alert(t('admin.images.errorUploadingImage', 'Error uploading image'));
     } finally {
       setUploading(false);
     }
@@ -79,10 +83,10 @@ export default function ImageLibraryPage() {
       const res = await fetch(`/api/admin/images/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setImages(images.filter((img) => img.id !== id));
-        alert('Image deleted successfully');
+        alert(t('admin.images.imageDeletedSuccessfully', 'Image deleted successfully'));
       }
     } catch (error) {
-      alert('Failed to delete image');
+      alert(t('admin.images.failedToDeleteImage', 'Failed to delete image'));
     }
     setDeleteConfirm({ show: false, id: null });
   };
@@ -99,21 +103,23 @@ export default function ImageLibraryPage() {
     <div>
       <div className="mb-8">
         <div>
-          <h1 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">Image Library</h1>
-          <p className="text-[#886644] text-sm">Upload and manage images used across the site</p>
+          <h1 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">
+            {t('admin.images.title', 'Image Library')}
+          </h1>
+          <p className="text-[#886644] text-sm">{t('admin.images.description', 'Upload and manage images used across the site')}</p>
         </div>
       </div>
 
       {/* Upload Section */}
       <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 mb-8">
-        <h2 className="font-bold text-lg text-[#B64847] mb-4">Upload New Image</h2>
+        <h2 className="font-bold text-lg text-[#B64847] mb-4">{t('admin.images.uploadNewImage', 'Upload New Image')}</h2>
         <ImageUploader
           value=""
           onChange={handleImageUpload}
           category="general"
           maxSizeMB={5}
         />
-        {uploading && <p className="text-[#886644] text-sm mt-4">Uploading...</p>}
+        {uploading && <p className="text-[#886644] text-sm mt-4">{getTranslation(translations.imageUploader.uploading, language)}</p>}
       </div>
 
       {/* Category Filter */}
@@ -124,7 +130,7 @@ export default function ImageLibraryPage() {
             filter === 'all' ? 'bg-[#B64847] text-white' : 'bg-white border border-[#E4DBCA] text-[#886644]'
           }`}
         >
-          All
+          {t('admin.images.all', 'All')}
         </button>
         {categories.map((cat) => (
           <button
@@ -142,11 +148,11 @@ export default function ImageLibraryPage() {
       {/* Image Grid */}
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-          <p className="text-[#886644] font-bold">⏳ Loading images...</p>
+          <p className="text-[#886644] font-bold">⏳ {t('admin.images.loadingImages', 'Loading images...')}</p>
         </div>
       ) : filteredImages.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-          <p className="text-[#886644] font-bold">No images found</p>
+          <p className="text-[#886644] font-bold">{t('admin.images.noImagesFound', 'No images found')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -157,7 +163,7 @@ export default function ImageLibraryPage() {
                 {image.base64Data && (
                   <img src={image.base64Data} alt={image.name} className="w-full h-full object-cover" />
                 )}
-                {!image.base64Data && <p className="text-[#886644] text-sm">No preview</p>}
+                {!image.base64Data && <p className="text-[#886644] text-sm">{t('admin.images.noPreview', 'No preview')}</p>}
               </div>
 
               {/* Image Info */}
@@ -165,10 +171,10 @@ export default function ImageLibraryPage() {
                 <h3 className="font-bold text-sm text-[#B64847] mb-2 truncate">{image.name}</h3>
                 <div className="space-y-1 text-xs text-[#886644] mb-4">
                   <p>
-                    <span className="font-bold">Size:</span> {formatFileSize(image.size)}
+                    <span className="font-bold">{t('admin.images.size', 'Size')}:</span> {formatFileSize(image.size)}
                   </p>
                   <p>
-                    <span className="font-bold">Category:</span> {image.category}
+                    <span className="font-bold">{t('admin.images.category', 'Category')}:</span> {image.category}
                   </p>
                 </div>
 
@@ -177,7 +183,7 @@ export default function ImageLibraryPage() {
                   onClick={() => setDeleteConfirm({ show: true, id: image.id })}
                   className="w-full px-3 py-2 text-xs font-bold text-center rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all"
                 >
-                  🗑️ Delete
+                  🗑️ {getTranslation(translations.common.delete, language)}
                 </button>
               </div>
             </div>
@@ -190,7 +196,7 @@ export default function ImageLibraryPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 flex justify-between items-center p-6 border-b border-[#E4DBCA] bg-[#FFFAF5]">
-              <h2 className="font-bold text-lg text-[#B64847]">Image Details</h2>
+              <h2 className="font-bold text-lg text-[#B64847]">{t('admin.images.imageDetails', 'Image Details')}</h2>
               <button
                 onClick={() => setSelectedImage(null)}
                 className="text-2xl text-[#886644] hover:text-[#B64847] transition"
@@ -206,31 +212,31 @@ export default function ImageLibraryPage() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold uppercase text-[#886644]">Name</label>
+                  <label className="text-xs font-bold uppercase text-[#886644]">{t('admin.images.name', 'Name')}</label>
                   <p className="text-sm text-[#303030]">{selectedImage.name}</p>
                 </div>
 
                 {selectedImage.description && (
                   <div>
-                    <label className="text-xs font-bold uppercase text-[#886644]">Description</label>
+                    <label className="text-xs font-bold uppercase text-[#886644]">{t('admin.images.descriptionLabel', 'Description')}</label>
                     <p className="text-sm text-[#303030]">{selectedImage.description}</p>
                   </div>
                 )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold uppercase text-[#886644]">Size</label>
+                    <label className="text-xs font-bold uppercase text-[#886644]">{t('admin.images.size', 'Size')}</label>
                     <p className="text-sm text-[#303030]">{formatFileSize(selectedImage.size)}</p>
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold uppercase text-[#886644]">Category</label>
+                    <label className="text-xs font-bold uppercase text-[#886644]">{t('admin.images.category', 'Category')}</label>
                     <p className="text-sm text-[#303030]">{selectedImage.category}</p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold uppercase text-[#886644]">Type</label>
+                  <label className="text-xs font-bold uppercase text-[#886644]">{t('admin.images.type', 'Type')}</label>
                   <p className="text-sm text-[#303030]">{selectedImage.mimeType}</p>
                 </div>
               </div>
@@ -242,7 +248,7 @@ export default function ImageLibraryPage() {
                 }}
                 className="w-full mt-6 px-4 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 transition-all text-sm"
               >
-                Delete Image
+                {t('admin.images.deleteImage', 'Delete Image')}
               </button>
             </div>
           </div>
@@ -251,9 +257,9 @@ export default function ImageLibraryPage() {
 
       <ConfirmDialog
         isOpen={deleteConfirm.show}
-        title="Delete Image"
-        message="Are you sure you want to delete this image?"
-        confirmText="Delete"
+        title={t('admin.images.deleteTitle', 'Delete Image')}
+        message={t('admin.images.deleteMessage', 'Are you sure you want to delete this image?')}
+        confirmText={getTranslation(translations.common.delete, language)}
         onConfirm={() => deleteConfirm.id && handleDelete(deleteConfirm.id)}
         onCancel={() => setDeleteConfirm({ show: false, id: null })}
         variant="danger"

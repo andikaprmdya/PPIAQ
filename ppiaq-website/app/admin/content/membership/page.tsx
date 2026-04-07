@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import ContentEditModal from '@/components/admin/content/ContentEditModal';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator } from '@/lib/translations';
 
 interface ContentSection {
   id: string;
@@ -14,6 +16,8 @@ interface ContentSection {
 }
 
 export default function MembershipContentPage() {
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const [sections, setSections] = useState<ContentSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingSection, setEditingSection] = useState<ContentSection | null>(null);
@@ -30,7 +34,7 @@ export default function MembershipContentPage() {
       setSections(data.data || []);
     } catch (error) {
       console.error('Error fetching content:', error);
-      alert('Failed to fetch content');
+      alert(t('admin.content.failedToFetchContent', 'Failed to fetch content'));
     } finally {
       setLoading(false);
     }
@@ -41,7 +45,7 @@ export default function MembershipContentPage() {
     setIsModalOpen(true);
   };
 
-  const handleSaveSection = async (updatedData: any) => {
+  const handleSaveSection = async (updatedData: Record<string, unknown>) => {
     try {
       const res = await fetch(`/api/admin/content/${editingSection?.id}`, {
         method: 'PUT',
@@ -53,13 +57,13 @@ export default function MembershipContentPage() {
         fetchContent();
         setIsModalOpen(false);
         setEditingSection(null);
-        alert('Content updated successfully');
+        alert(t('admin.content.contentUpdatedSuccessfully', 'Content updated successfully'));
       } else {
-        alert('Failed to update content');
+        alert(t('admin.content.failedToUpdateContent', 'Failed to update content'));
       }
     } catch (error) {
       console.error('Error saving content:', error);
-      alert('Failed to save content');
+      alert(t('admin.content.failedToSaveContent', 'Failed to save content'));
     }
   };
 
@@ -76,14 +80,16 @@ export default function MembershipContentPage() {
     <div>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">Membership Page Content</h1>
-        <p className="text-[#886644] text-sm">Edit sections of your membership page with bilingual support</p>
+        <h1 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">
+          {t('admin.content.pageEditor.membershipTitle', 'Membership Page Content')}
+        </h1>
+        <p className="text-[#886644] text-sm">{t('admin.content.pageEditor.membershipDescription', 'Edit sections of your membership page with bilingual support')}</p>
       </div>
 
       {/* Content Sections */}
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-          <p className="text-[#886644]">Loading content...</p>
+          <p className="text-[#886644]">{t('admin.content.pageEditor.loadingContent', 'Loading content...')}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -99,16 +105,16 @@ export default function MembershipContentPage() {
                     {existingContent ? (
                       <div className="space-y-2">
                         <div>
-                          <p className="text-xs font-bold text-[#886644] uppercase mb-1">Indonesian</p>
-                          <p className="text-sm text-[#303030]">{existingContent.content.id || '(empty)'}</p>
+                          <p className="text-xs font-bold text-[#886644] uppercase mb-1">{t('admin.content.sectionLabels.indonesian', 'Indonesian')}</p>
+                          <p className="text-sm text-[#303030]">{existingContent.content.id || t('admin.content.sectionLabels.empty', '(empty)')}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-bold text-[#886644] uppercase mb-1">English</p>
-                          <p className="text-sm text-[#303030]">{existingContent.content.en || '(empty)'}</p>
+                          <p className="text-xs font-bold text-[#886644] uppercase mb-1">{t('admin.content.sectionLabels.english', 'English')}</p>
+                          <p className="text-sm text-[#303030]">{existingContent.content.en || t('admin.content.sectionLabels.empty', '(empty)')}</p>
                         </div>
                       </div>
                     ) : (
-                      <p className="text-sm text-[#886644] italic">No content set yet</p>
+                      <p className="text-sm text-[#886644] italic">{t('admin.content.sectionLabels.noContentYet', 'No content set yet')}</p>
                     )}
                   </div>
 
@@ -116,7 +122,9 @@ export default function MembershipContentPage() {
                     onClick={() => handleEditSection(existingContent || { id: '', key: sectionConfig.key, section: sectionConfig.section, content: { id: '', en: '' }, type: 'TEXT', page: 'membership' })}
                     className="ml-4 px-4 py-2 bg-[#B64847] text-white font-bold rounded-xl hover:bg-[#303030] transition-all text-sm uppercase whitespace-nowrap"
                   >
-                    {existingContent ? 'Edit' : 'Create'}
+                    {existingContent
+                      ? t('admin.content.sectionLabels.edit', 'Edit')
+                      : t('admin.content.sectionLabels.create', 'Create')}
                   </button>
                 </div>
               </div>

@@ -6,6 +6,8 @@ import BilingualInput from '@/components/admin/BilingualInput';
 import FormField from '@/components/admin/forms/FormField';
 import FormSection from '@/components/admin/forms/FormSection';
 import FormActions from '@/components/admin/forms/FormActions';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator } from '@/lib/translations';
 
 interface FAQFormData {
   page: string;
@@ -19,6 +21,8 @@ const pages = ['home', 'membership'];
 
 export default function CreateFAQPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<FAQFormData>({
     page: 'home',
@@ -40,13 +44,13 @@ export default function CreateFAQPage() {
       });
 
       if (res.ok) {
-        alert('FAQ created successfully!');
+        alert(t('admin.faq.faqCreatedSuccessfully', 'FAQ created successfully!'));
         router.push('/admin/faq');
       } else {
-        alert('Failed to create FAQ');
+        alert(t('admin.faq.failedToCreateFaq', 'Failed to create FAQ'));
       }
     } catch (error) {
-      alert('Error creating FAQ');
+      alert(t('admin.faq.errorCreatingFaq', 'Error creating FAQ'));
     } finally {
       setLoading(false);
     }
@@ -55,10 +59,10 @@ export default function CreateFAQPage() {
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl">
       <FormSection
-        title="FAQ Information"
-        subtitle="Create a new frequently asked question"
+        title={t('admin.faq.faqInformation', 'FAQ Information')}
+        subtitle={t('admin.faq.faqInformationSubtitle', 'Create a new frequently asked question')}
       >
-        <FormField label="Page" required>
+        <FormField label={t('common.page', 'Page')} required>
           <select
             value={formData.page}
             onChange={(e) => setFormData({ ...formData, page: e.target.value })}
@@ -67,7 +71,9 @@ export default function CreateFAQPage() {
           >
             {pages.map((p) => (
               <option key={p} value={p}>
-                {p.charAt(0).toUpperCase() + p.slice(1)}
+                {p === 'home'
+                  ? t('admin.faq.filters.home', 'Home')
+                  : t('admin.faq.filters.membership', 'Membership')}
               </option>
             ))}
           </select>
@@ -75,11 +81,11 @@ export default function CreateFAQPage() {
       </FormSection>
 
       <FormSection
-        title="Question & Answer"
-        subtitle="Enter the question and answer in both languages"
+        title={t('admin.faq.questionAnswer', 'Question & Answer')}
+        subtitle={t('admin.faq.questionAnswerSubtitle', 'Enter the question and answer in both languages')}
       >
         <BilingualInput
-          label="Question"
+          label={t('common.question', 'Question')}
           required
           valueId={formData.question.id}
           valueEn={formData.question.en}
@@ -89,7 +95,7 @@ export default function CreateFAQPage() {
         />
 
         <BilingualInput
-          label="Answer"
+          label={t('common.answer', 'Answer')}
           type="textarea"
           required
           valueId={formData.answer.id}
@@ -101,8 +107,8 @@ export default function CreateFAQPage() {
         />
       </FormSection>
 
-      <FormSection title="Organization">
-        <FormField label="Display Order">
+      <FormSection title={t('admin.faq.organization', 'Organization')}>
+        <FormField label={t('admin.faq.displayOrder', 'Display Order')}>
           <input
             type="number"
             value={formData.order}
@@ -119,7 +125,7 @@ export default function CreateFAQPage() {
               onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
               className="w-5 h-5 accent-[#B64847]"
             />
-            <span className="font-bold text-sm text-[#B64847]">Active FAQ</span>
+            <span className="font-bold text-sm text-[#B64847]">{t('admin.faq.activeFaq', 'Active FAQ')}</span>
           </label>
         </div>
       </FormSection>
@@ -127,7 +133,7 @@ export default function CreateFAQPage() {
       <FormActions
         onCancel={() => router.back()}
         onSubmit={() => document.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true }))}
-        submitText="Create FAQ"
+        submitText={t('admin.faq.createFaq', 'Create FAQ')}
         isLoading={loading}
       />
     </form>

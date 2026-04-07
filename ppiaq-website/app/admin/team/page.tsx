@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/admin/forms/ConfirmDialog';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator, getTranslation, translations } from '@/lib/translations';
 
 interface TeamMember {
   id: string;
@@ -13,13 +15,16 @@ interface TeamMember {
   order: number;
 }
 
+const DIVISIONS = ['core', 'admin', 'education', 'sports', 'media', 'partnership'] as const;
+type TeamFilter = 'all' | (typeof DIVISIONS)[number];
+
 export default function TeamManagementPage() {
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'core' | 'admin' | 'education' | 'sports' | 'media' | 'partnership'>('all');
+  const [filter, setFilter] = useState<TeamFilter>('all');
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; id: string | null }>({ show: false, id: null });
-
-  const divisions = ['core', 'admin', 'education', 'sports', 'media', 'partnership'];
 
   useEffect(() => {
     fetchMembers();
@@ -32,7 +37,7 @@ export default function TeamManagementPage() {
       setMembers(data.data || []);
     } catch (error) {
       console.error('Error fetching members:', error);
-      alert('Failed to fetch team members');
+      alert(t('admin.team.failedToFetchMembers', 'Failed to fetch team members'));
     } finally {
       setLoading(false);
     }
@@ -45,10 +50,10 @@ export default function TeamManagementPage() {
       const res = await fetch(`/api/admin/team/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setMembers(members.filter((m) => m.id !== id));
-        alert('Member deleted successfully');
+        alert(t('admin.team.memberDeletedSuccessfully', 'Member deleted successfully'));
       }
     } catch (error) {
-      alert('Failed to delete member');
+      alert(t('admin.team.failedToDeleteMember', 'Failed to delete member'));
     }
     setDeleteConfirm({ show: false, id: null });
   };
@@ -65,7 +70,7 @@ export default function TeamManagementPage() {
         setMembers(members.map((m) => (m.id === member.id ? { ...m, isActive: !m.isActive } : m)));
       }
     } catch (error) {
-      alert('Failed to update member');
+      alert(t('admin.team.failedToUpdateMember', 'Failed to update member'));
     }
   };
 
@@ -73,15 +78,17 @@ export default function TeamManagementPage() {
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">Manage Team</h1>
-          <p className="text-[#886644] text-sm">Add, edit, and organize team members</p>
+          <h1 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">
+            {t('admin.team.title', 'Manage Team')}
+          </h1>
+          <p className="text-[#886644] text-sm">{t('admin.team.description', 'Add, edit, and organize team members')}</p>
         </div>
 
         <Link
           href="/admin/team/create"
           className="px-8 py-3 bg-[#B64847] text-white font-bold rounded-xl hover:bg-[#303030] transition-all text-sm uppercase"
         >
-          + Add Member
+          + {t('admin.team.addMember', 'Add Member')}
         </Link>
       </div>
 
@@ -93,12 +100,12 @@ export default function TeamManagementPage() {
             filter === 'all' ? 'bg-[#B64847] text-white' : 'bg-white border border-[#E4DBCA] text-[#886644]'
           }`}
         >
-          All
+          {t('admin.faq.filters.all', 'All')}
         </button>
-        {divisions.map((div) => (
+        {DIVISIONS.map((div) => (
           <button
             key={div}
-            onClick={() => setFilter(div as any)}
+            onClick={() => setFilter(div)}
             className={`px-4 py-2 rounded-lg font-bold text-xs uppercase transition-all ${
               filter === div ? 'bg-[#B64847] text-white' : 'bg-white border border-[#E4DBCA] text-[#886644]'
             }`}
@@ -111,16 +118,16 @@ export default function TeamManagementPage() {
       {/* Grid View */}
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-          <p className="text-[#886644] font-bold">⏳ Loading team members...</p>
+          <p className="text-[#886644] font-bold">⏳ {t('admin.team.loadingMember', 'Loading member...')}</p>
         </div>
       ) : filteredMembers.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-          <p className="text-[#886644] font-bold mb-4">No team members found</p>
+          <p className="text-[#886644] font-bold mb-4">{t('admin.team.noMembersFound', 'No team members found')}</p>
           <Link
             href="/admin/team/create"
             className="inline-block px-6 py-2 bg-[#B64847] text-white font-bold rounded-lg text-sm"
           >
-            Add first member
+            {t('admin.team.addFirstMember', 'Add first member')}
           </Link>
         </div>
       ) : (
@@ -130,11 +137,15 @@ export default function TeamManagementPage() {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="font-bold text-lg text-[#B64847]">{member.name}</h3>
-                  <p className="text-xs text-[#886644] font-bold uppercase tracking-widest">{member.role.en}</p>
+                  <p className="text-xs text-[#886644] font-bold uppercase tracking-widest">
+                    {language === 'id' ? member.role.id : member.role.en}
+                  </p>
                 </div>
 
                 <span className={`text-xs font-bold px-2 py-1 rounded ${member.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                  {member.isActive ? '✅ Active' : '❌ Inactive'}
+                  {member.isActive
+                    ? `✅ ${getTranslation(translations.common.active, language)}`
+                    : `❌ ${getTranslation(translations.common.inactive, language)}`}
                 </span>
               </div>
 
@@ -145,21 +156,23 @@ export default function TeamManagementPage() {
                   onClick={() => handleToggleActive(member)}
                   className="w-full px-3 py-2 text-xs font-bold rounded-lg transition-all border-2 border-[#B64847] text-[#B64847] hover:bg-[#B64847] hover:text-white"
                 >
-                  {member.isActive ? '🔴 Deactivate' : '🟢 Activate'}
+                  {member.isActive
+                    ? `🔴 ${t('admin.team.deactivate', 'Deactivate')}`
+                    : `🟢 ${t('admin.team.activate', 'Activate')}`}
                 </button>
 
                 <Link
                   href={`/admin/team/${member.id}/edit`}
                   className="block w-full px-3 py-2 text-xs font-bold text-center rounded-lg bg-[#B64847] text-white hover:bg-[#303030] transition-all"
                 >
-                  ✏️ Edit
+                  ✏️ {getTranslation(translations.common.edit, language)}
                 </Link>
 
                 <button
                   onClick={() => setDeleteConfirm({ show: true, id: member.id })}
                   className="w-full px-3 py-2 text-xs font-bold text-center rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all"
                 >
-                  🗑️ Delete
+                  🗑️ {getTranslation(translations.common.delete, language)}
                 </button>
               </div>
             </div>
@@ -169,9 +182,9 @@ export default function TeamManagementPage() {
 
       <ConfirmDialog
         isOpen={deleteConfirm.show}
-        title="Delete Member"
-        message="Are you sure you want to remove this team member?"
-        confirmText="Delete"
+        title={t('admin.team.deleteTitle', 'Delete Member')}
+        message={t('admin.team.deleteMessage', 'Are you sure you want to remove this team member?')}
+        confirmText={getTranslation(translations.common.delete, language)}
         onConfirm={() => deleteConfirm.id && handleDelete(deleteConfirm.id)}
         onCancel={() => setDeleteConfirm({ show: false, id: null })}
         variant="danger"

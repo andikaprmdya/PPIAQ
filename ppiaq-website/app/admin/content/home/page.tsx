@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useLanguage } from '@/lib/language-context';
 import ContentEditModal from '@/components/admin/content/ContentEditModal';
+import { createTranslator } from '@/lib/translations';
 
 interface ContentData {
   id: string;
@@ -17,15 +17,15 @@ interface ContentData {
 }
 
 interface EditingState {
-  section: ContentData;
+  section: ContentData | null;
   isOpen: boolean;
 }
 
 export default function HomeContentAdminPage() {
   const { language } = useLanguage();
+  const t = createTranslator(language);
   const [contentData, setContentData] = useState<ContentData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState<EditingState>({ section: null as any, isOpen: false });
+  const [editing, setEditing] = useState<EditingState>({ section: null, isOpen: false });
   const [currentBg, setCurrentBg] = useState(0);
 
   const backgroundImages = [
@@ -39,18 +39,7 @@ export default function HomeContentAdminPage() {
     '/images/uqmarketday.jpg',
   ];
 
-  useEffect(() => {
-    fetchContent();
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const fetchContent = async () => {
+  async function fetchContent() {
     try {
       const url = new URL('/api/admin/content', window.location.origin);
       url.searchParams.set('page', 'home');
@@ -66,10 +55,21 @@ export default function HomeContentAdminPage() {
       setContentData(data.data || []);
     } catch (error) {
       console.error('Error fetching content:', error);
-    } finally {
-      setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    void (async () => {
+      await fetchContent();
+    })();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const getContent = (key: string) => {
     const item = contentData.find((c) => c.key === key);
@@ -91,7 +91,9 @@ export default function HomeContentAdminPage() {
     });
   };
 
-  const handleSave = async (updatedData: any) => {
+  const handleSave = async (updatedData: Record<string, unknown>) => {
+    if (!editing.section) return;
+
     const endpoint = editing.section.id ? `/api/admin/content/${editing.section.id}` : '/api/admin/content';
     const method = editing.section.id ? 'PUT' : 'POST';
 
@@ -110,13 +112,13 @@ export default function HomeContentAdminPage() {
 
       if (res.ok) {
         fetchContent();
-        setEditing({ section: null as any, isOpen: false });
+        setEditing({ section: null, isOpen: false });
       } else {
-        alert('Failed to save');
+        alert(t('admin.content.failedToSaveContent', 'Failed to save'));
       }
     } catch (error) {
       console.error('Error saving:', error);
-      alert('Failed to save');
+      alert(t('admin.content.failedToSaveContent', 'Failed to save'));
     }
   };
 
@@ -154,7 +156,7 @@ export default function HomeContentAdminPage() {
           onClick={() => handleEditSection('hero_title', 'hero')}
           className="absolute top-4 right-4 opacity-0 group-hover/hero:opacity-100 transition-opacity z-20 bg-[#B64847] text-white px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-widest hover:bg-[#303030] shadow-lg"
         >
-          Edit Hero
+          {t('common.edit', 'Edit')} Hero
         </button>
 
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 relative z-10">
@@ -176,10 +178,10 @@ export default function HomeContentAdminPage() {
             </p>
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
               <button className="px-8 py-3 bg-white text-[#B64847] font-bold rounded-sm hover:bg-[#FEB602] transition-colors uppercase tracking-wider text-sm">
-                {language === 'id' ? 'Pelajari Tentang Kami' : 'Learn More About Us'}
+                {t('admin.content.learnMoreAboutUs', 'Learn More About Us')}
               </button>
               <button className="px-8 py-3 border-2 border-white text-white font-bold rounded-sm hover:bg-white hover:text-[#B64847] transition-all uppercase tracking-wider text-sm">
-                {language === 'id' ? 'Jadilah Anggota' : 'Become a Member'}
+                {t('home.cta.joinMembership', 'Become a Member')}
               </button>
             </div>
           </div>
@@ -191,7 +193,7 @@ export default function HomeContentAdminPage() {
         <ContentEditModal
           section={editing.section}
           isOpen={editing.isOpen}
-          onClose={() => setEditing({ section: null as any, isOpen: false })}
+          onClose={() => setEditing({ section: null, isOpen: false })}
           onSave={handleSave}
         />
       )}

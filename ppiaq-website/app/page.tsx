@@ -149,7 +149,7 @@ export default function HomePage() {
             <p className="text-lg md:text-xl mb-10 opacity-90 leading-relaxed italic">
               {language === 'id'
                 ? 'Selamat datang! Kami menghubungkan pelajar Indonesia di seluruh Queensland dengan berbagai peluang, dan satu sama lain.'
-                : 'Selamat datang! We connect Indonesian students all over Queensland to opportunities, and to each other.'}
+                : 'Welcome! We connect Indonesian students all over Queensland to opportunities, and to each other.'}
             </p>
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
               <button className="px-8 py-3 bg-white text-[#B64847] font-bold rounded-sm hover:bg-[#FEB602] transition-colors uppercase tracking-wider text-sm">
@@ -208,9 +208,13 @@ export default function HomePage() {
           </h2>
 
           {eventsLoading ? (
-            <div className="text-center py-8 text-[#886644]">Loading events...</div>
+            <div className="text-center py-8 text-[#886644]">
+              {language === 'id' ? 'Memuat acara...' : 'Loading events...'}
+            </div>
           ) : upcomingEvents.length === 0 ? (
-            <div className="text-center py-8 text-[#886644]">No upcoming events available</div>
+            <div className="text-center py-8 text-[#886644]">
+              {language === 'id' ? 'Belum ada acara mendatang' : 'No upcoming events available'}
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {upcomingEvents.map((event) => {
@@ -238,8 +242,8 @@ export default function HomePage() {
                     <div className="p-6">
                       <h3 className="font-bold text-lg mb-4 group-hover:text-[#B64847] transition-colors">{title}</h3>
                       <div className="space-y-1 text-sm text-gray-500 font-medium">
-                        <p>Date: {event.date}</p>
-                        <p>Location: {location}</p>
+                        <p>{language === 'id' ? 'Tanggal' : 'Date'}: {event.date}</p>
+                        <p>{language === 'id' ? 'Lokasi' : 'Location'}: {location}</p>
                       </div>
                     </div>
                   </div>
@@ -268,9 +272,9 @@ export default function HomePage() {
 
           <div className="space-y-4">
             {faqLoading ? (
-              <div className="text-center py-8 text-[#886644]">Loading FAQs...</div>
+              <div className="text-center py-8 text-[#886644]">{language === 'id' ? 'Memuat FAQ...' : 'Loading FAQs...'}</div>
             ) : displayFAQ.length === 0 ? (
-              <div className="text-center py-8 text-[#886644]">No FAQs available</div>
+              <div className="text-center py-8 text-[#886644]">{language === 'id' ? 'Belum ada FAQ' : 'No FAQs available'}</div>
             ) : (
               displayFAQ.map((faq, i) => (
                 <div key={i} className="bg-[#FEB602]/20 rounded-lg overflow-hidden transition-all">
@@ -313,8 +317,16 @@ export default function HomePage() {
                     : 'I agree to receiving marketing and promotional materials'} <span className="text-[#B64847]">*</span>
                 </label>
               </div>
-              {newsletterSuccess && <p className="text-green-600 text-xs font-bold">Success! {language === 'id' ? 'Berhasil berlangganan!' : 'Successfully subscribed!'}</p>}
-              {newsletterError && <p className="text-red-600 text-xs font-bold">Error: {newsletterError}</p>}
+              {newsletterSuccess && (
+                <p className="text-green-600 text-xs font-bold">
+                  {language === 'id' ? 'Berhasil!' : 'Success!'} {language === 'id' ? 'Berhasil berlangganan!' : 'Successfully subscribed!'}
+                </p>
+              )}
+              {newsletterError && (
+                <p className="text-red-600 text-xs font-bold">
+                  {language === 'id' ? 'Kesalahan' : 'Error'}: {newsletterError}
+                </p>
+              )}
               <button type="submit" disabled={newsletterLoading} className="px-10 py-4 border border-black text-black font-bold uppercase tracking-widest text-sm hover:bg-black hover:text-white transition-all disabled:opacity-50">
                 {newsletterLoading ? (language === 'id' ? 'Mengirim...' : 'Sending...') : (language === 'id' ? 'Berlangganan Newsletter' : 'Subscribe to Newsletter')}
               </button>
@@ -328,10 +340,9 @@ export default function HomePage() {
             <div className="space-y-6 text-lg text-gray-700">
               <div className="space-y-1">
                 <p className="font-medium leading-relaxed">
-                  Perhimpunan Pelajar Indonesia di Australia Cabang Queensland
-                </p>
-                <p className="leading-relaxed">
-                  The Indonesian Student Association in Australia - Queensland Chapter
+                  {language === 'id'
+                    ? 'Perhimpunan Pelajar Indonesia di Australia Cabang Queensland'
+                    : 'The Indonesian Student Association in Australia - Queensland Chapter'}
                 </p>
                 <p className="font-bold tracking-wide">ABN 82 422 047 615</p>
               </div>

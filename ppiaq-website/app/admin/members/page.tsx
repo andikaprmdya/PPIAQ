@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator, getTranslation, translations } from '@/lib/translations';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -24,7 +26,9 @@ interface User {
 }
 
 export default function AdminMembersPage() {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const router = useRouter();
   const [members, setMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,6 +58,10 @@ export default function AdminMembersPage() {
       }
     } catch (error) {
       console.error('Failed to fetch members:', error);
+      setImportMessage({
+        type: 'error',
+        text: t('admin.crud.failedToFetch', 'Failed to fetch data'),
+      });
     } finally {
       setLoading(false);
     }
@@ -78,22 +86,26 @@ export default function AdminMembersPage() {
       const data = await response.json();
 
       if (response.ok) {
+        const template = t('admin.members.importCompleted', 'Import completed: {imported} imported, {updated} updated, {skipped} skipped');
         setImportMessage({
           type: 'success',
-          text: `Import completed: ${data.results.imported} imported, ${data.results.updated} updated, ${data.results.skipped} skipped`,
+          text: template
+            .replace('{imported}', String(data.results.imported))
+            .replace('{updated}', String(data.results.updated))
+            .replace('{skipped}', String(data.results.skipped)),
         });
         // Refresh members list
         await fetchAllMembers();
       } else {
         setImportMessage({
           type: 'error',
-          text: data.error || 'Import failed',
+          text: data.error || t('admin.members.importFailed', 'Import failed'),
         });
       }
     } catch (error) {
       setImportMessage({
         type: 'error',
-        text: 'Error during import',
+        text: t('admin.members.importError', 'Error during import'),
       });
       console.error('Import error:', error);
     } finally {
@@ -123,7 +135,7 @@ export default function AdminMembersPage() {
   };
 
   const handleUnreject = async (userId: string) => {
-    if (!confirm('Change this member status back to pending?')) return;
+    if (!confirm(t('admin.members.unrejectConfirm', 'Change this member status back to pending?'))) return;
 
     try {
       const response = await fetch('/api/admin/users/unreject', {
@@ -135,7 +147,7 @@ export default function AdminMembersPage() {
       if (response.ok) {
         setImportMessage({
           type: 'success',
-          text: 'Member status changed back to pending',
+          text: t('admin.members.memberStatusChangedToPending', 'Member status changed back to pending'),
         });
         await fetchAllMembers();
       }
@@ -143,7 +155,7 @@ export default function AdminMembersPage() {
       console.error('Unreject error:', error);
       setImportMessage({
         type: 'error',
-        text: 'Error changing member status',
+        text: t('admin.members.errorChangingStatus', 'Error changing member status'),
       });
     }
   };
@@ -163,10 +175,10 @@ export default function AdminMembersPage() {
             href="/admin/dashboard"
             className="text-[#B64847] hover:text-[#9a3a3e] font-semibold mb-4 inline-block"
           >
-            ← Back to Dashboard
+            ← {getTranslation(translations.common.backToDashboard, language)}
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Members Management</h1>
-          <p className="text-gray-600">Manage all PPIAQ members and memberships</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('admin.members.title', 'Members Management')}</h1>
+          <p className="text-gray-600">{t('admin.members.description', 'Manage all PPIAQ members and memberships')}</p>
         </div>
 
         {/* Messages */}
@@ -190,21 +202,21 @@ export default function AdminMembersPage() {
               disabled={importLoading}
               className="hidden"
             />
-            📤 Import CSV/Excel
+            📤 {t('admin.members.importCsvExcel', 'Import CSV/Excel')}
           </label>
 
           <button
             onClick={() => handleExport('csv')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold transition"
           >
-            📥 Export to CSV
+            📥 {t('admin.members.exportToCsv', 'Export to CSV')}
           </button>
 
           <button
             onClick={() => handleExport('excel')}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold transition"
           >
-            📥 Export to Excel
+            📥 {t('admin.members.exportToExcel', 'Export to Excel')}
           </button>
         </div>
 
@@ -220,7 +232,13 @@ export default function AdminMembersPage() {
                   : 'bg-white text-gray-700 border border-gray-300 hover:border-[#B64847]'
               }`}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)}
+              {status === 'all'
+                ? getTranslation(translations.common.all, language)
+                : status === 'pending'
+                  ? getTranslation(translations.common.pending, language)
+                  : status === 'approved'
+                    ? getTranslation(translations.common.approved, language)
+                    : getTranslation(translations.common.rejected, language)}
             </button>
           ))}
         </div>
@@ -228,21 +246,21 @@ export default function AdminMembersPage() {
         {/* Members Table */}
         <div className="bg-white rounded-lg shadow-md overflow-x-auto">
           {loading ? (
-            <div className="p-8 text-center text-gray-600">Loading members...</div>
+            <div className="p-8 text-center text-gray-600">{t('admin.members.loadingMembers', 'Loading members...')}</div>
           ) : filteredMembers.length === 0 ? (
-            <div className="p-8 text-center text-gray-600">No members found</div>
+            <div className="p-8 text-center text-gray-600">{t('admin.members.noMembersFound', 'No members found')}</div>
           ) : (
             <table className="w-full">
               <thead className="bg-gray-100 border-b">
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Email</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Phone</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Student ID</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">University</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Actions</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{getTranslation(translations.common.name, language)}</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{getTranslation(translations.common.email, language)}</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{getTranslation(translations.common.phone, language)}</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{getTranslation(translations.common.studentId, language)}</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{getTranslation(translations.common.university, language)}</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{getTranslation(translations.common.type, language)}</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{getTranslation(translations.common.status, language)}</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">{getTranslation(translations.common.actions, language)}</th>
                 </tr>
               </thead>
               <tbody>
@@ -261,7 +279,9 @@ export default function AdminMembersPage() {
                           ? 'bg-blue-100 text-blue-800'
                           : 'bg-purple-100 text-purple-800'
                       }`}>
-                        {member.membershipType}
+                        {member.membershipType === 'ordinary'
+                          ? getTranslation(translations.common.ordinary, language)
+                          : getTranslation(translations.common.associate, language)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
@@ -272,7 +292,11 @@ export default function AdminMembersPage() {
                           ? 'bg-green-100 text-green-800'
                           : 'bg-red-100 text-red-800'
                       }`}>
-                        {member.status}
+                        {member.status === 'pending'
+                          ? getTranslation(translations.common.pending, language)
+                          : member.status === 'approved'
+                            ? getTranslation(translations.common.approved, language)
+                            : getTranslation(translations.common.rejected, language)}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm">
@@ -281,14 +305,14 @@ export default function AdminMembersPage() {
                           href={`/admin/members/${member.id}/edit`}
                           className="px-2 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600 transition"
                         >
-                          Edit
+                          {getTranslation(translations.common.edit, language)}
                         </Link>
                         {member.status === 'rejected' && (
                           <button
                             onClick={() => handleUnreject(member.id)}
                             className="px-2 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600 transition"
                           >
-                            Unreject
+                            {t('admin.members.unreject', 'Unreject')}
                           </button>
                         )}
                       </div>
@@ -304,19 +328,19 @@ export default function AdminMembersPage() {
         <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-gray-900">{members.length}</div>
-            <div className="text-gray-600 font-semibold">Total Members</div>
+            <div className="text-gray-600 font-semibold">{t('admin.members.totalMembers', 'Total Members')}</div>
           </div>
           <div className="bg-yellow-50 p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-yellow-800">{members.filter(m => m.status === 'pending').length}</div>
-            <div className="text-gray-600 font-semibold">Pending</div>
+            <div className="text-gray-600 font-semibold">{getTranslation(translations.common.pending, language)}</div>
           </div>
           <div className="bg-green-50 p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-green-800">{members.filter(m => m.status === 'approved').length}</div>
-            <div className="text-gray-600 font-semibold">Approved</div>
+            <div className="text-gray-600 font-semibold">{getTranslation(translations.common.approved, language)}</div>
           </div>
           <div className="bg-red-50 p-6 rounded-lg shadow-md">
             <div className="text-3xl font-bold text-red-800">{members.filter(m => m.status === 'rejected').length}</div>
-            <div className="text-gray-600 font-semibold">Rejected</div>
+            <div className="text-gray-600 font-semibold">{getTranslation(translations.common.rejected, language)}</div>
           </div>
         </div>
       </div>

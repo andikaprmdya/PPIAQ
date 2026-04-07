@@ -8,6 +8,8 @@ import StatusToggle from '@/components/admin/forms/StatusToggle';
 import FormField from '@/components/admin/forms/FormField';
 import FormSection from '@/components/admin/forms/FormSection';
 import FormActions from '@/components/admin/forms/FormActions';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator, getTranslation, translations } from '@/lib/translations';
 
 interface EventData {
   id: string;
@@ -24,6 +26,8 @@ interface EventData {
 
 export default function EditEventPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const params = useParams();
   const eventId = params.id as string;
   const [loading, setLoading] = useState(true);
@@ -39,7 +43,7 @@ export default function EditEventPage() {
           setFormData(data.data);
         }
       } catch (error) {
-        alert('Failed to load event');
+        alert(t('admin.events.failedToLoadEvent', 'Failed to load event'));
         router.back();
       } finally {
         setLoading(false);
@@ -63,13 +67,13 @@ export default function EditEventPage() {
       });
 
       if (res.ok) {
-        alert('Event updated successfully!');
+        alert(t('admin.events.eventUpdatedSuccessfully', 'Event updated successfully!'));
         router.push('/admin/events');
       } else {
-        alert('Failed to update event');
+        alert(t('admin.events.failedToUpdateEvent', 'Failed to update event'));
       }
     } catch (error) {
-      alert('Error updating event');
+      alert(t('admin.events.errorUpdatingEvent', 'Error updating event'));
     } finally {
       setSubmitting(false);
     }
@@ -78,7 +82,7 @@ export default function EditEventPage() {
   if (loading || !formData) {
     return (
       <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-        <p className="text-[#886644] font-bold">⏳ Loading event...</p>
+        <p className="text-[#886644] font-bold">⏳ {t('admin.events.loadingEvent', 'Loading event...')}</p>
       </div>
     );
   }
@@ -86,11 +90,11 @@ export default function EditEventPage() {
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl">
       <FormSection
-        title="Basic Information"
-        subtitle="Edit the basic details about your event"
+        title={t('admin.events.basicInformation', 'Basic Information')}
+        subtitle={t('admin.events.editBasicInformationSubtitle', 'Edit the basic details about your event')}
       >
         <div className="grid grid-cols-2 gap-6">
-          <FormField label="Day" required>
+          <FormField label={getTranslation(translations.common.day, language)} required>
             <input
               type="text"
               value={formData.day}
@@ -100,7 +104,7 @@ export default function EditEventPage() {
             />
           </FormField>
 
-          <FormField label="Month" required>
+          <FormField label={getTranslation(translations.common.month, language)} required>
             <input
               type="text"
               value={formData.month}
@@ -112,7 +116,7 @@ export default function EditEventPage() {
         </div>
 
         <BilingualInput
-          label="Title"
+          label={getTranslation(translations.common.title, language)}
           required
           valueId={formData.title.id}
           valueEn={formData.title.en}
@@ -120,7 +124,7 @@ export default function EditEventPage() {
           onChangeEn={(v) => setFormData({ ...formData, title: { ...formData.title, en: v } })}
         />
 
-        <FormField label="Full Date" required>
+        <FormField label={t('admin.events.fullDate', 'Full Date')} required>
           <input
             type="text"
             value={formData.date}
@@ -131,7 +135,7 @@ export default function EditEventPage() {
         </FormField>
 
         <BilingualInput
-          label="Location"
+          label={getTranslation(translations.common.location, language)}
           required
           valueId={formData.location.id}
           valueEn={formData.location.en}
@@ -140,9 +144,9 @@ export default function EditEventPage() {
         />
       </FormSection>
 
-      <FormSection title="Details">
+      <FormSection title={t('admin.events.details', 'Details')}>
         <BilingualInput
-          label="Description"
+          label={getTranslation(translations.common.description, language)}
           type="textarea"
           valueId={formData.description.id}
           valueEn={formData.description.en}
@@ -151,7 +155,7 @@ export default function EditEventPage() {
           rows={4}
         />
 
-        <FormField label="Registration URL">
+        <FormField label={t('admin.events.registrationUrl', 'Registration URL')}>
           <input
             type="url"
             value={formData.registrationUrl || ''}
@@ -161,7 +165,7 @@ export default function EditEventPage() {
         </FormField>
       </FormSection>
 
-      <FormSection title="Media">
+      <FormSection title={t('admin.events.media', 'Media')}>
         <ImageUploader
           value={formData.image}
           onChange={(base64) => setFormData({ ...formData, image: base64 })}
@@ -169,7 +173,7 @@ export default function EditEventPage() {
         />
       </FormSection>
 
-      <FormSection title="Publish">
+      <FormSection title={t('admin.events.publish', 'Publish')}>
         <StatusToggle
           value={formData.status}
           onChange={(status) => setFormData({ ...formData, status })}
@@ -179,7 +183,7 @@ export default function EditEventPage() {
       <FormActions
         onCancel={() => router.back()}
         onSubmit={() => document.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true }))}
-        submitText="Update Event"
+        submitText={t('admin.events.updateEvent', 'Update Event')}
         isLoading={submitting}
       />
     </form>

@@ -1,5 +1,8 @@
 'use client';
 
+import { useLanguage } from '@/lib/language-context';
+import { getTranslation, translations } from '@/lib/translations';
+
 interface FormActionsProps {
   onCancel: () => void;
   onSubmit?: () => void;
@@ -12,11 +15,15 @@ interface FormActionsProps {
 export default function FormActions({
   onCancel,
   onSubmit,
-  submitText = 'Save',
-  cancelText = 'Cancel',
+  submitText,
+  cancelText,
   isLoading = false,
   isDanger = false,
 }: FormActionsProps) {
+  const { language } = useLanguage();
+  const submitLabel = submitText || getTranslation(translations.common.save, language);
+  const cancelLabel = cancelText || getTranslation(translations.common.cancel, language);
+
   return (
     <div className="flex gap-4 mt-12 pt-8 border-t border-[#E4DBCA]">
       <button
@@ -25,7 +32,7 @@ export default function FormActions({
         disabled={isLoading}
         className="px-8 py-3 border-2 border-[#B64847] text-[#B64847] font-bold rounded-xl hover:bg-[#B64847] hover:text-white transition-all text-sm uppercase disabled:opacity-50"
       >
-        {cancelText}
+        {cancelLabel}
       </button>
 
       {onSubmit && (
@@ -39,7 +46,7 @@ export default function FormActions({
             text-white disabled:opacity-50
           `}
         >
-          {isLoading ? '⏳ Processing...' : submitText}
+          {isLoading ? `⏳ ${getTranslation(translations.common.processing, language)}` : submitLabel}
         </button>
       )}
     </div>

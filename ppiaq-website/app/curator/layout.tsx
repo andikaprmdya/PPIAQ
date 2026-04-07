@@ -5,9 +5,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useLanguage } from '@/lib/language-context';
+import { getTranslation, translations } from '@/lib/translations';
 
 export default function CuratorLayout({ children }: { children: React.ReactNode }) {
   const { isCurator, isAdmin, loading } = useAuth();
+  const { language } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -22,7 +25,7 @@ export default function CuratorLayout({ children }: { children: React.ReactNode 
   }
 
   const sidebarItems = [
-    { label: 'Upcoming Events', href: '/curator/events' },
+    { label: getTranslation(translations.curator.layout.upcomingEvents, language), href: '/curator/events' },
   ];
 
   return (
@@ -41,10 +44,10 @@ export default function CuratorLayout({ children }: { children: React.ReactNode 
               />
               <div className="min-w-0">
                 <p className="font-tan-angleton text-lg font-bold text-[#303030] sm:text-xl">
-                  Curator Dashboard
+                  {getTranslation(translations.curator.layout.dashboard, language)}
                 </p>
                 <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.28em] text-[#886644]">
-                  Upcoming Events
+                  {getTranslation(translations.curator.layout.upcomingEvents, language)}
                 </p>
               </div>
             </div>
@@ -52,10 +55,14 @@ export default function CuratorLayout({ children }: { children: React.ReactNode 
 
           <div className="space-y-6 px-5 py-5 sm:px-6">
             <div className="rounded-[28px] border border-[#E4DBCA] bg-[#FFFAF5] p-5 shadow-[0_16px_35px_rgba(48,48,48,0.06)]">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#886644]">Logged in as</p>
-              <p className="mt-3 font-tan-angleton text-2xl font-bold text-[#B64847]">Curator</p>
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#886644]">
+                {getTranslation(translations.curator.layout.loggedInAs, language)}
+              </p>
+              <p className="mt-3 font-tan-angleton text-2xl font-bold text-[#B64847]">
+                {getTranslation(translations.curator.layout.curator, language)}
+              </p>
               <p className="mt-2 text-sm leading-6 text-[#886644]">
-                Manage event drafts and published listings with the same visual rhythm visitors see on the public site.
+                {getTranslation(translations.curator.layout.summary, language)}
               </p>
             </div>
 
@@ -78,11 +85,13 @@ export default function CuratorLayout({ children }: { children: React.ReactNode 
             </nav>
 
             <div className="rounded-[28px] border border-[#E4DBCA] bg-white p-5">
-              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#886644]">Quick Notes</p>
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-[#886644]">
+                {getTranslation(translations.curator.layout.quickNotes, language)}
+              </p>
               <ul className="mt-3 space-y-2 text-sm leading-6 text-[#886644]">
-                <li>Review draft events before publishing.</li>
-                <li>Check dates and locations for mobile readability.</li>
-                <li>Use each event card to edit or remove entries quickly.</li>
+                <li>{getTranslation(translations.curator.layout.note1, language)}</li>
+                <li>{getTranslation(translations.curator.layout.note2, language)}</li>
+                <li>{getTranslation(translations.curator.layout.note3, language)}</li>
               </ul>
             </div>
 
@@ -90,7 +99,7 @@ export default function CuratorLayout({ children }: { children: React.ReactNode 
               href="/"
               className="inline-flex w-full items-center justify-center rounded-2xl border-2 border-[#B64847] px-4 py-3 text-xs font-bold uppercase tracking-[0.22em] text-[#B64847] transition-all hover:bg-[#B64847] hover:text-white"
             >
-              Back to Site
+              {getTranslation(translations.curator.layout.backToSite, language)}
             </Link>
           </div>
         </aside>
@@ -98,9 +107,11 @@ export default function CuratorLayout({ children }: { children: React.ReactNode 
         <main className="min-w-0 flex-1">
           <div className="border-b border-[#E4DBCA] bg-white/90 px-5 py-6 shadow-sm backdrop-blur sm:px-8">
             <div className="mx-auto max-w-7xl">
-              <p className="mb-2 text-xs font-bold uppercase tracking-[0.28em] text-[#886644]">Curator Panel</p>
+              <p className="mb-2 text-xs font-bold uppercase tracking-[0.28em] text-[#886644]">
+                {getTranslation(translations.curator.layout.panel, language)}
+              </p>
               <h2 className="font-tan-angleton text-3xl font-bold text-[#B64847] sm:text-4xl">
-                {pathname.startsWith('/curator/events') && 'Upcoming Events Management'}
+                {pathname.startsWith('/curator/events') && getTranslation(translations.curator.layout.upcomingEventsManagement, language)}
               </h2>
             </div>
           </div>

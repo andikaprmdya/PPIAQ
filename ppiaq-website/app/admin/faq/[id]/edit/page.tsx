@@ -6,6 +6,8 @@ import BilingualInput from '@/components/admin/BilingualInput';
 import FormField from '@/components/admin/forms/FormField';
 import FormSection from '@/components/admin/forms/FormSection';
 import FormActions from '@/components/admin/forms/FormActions';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator } from '@/lib/translations';
 
 interface FAQData {
   id: string;
@@ -20,6 +22,8 @@ const pages = ['home', 'membership'];
 
 export default function EditFAQPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const params = useParams();
   const faqId = params.id;
   const [loading, setLoading] = useState(true);
@@ -35,7 +39,7 @@ export default function EditFAQPage() {
           setFormData(data.data);
         }
       } catch (error) {
-        alert('Failed to load FAQ');
+        alert(t('admin.faq.failedToLoadFaq', 'Failed to load FAQ'));
         router.back();
       } finally {
         setLoading(false);
@@ -59,13 +63,13 @@ export default function EditFAQPage() {
       });
 
       if (res.ok) {
-        alert('FAQ updated successfully!');
+        alert(t('admin.faq.faqUpdatedSuccessfully', 'FAQ updated successfully!'));
         router.push('/admin/faq');
       } else {
-        alert('Failed to update FAQ');
+        alert(t('admin.faq.failedToUpdateFaq', 'Failed to update FAQ'));
       }
     } catch (error) {
-      alert('Error updating FAQ');
+      alert(t('admin.faq.errorUpdatingFaq', 'Error updating FAQ'));
     } finally {
       setSubmitting(false);
     }
@@ -74,7 +78,7 @@ export default function EditFAQPage() {
   if (loading || !formData) {
     return (
       <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-        <p className="text-[#886644] font-bold">Loading FAQ...</p>
+        <p className="text-[#886644] font-bold">{t('common.loading', 'Loading...')}</p>
       </div>
     );
   }
@@ -82,10 +86,10 @@ export default function EditFAQPage() {
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl">
       <FormSection
-        title="FAQ Information"
-        subtitle="Edit the frequently asked question"
+        title={t('admin.faq.faqInformation', 'FAQ Information')}
+        subtitle={t('admin.faq.faqInformationEditSubtitle', 'Edit the frequently asked question')}
       >
-        <FormField label="Page" required>
+        <FormField label={t('common.page', 'Page')} required>
           <select
             value={formData.page}
             onChange={(e) => setFormData({ ...formData, page: e.target.value })}
@@ -94,7 +98,9 @@ export default function EditFAQPage() {
           >
             {pages.map((p) => (
               <option key={p} value={p}>
-                {p.charAt(0).toUpperCase() + p.slice(1)}
+                {p === 'home'
+                  ? t('admin.faq.filters.home', 'Home')
+                  : t('admin.faq.filters.membership', 'Membership')}
               </option>
             ))}
           </select>
@@ -102,11 +108,11 @@ export default function EditFAQPage() {
       </FormSection>
 
       <FormSection
-        title="Question & Answer"
-        subtitle="Edit the question and answer in both languages"
+        title={t('admin.faq.questionAnswer', 'Question & Answer')}
+        subtitle={t('admin.faq.questionAnswerEditSubtitle', 'Edit the question and answer in both languages')}
       >
         <BilingualInput
-          label="Question"
+          label={t('common.question', 'Question')}
           required
           valueId={formData.question.id}
           valueEn={formData.question.en}
@@ -115,7 +121,7 @@ export default function EditFAQPage() {
         />
 
         <BilingualInput
-          label="Answer"
+          label={t('common.answer', 'Answer')}
           type="textarea"
           required
           valueId={formData.answer.id}
@@ -126,8 +132,8 @@ export default function EditFAQPage() {
         />
       </FormSection>
 
-      <FormSection title="Organization">
-        <FormField label="Display Order">
+      <FormSection title={t('admin.faq.organization', 'Organization')}>
+        <FormField label={t('admin.faq.displayOrder', 'Display Order')}>
           <input
             type="number"
             value={formData.order}
@@ -144,7 +150,7 @@ export default function EditFAQPage() {
               onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
               className="w-5 h-5 accent-[#B64847]"
             />
-            <span className="font-bold text-sm text-[#B64847]">Active FAQ</span>
+            <span className="font-bold text-sm text-[#B64847]">{t('admin.faq.activeFaq', 'Active FAQ')}</span>
           </label>
         </div>
       </FormSection>
@@ -152,7 +158,7 @@ export default function EditFAQPage() {
       <FormActions
         onCancel={() => router.back()}
         onSubmit={() => document.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true }))}
-        submitText="Update FAQ"
+        submitText={t('admin.faq.updateFaq', 'Update FAQ')}
         isLoading={submitting}
       />
     </form>

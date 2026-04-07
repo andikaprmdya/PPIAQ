@@ -1,5 +1,8 @@
 'use client';
 
+import { useLanguage } from '@/lib/language-context';
+import { getTranslation, translations } from '@/lib/translations';
+
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
@@ -15,13 +18,18 @@ export default function ConfirmDialog({
   isOpen,
   title,
   message,
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
+  confirmText,
+  cancelText,
   onConfirm,
   onCancel,
   variant = 'danger',
 }: ConfirmDialogProps) {
+  const { language } = useLanguage();
+
   if (!isOpen) return null;
+
+  const confirmLabel = confirmText || getTranslation(translations.confirmDialog.confirm, language);
+  const cancelLabel = cancelText || getTranslation(translations.confirmDialog.cancel, language);
 
   const variantColors = {
     danger: 'text-red-600 bg-red-50 border-red-200',
@@ -49,14 +57,14 @@ export default function ConfirmDialog({
             onClick={onCancel}
             className="flex-1 px-4 py-3 border-2 border-[#B64847] text-[#B64847] font-bold rounded-xl hover:bg-[#B64847] hover:text-white transition-all text-sm"
           >
-            {cancelText}
+            {cancelLabel}
           </button>
 
           <button
             onClick={onConfirm}
             className={`flex-1 px-4 py-3 text-white font-bold rounded-xl transition-all text-sm ${buttonColor[variant]}`}
           >
-            {confirmText}
+            {confirmLabel}
           </button>
         </div>
       </div>

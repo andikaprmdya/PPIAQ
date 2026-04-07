@@ -108,7 +108,7 @@ export default function MembershipPage() {
             <div className="group">
               <div className="bg-white rounded-4xl border border-[#E4DBCA] overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1.25 transition-all duration-500">
                 <div className="bg-[#B64847] p-8 text-white text-center">
-                  <h2 className="font-tan-angleton font-bold text-2xl mb-2">Member</h2>
+                  <h2 className="font-tan-angleton font-bold text-2xl mb-2">{language === 'id' ? 'Anggota' : 'Member'}</h2>
                   <div className="flex items-center justify-center gap-1 font-tan-angleton">
                     <span className="text-3xl font-bold">$10</span>
                     <span className="text-lg font-bold tracking-tighter">AUD</span>
@@ -128,7 +128,7 @@ export default function MembershipPage() {
                     onClick={openSignupModal}
                     className="block w-full text-center bg-[#B64847] text-white py-3 rounded-xl hover:bg-[#303030] transition-colors font-bold uppercase tracking-widest text-xs"
                   >
-                    Sign Up Now
+                    {language === 'id' ? 'Daftar Sekarang' : 'Sign Up Now'}
                   </button>
                 </div>
               </div>
@@ -137,17 +137,29 @@ export default function MembershipPage() {
 
           {/* --- WHAT YOU GET TABLE --- */}
           <div className="bg-white rounded-4xl border border-[#E4DBCA] p-6 md:p-10 shadow-sm mb-20">
-            <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] text-center mb-8">What You Get</h2>
+            <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] text-center mb-8">
+              {language === 'id' ? 'Manfaat Keanggotaan' : 'What You Get'}
+            </h2>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[#E4DBCA]">
-                    <th className="text-left py-4 px-4 text-[#886644] font-bold uppercase tracking-widest text-[10px]">Benefit</th>
-                    <th className="text-center py-4 px-4 text-[#B64847] font-bold uppercase tracking-widest text-[10px]">Member</th>
+                    <th className="text-left py-4 px-4 text-[#886644] font-bold uppercase tracking-widest text-[10px]">
+                      {language === 'id' ? 'Manfaat' : 'Benefit'}
+                    </th>
+                    <th className="text-center py-4 px-4 text-[#B64847] font-bold uppercase tracking-widest text-[10px]">
+                      {language === 'id' ? 'Anggota' : 'Member'}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E4DBCA]/20">
-                  {[{ n: 'Event Pricing', v: '✓' }, { n: 'Early Access', v: '✓' }, { n: 'Community Board', v: '✓' }, { n: 'Newsletter', v: '✓' }, { n: 'Partner Discounts', v: '✓' }].map((r, i) => (
+                  {[
+                    { n: language === 'id' ? 'Harga Acara' : 'Event Pricing', v: '✓' },
+                    { n: language === 'id' ? 'Akses Awal' : 'Early Access', v: '✓' },
+                    { n: language === 'id' ? 'Papan Komunitas' : 'Community Board', v: '✓' },
+                    { n: 'Newsletter', v: '✓' },
+                    { n: language === 'id' ? 'Diskon Mitra' : 'Partner Discounts', v: '✓' },
+                  ].map((r, i) => (
                     <tr key={i} className="group hover:bg-[#FFFAF5] transition-colors italic">
                       <td className="py-4 px-4 text-xs font-medium text-gray-600">{r.n}</td>
                       <td className="py-4 px-4 text-center text-[#B64847] font-bold text-lg">{r.v}</td>
@@ -160,7 +172,9 @@ export default function MembershipPage() {
 
           {/* --- FAQ SECTION (5 Questions) --- */}
           <div className="max-w-4xl mx-auto pb-20">
-            <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] text-center mb-10 italic">Membership FAQ</h2>
+            <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] text-center mb-10 italic">
+              {language === 'id' ? 'FAQ Keanggotaan' : 'Membership FAQ'}
+            </h2>
             <div className="space-y-4">
               {faqs.map((faq, i) => (
                 <div key={i} className="bg-white border border-[#E4DBCA] rounded-2xl p-6 hover:shadow-md transition-shadow">
@@ -201,7 +215,7 @@ export default function MembershipPage() {
                     : 'border-[#E4DBCA] hover:border-[#B64847]/60'
                 }`}
               >
-                <p className="font-bold text-[#B64847] mb-1">Ordinary Member</p>
+                <p className="font-bold text-[#B64847] mb-1">{language === 'id' ? 'Anggota Biasa' : 'Ordinary Member'}</p>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   {language === 'id'
                     ? 'Untuk mahasiswa Indonesia yang memenuhi syarat keanggotaan penuh.'
@@ -218,7 +232,7 @@ export default function MembershipPage() {
                     : 'border-[#E4DBCA] hover:border-[#B64847]/60'
                 }`}
               >
-                <p className="font-bold text-[#B64847] mb-1">Associate Member</p>
+                <p className="font-bold text-[#B64847] mb-1">{language === 'id' ? 'Anggota Asosiasi' : 'Associate Member'}</p>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   {language === 'id'
                     ? 'Untuk non-WNI atau pendukung komunitas.'
@@ -231,7 +245,9 @@ export default function MembershipPage() {
               {selectedMembershipType === 'associate' && (
                 <div className="rounded-2xl border border-[#FEB602] bg-[#FEB602]/10 p-4">
                   <p className="text-xs text-[#303030] leading-relaxed">
-                    For non-Indonesian citizen: this membership does not come with voting rights. Associate members are not able to run for President, Secretary, or Treasurer positions within PPIA Queensland.
+                    {language === 'id'
+                      ? 'Untuk non-WNI: keanggotaan ini tidak memiliki hak suara. Anggota asosiasi tidak dapat mencalonkan diri sebagai Presiden, Sekretaris, atau Bendahara PPIA Queensland.'
+                      : 'For non-Indonesian citizens: this membership does not include voting rights. Associate members cannot run for President, Secretary, or Treasurer positions within PPIA Queensland.'}
                   </p>
                 </div>
               )}
@@ -244,7 +260,9 @@ export default function MembershipPage() {
                     onChange={(e) => setAgreeAssociateLimits(e.target.checked)}
                     className="mt-0.5 accent-[#B64847]"
                   />
-                  I understand that Associate membership has no voting rights and is not eligible for President, Secretary, or Treasurer roles.
+                  {language === 'id'
+                    ? 'Saya memahami bahwa keanggotaan asosiasi tidak memiliki hak suara dan tidak dapat mencalonkan diri sebagai Presiden, Sekretaris, atau Bendahara.'
+                    : 'I understand that Associate membership has no voting rights and is not eligible for President, Secretary, or Treasurer roles.'}
                 </label>
               )}
 
@@ -255,7 +273,9 @@ export default function MembershipPage() {
                   onChange={(e) => setAgreePrivacyUse(e.target.checked)}
                   className="mt-0.5 accent-[#B64847]"
                 />
-                PPIA Queensland may use your information in case of emergency and for marketing purposes. We will not provide your information to a third party without your concern, or for any of our team&apos;s personal uses.
+                {language === 'id'
+                  ? 'PPIA Queensland dapat menggunakan informasi Anda untuk keadaan darurat dan keperluan pemasaran. Kami tidak akan memberikan informasi Anda kepada pihak ketiga tanpa persetujuan Anda, atau untuk penggunaan pribadi tim kami.'
+                  : 'PPIA Queensland may use your information in emergencies and for marketing purposes. We will not provide your information to third parties without your consent, or for personal use by our team.'}
               </label>
             </div>
 

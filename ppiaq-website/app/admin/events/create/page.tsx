@@ -8,9 +8,13 @@ import StatusToggle from '@/components/admin/forms/StatusToggle';
 import FormField from '@/components/admin/forms/FormField';
 import FormSection from '@/components/admin/forms/FormSection';
 import FormActions from '@/components/admin/forms/FormActions';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator, getTranslation, translations } from '@/lib/translations';
 
 export default function CreateEventPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<{
     day: string;
@@ -46,13 +50,13 @@ export default function CreateEventPage() {
       });
 
       if (res.ok) {
-        alert('Event created successfully!');
+        alert(t('admin.events.eventCreatedSuccessfully', 'Event created successfully!'));
         router.push('/admin/events');
       } else {
-        alert('Failed to create event');
+        alert(t('admin.events.failedToCreateEvent', 'Failed to create event'));
       }
     } catch (error) {
-      alert('Error creating event');
+      alert(t('admin.events.errorCreatingEvent', 'Error creating event'));
     } finally {
       setLoading(false);
     }
@@ -61,11 +65,11 @@ export default function CreateEventPage() {
   return (
     <form onSubmit={handleSubmit} className="max-w-3xl">
       <FormSection
-        title="Basic Information"
-        subtitle="Enter the basic details about your event"
+        title={t('admin.events.basicInformation', 'Basic Information')}
+        subtitle={t('admin.events.basicInformationSubtitle', 'Enter the basic details about your event')}
       >
         <div className="grid grid-cols-2 gap-6">
-          <FormField label="Day" required>
+          <FormField label={getTranslation(translations.common.day, language)} required>
             <input
               type="text"
               value={formData.day}
@@ -76,7 +80,7 @@ export default function CreateEventPage() {
             />
           </FormField>
 
-          <FormField label="Month" required>
+          <FormField label={getTranslation(translations.common.month, language)} required>
             <input
               type="text"
               value={formData.month}
@@ -89,7 +93,7 @@ export default function CreateEventPage() {
         </div>
 
         <BilingualInput
-          label="Title"
+          label={getTranslation(translations.common.title, language)}
           required
           valueId={formData.title.id}
           valueEn={formData.title.en}
@@ -98,7 +102,7 @@ export default function CreateEventPage() {
           placeholder={{ id: 'Judul acara...', en: 'Event title...' }}
         />
 
-        <FormField label="Full Date" required>
+        <FormField label={t('admin.events.fullDate', 'Full Date')} required>
           <input
             type="text"
             value={formData.date}
@@ -110,7 +114,7 @@ export default function CreateEventPage() {
         </FormField>
 
         <BilingualInput
-          label="Location"
+          label={getTranslation(translations.common.location, language)}
           required
           valueId={formData.location.id}
           valueEn={formData.location.en}
@@ -121,11 +125,11 @@ export default function CreateEventPage() {
       </FormSection>
 
       <FormSection
-        title="Details"
-        subtitle="Provide more information about the event"
+        title={t('admin.events.details', 'Details')}
+        subtitle={t('admin.events.detailsSubtitle', 'Provide more information about the event')}
       >
         <BilingualInput
-          label="Description"
+          label={getTranslation(translations.common.description, language)}
           type="textarea"
           valueId={formData.description.id}
           valueEn={formData.description.en}
@@ -135,7 +139,7 @@ export default function CreateEventPage() {
           rows={4}
         />
 
-        <FormField label="Registration URL">
+        <FormField label={t('admin.events.registrationUrl', 'Registration URL')}>
           <input
             type="url"
             value={formData.registrationUrl}
@@ -147,8 +151,8 @@ export default function CreateEventPage() {
       </FormSection>
 
       <FormSection
-        title="Media"
-        subtitle="Upload an image for your event"
+        title={t('admin.events.media', 'Media')}
+        subtitle={t('admin.events.mediaSubtitle', 'Upload an image for your event')}
       >
         <ImageUploader
           value={formData.image}
@@ -159,8 +163,8 @@ export default function CreateEventPage() {
       </FormSection>
 
       <FormSection
-        title="Publish"
-        subtitle="Choose whether to publish or save as draft"
+        title={t('admin.events.publish', 'Publish')}
+        subtitle={t('admin.events.publishSubtitle', 'Choose whether to publish or save as draft')}
       >
         <StatusToggle
           value={formData.status}
@@ -171,7 +175,7 @@ export default function CreateEventPage() {
       <FormActions
         onCancel={() => router.back()}
         onSubmit={() => document.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true }))}
-        submitText="Create Event"
+        submitText={t('admin.events.createEvent', 'Create Event')}
         isLoading={loading}
       />
     </form>

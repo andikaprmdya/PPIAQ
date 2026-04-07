@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator, getTranslation, translations } from '@/lib/translations';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -24,7 +26,9 @@ interface User {
 }
 
 export default function EditMemberPage() {
-  const { user, isAdmin } = useAuth();
+  const { isAdmin } = useAuth();
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const router = useRouter();
   const params = useParams();
   const memberId = params.id as string;
@@ -35,6 +39,12 @@ export default function EditMemberPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   const [formData, setFormData] = useState<Partial<User>>({});
+
+  const normalizeMemberData = (data: User): User => ({
+    ...data,
+    membershipType: (data.membershipType || '').toLowerCase() as User['membershipType'],
+    status: (data.status || '').toLowerCase() as User['status'],
+  });
 
   // Redirect if not admin
   useEffect(() => {
@@ -53,13 +63,14 @@ export default function EditMemberPage() {
       setLoading(true);
       const response = await fetch(`/api/admin/users/${memberId}`);
       if (response.ok) {
-        const data = await response.json();
-        setMember(data);
-        setFormData(data);
+        const data = await response.json() as User;
+        const normalizedData = normalizeMemberData(data);
+        setMember(normalizedData);
+        setFormData(normalizedData);
       }
     } catch (error) {
       console.error('Failed to fetch member:', error);
-      setMessage({ type: 'error', text: 'Failed to load member data' });
+      setMessage({ type: 'error', text: t('admin.members.failedToLoadMemberData', 'Failed to load member data') });
     } finally {
       setLoading(false);
     }
@@ -87,14 +98,16 @@ export default function EditMemberPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setMember(data.user);
-        setMessage({ type: 'success', text: 'Member updated successfully' });
+        const normalizedData = normalizeMemberData(data.user as User);
+        setMember(normalizedData);
+        setFormData(normalizedData);
+        setMessage({ type: 'success', text: t('admin.members.memberUpdatedSuccessfully', 'Member updated successfully') });
       } else {
-        setMessage({ type: 'error', text: 'Failed to update member' });
+        setMessage({ type: 'error', text: t('admin.members.failedToUpdateMember', 'Failed to update member') });
       }
     } catch (error) {
       console.error('Update error:', error);
-      setMessage({ type: 'error', text: 'Error updating member' });
+      setMessage({ type: 'error', text: t('admin.members.errorUpdatingMember', 'Error updating member') });
     } finally {
       setSaving(false);
     }
@@ -105,7 +118,7 @@ export default function EditMemberPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4 flex items-center justify-center">
-        <div className="text-gray-600">Loading member data...</div>
+        <div className="text-gray-600">{t('admin.members.loadingMemberData', 'Loading member data...')}</div>
       </div>
     );
   }
@@ -114,9 +127,9 @@ export default function EditMemberPage() {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
         <div className="max-w-2xl mx-auto">
-          <p className="text-red-600">Member not found</p>
+          <p className="text-red-600">{t('admin.members.memberNotFound', 'Member not found')}</p>
           <Link href="/admin/members" className="text-[#B64847] hover:text-[#9a3a3e] font-semibold mt-4 inline-block">
-            ← Back to Members
+            ← {getTranslation(translations.common.backToMembers, language)}
           </Link>
         </div>
       </div>
@@ -132,9 +145,9 @@ export default function EditMemberPage() {
             href="/admin/members"
             className="text-[#B64847] hover:text-[#9a3a3e] font-semibold mb-4 inline-block"
           >
-            ← Back to Members
+            ← {getTranslation(translations.common.backToMembers, language)}
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Member</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('admin.members.editMember', 'Edit Member')}</h1>
           <p className="text-gray-600 mt-2">{member.firstName} {member.lastName}</p>
         </div>
 
@@ -153,10 +166,10 @@ export default function EditMemberPage() {
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
           {/* Basic Info */}
           <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Basic Information</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4">{t('admin.members.basicInformation', 'Basic Information')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">First Name</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('admin.members.firstName', 'First Name')}</label>
                 <input
                   type="text"
                   name="firstName"
@@ -167,7 +180,7 @@ export default function EditMemberPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Last Name</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('admin.members.lastName', 'Last Name')}</label>
                 <input
                   type="text"
                   name="lastName"
@@ -178,7 +191,7 @@ export default function EditMemberPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{getTranslation(translations.common.email, language)}</label>
                 <input
                   type="email"
                   name="email"
@@ -189,7 +202,7 @@ export default function EditMemberPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('admin.members.phoneNumber', 'Phone Number')}</label>
                 <input
                   type="tel"
                   name="phoneNumber"
@@ -199,7 +212,7 @@ export default function EditMemberPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Student ID</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{getTranslation(translations.common.studentId, language)}</label>
                 <input
                   type="text"
                   name="studentId"
@@ -209,7 +222,7 @@ export default function EditMemberPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Birth Date</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('admin.members.birthDate', 'Birth Date')}</label>
                 <input
                   type="date"
                   name="birthDate"
@@ -223,10 +236,10 @@ export default function EditMemberPage() {
 
           {/* Educational Info */}
           <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Educational Information</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4">{t('admin.members.educationalInformation', 'Educational Information')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Nationality</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('admin.members.nationality', 'Nationality')}</label>
                 <input
                   type="text"
                   name="nationality"
@@ -236,7 +249,7 @@ export default function EditMemberPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Education Level</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('admin.members.educationLevel', 'Education Level')}</label>
                 <input
                   type="text"
                   name="educationLevel"
@@ -246,7 +259,7 @@ export default function EditMemberPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">University</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{getTranslation(translations.common.university, language)}</label>
                 <input
                   type="text"
                   name="university"
@@ -256,7 +269,7 @@ export default function EditMemberPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Major</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('admin.members.major', 'Major')}</label>
                 <input
                   type="text"
                   name="major"
@@ -270,31 +283,31 @@ export default function EditMemberPage() {
 
           {/* Membership Info */}
           <div>
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Membership Information</h2>
+            <h2 className="text-lg font-bold text-gray-900 mb-4">{t('admin.members.membershipInformation', 'Membership Information')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Membership Type</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('admin.members.membershipType', 'Membership Type')}</label>
                 <select
                   name="membershipType"
                   value={formData.membershipType || ''}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B64847]"
                 >
-                  <option value="ORDINARY">Ordinary</option>
-                  <option value="ASSOCIATE">Associate</option>
+                  <option value="ordinary">{getTranslation(translations.common.ordinary, language)}</option>
+                  <option value="associate">{getTranslation(translations.common.associate, language)}</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Status</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{getTranslation(translations.common.status, language)}</label>
                 <select
                   name="status"
                   value={formData.status || ''}
                   onChange={handleInputChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#B64847]"
                 >
-                  <option value="PENDING">Pending</option>
-                  <option value="APPROVED">Approved</option>
-                  <option value="REJECTED">Rejected</option>
+                  <option value="pending">{getTranslation(translations.common.pending, language)}</option>
+                  <option value="approved">{getTranslation(translations.common.approved, language)}</option>
+                  <option value="rejected">{getTranslation(translations.common.rejected, language)}</option>
                 </select>
               </div>
             </div>
@@ -303,9 +316,9 @@ export default function EditMemberPage() {
           {/* Rejection Reason (if rejected) */}
           {formData.status === 'rejected' && (
             <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Rejection Details</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-4">{t('admin.members.rejectionDetails', 'Rejection Details')}</h2>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Rejection Reason</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">{t('admin.members.rejectionReason', 'Rejection Reason')}</label>
                 <input
                   type="text"
                   name="rejectionReason"
@@ -324,13 +337,13 @@ export default function EditMemberPage() {
               disabled={saving}
               className="px-6 py-2 bg-[#B64847] text-white rounded-lg hover:bg-[#9a3a3e] font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving ? getTranslation(translations.common.processing, language) : getTranslation(translations.common.saveChanges, language)}
             </button>
             <Link
               href="/admin/members"
               className="px-6 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 font-semibold transition"
             >
-              Cancel
+              {getTranslation(translations.common.cancel, language)}
             </Link>
           </div>
         </form>

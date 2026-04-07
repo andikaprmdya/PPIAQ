@@ -39,8 +39,17 @@ export default function AboutPage() {
           />
 
           <h1 className="font-tan-angleton font-bold text-3xl md:text-5xl text-[#B64847] leading-tight mb-4">
-            Perhimpunan Pelajar Indonesia di Australia, <br className="hidden md:block" />
-            Queensland (PPIA Queensland)
+            {language === 'id' ? (
+              <>
+                Perhimpunan Pelajar Indonesia di Australia, <br className="hidden md:block" />
+                Queensland (PPIA Queensland)
+              </>
+            ) : (
+              <>
+                The Indonesian Student Association in Australia, <br className="hidden md:block" />
+                Queensland Chapter (PPIA Queensland)
+              </>
+            )}
           </h1>
 
           <p className="font-nickainley font-bold text-2xl md:text-3xl text-[#886644] mb-8 opacity-90">
@@ -80,7 +89,7 @@ export default function AboutPage() {
 
         {/* VISI MISI Button */}
         <a href="/visi-misi" className="px-8 py-3 bg-[#B64847] text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#303030] transition-all shadow-lg active:scale-95">
-          Visi Misi
+          {language === 'id' ? 'Visi Misi' : 'Vision & Mission'}
         </a>
       </div>
 

@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import BilingualInput from '@/components/admin/BilingualInput';
+import { useLanguage } from '@/lib/language-context';
+import { getTranslation, translations } from '@/lib/translations';
 
 interface ContentSection {
   id: string;
@@ -17,10 +19,11 @@ interface ContentEditModalProps {
   section: ContentSection;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updatedData: any) => void;
+  onSave: (updatedData: Record<string, unknown>) => void;
 }
 
 export default function ContentEditModal({ section, isOpen, onClose, onSave }: ContentEditModalProps) {
+  const { language } = useLanguage();
   const [contentId, setContentId] = useState(section.content?.id || '');
   const [contentEn, setContentEn] = useState(section.content?.en || '');
   const [image, setImage] = useState(section.image || '');
@@ -29,7 +32,7 @@ export default function ContentEditModal({ section, isOpen, onClose, onSave }: C
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      const updateData: any = {
+      const updateData: Record<string, unknown> = {
         content: {
           id: contentId,
           en: contentEn,
@@ -58,7 +61,9 @@ export default function ContentEditModal({ section, isOpen, onClose, onSave }: C
         {/* Header */}
         <div className="flex justify-between items-start mb-8">
           <div>
-            <p className="text-xs text-[#886644] font-bold uppercase tracking-widest mb-2">Edit Content</p>
+            <p className="text-xs text-[#886644] font-bold uppercase tracking-widest mb-2">
+              {getTranslation(translations.admin.content.modal.editContent, language)}
+            </p>
             <h2 className="font-tan-angleton font-bold text-2xl text-[#B64847]">{section.key}</h2>
           </div>
 
@@ -75,7 +80,7 @@ export default function ContentEditModal({ section, isOpen, onClose, onSave }: C
         <div className="space-y-6">
           {/* Bilingual Text Input */}
           <BilingualInput
-            label="Content Text"
+            label={getTranslation(translations.admin.content.modal.contentText, language)}
             valueId={contentId}
             valueEn={contentEn}
             onChangeId={setContentId}
@@ -91,7 +96,7 @@ export default function ContentEditModal({ section, isOpen, onClose, onSave }: C
           {/* Image Upload */}
           <div>
             <label className="block text-sm font-bold uppercase tracking-widest text-[#886644] mb-3">
-              Image (Optional)
+              {getTranslation(translations.admin.content.modal.imageOptional, language)}
             </label>
 
             {/* Image Preview */}
@@ -142,9 +147,13 @@ export default function ContentEditModal({ section, isOpen, onClose, onSave }: C
 
               <label htmlFor="image-upload" className="cursor-pointer">
                 <p className="font-bold text-[#B64847] mb-1">
-                  {image ? 'Image uploaded - drag to replace or click to change' : 'Drag image here or click to select'}
+                  {image
+                    ? getTranslation(translations.admin.content.modal.imageUploaded, language)
+                    : getTranslation(translations.admin.content.modal.dragImage, language)}
                 </p>
-                <p className="text-xs text-[#886644]">JPG, PNG or WebP up to 5MB</p>
+                <p className="text-xs text-[#886644]">
+                  {getTranslation(translations.admin.content.modal.imageFormatHint, language)}
+                </p>
               </label>
             </div>
 
@@ -156,7 +165,7 @@ export default function ContentEditModal({ section, isOpen, onClose, onSave }: C
                 disabled={isLoading}
                 className="mt-2 text-sm text-red-600 font-bold hover:underline disabled:opacity-50"
               >
-                Remove Image
+                {getTranslation(translations.admin.content.modal.removeImage, language)}
               </button>
             )}
           </div>
@@ -168,7 +177,7 @@ export default function ContentEditModal({ section, isOpen, onClose, onSave }: C
               disabled={isLoading}
               className="flex-1 px-4 py-3 border-2 border-[#B64847] text-[#B64847] font-bold rounded-xl hover:bg-[#B64847] hover:text-white transition-all text-sm uppercase disabled:opacity-50"
             >
-              Cancel
+              {getTranslation(translations.common.cancel, language)}
             </button>
 
             <button
@@ -176,7 +185,9 @@ export default function ContentEditModal({ section, isOpen, onClose, onSave }: C
               disabled={isLoading || (!contentId && !contentEn)}
               className="flex-1 px-4 py-3 bg-[#B64847] text-white font-bold rounded-xl hover:bg-[#303030] transition-all text-sm uppercase disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Saving...' : 'Save Changes'}
+              {isLoading
+                ? getTranslation(translations.admin.content.modal.saving, language)
+                : getTranslation(translations.admin.content.modal.saveChanges, language)}
             </button>
           </div>
         </div>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import ConfirmDialog from '@/components/admin/forms/ConfirmDialog';
+import { useLanguage } from '@/lib/language-context';
+import { createTranslator, getTranslation, translations } from '@/lib/translations';
 
 interface ContentItem {
   id: string;
@@ -14,6 +16,8 @@ interface ContentItem {
 const pages = ['home', 'about', 'membership', 'visi-misi', 'contact'];
 
 export default function ContentManagementPage() {
+  const { language } = useLanguage();
+  const t = createTranslator(language);
   const [selectedPage, setSelectedPage] = useState('home');
   const [content, setContent] = useState<ContentItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +34,7 @@ export default function ContentManagementPage() {
       const data = await res.json();
       setContent(data.data || []);
     } catch (error) {
-      alert('Failed to fetch content');
+      alert(t('admin.content.failedToFetchContent', 'Failed to fetch content'));
     } finally {
       setLoading(false);
     }
@@ -41,10 +45,10 @@ export default function ContentManagementPage() {
       const res = await fetch(`/api/admin/content/${id}`, { method: 'DELETE' });
       if (res.ok) {
         setContent(content.filter((c) => c.id !== id));
-        alert('Content deleted');
+        alert(t('admin.content.contentDeleted', 'Content deleted'));
       }
     } catch (error) {
-      alert('Failed to delete');
+      alert(t('admin.content.failedToDeleteContent', 'Failed to delete'));
     }
     setDeleteConfirm({ show: false, id: null });
   };
@@ -53,15 +57,17 @@ export default function ContentManagementPage() {
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">Manage Content</h1>
-          <p className="text-[#886644] text-sm">Edit static page content</p>
+          <h1 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-2">
+            {t('admin.content.title', 'Manage Content')}
+          </h1>
+          <p className="text-[#886644] text-sm">{t('admin.content.description', 'Edit static page content')}</p>
         </div>
 
         <Link
           href="/admin/content/create"
           className="px-8 py-3 bg-[#B64847] text-white font-bold rounded-xl hover:bg-[#303030] transition-all text-sm uppercase"
         >
-          + Create Content
+          + {t('admin.content.createContent', 'Create Content')}
         </Link>
       </div>
 
@@ -76,28 +82,36 @@ export default function ContentManagementPage() {
                 : 'bg-white border border-[#E4DBCA] text-[#886644]'
             }`}
           >
-            {p.charAt(0).toUpperCase() + p.slice(1)}
+            {p === 'home'
+              ? t('admin.content.pages.home', 'Home')
+              : p === 'about'
+                ? t('admin.content.pages.about', 'About')
+                : p === 'membership'
+                  ? t('admin.content.pages.membership', 'Membership')
+                  : p === 'visi-misi'
+                    ? t('admin.content.pages.visiMisi', 'Visi Misi')
+                    : t('admin.content.pages.contact', 'Contact')}
           </button>
         ))}
       </div>
 
       {loading ? (
         <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-          <p className="text-[#886644] font-bold">Loading...</p>
+          <p className="text-[#886644] font-bold">{getTranslation(translations.common.loading, language)}</p>
         </div>
       ) : content.length === 0 ? (
         <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 text-center">
-          <p className="text-[#886644] font-bold">No content yet</p>
+          <p className="text-[#886644] font-bold">{t('admin.content.noContent', 'No content yet')}</p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-[#E4DBCA] shadow-sm bg-white">
           <table className="w-full">
             <thead className="bg-[#FFFAF5] border-b border-[#E4DBCA]">
               <tr>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#886644]">Key</th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#886644]">Section</th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#886644]">Type</th>
-                <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#886644]">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#886644]">{getTranslation(translations.common.key, language)}</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#886644]">{getTranslation(translations.common.section, language)}</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#886644]">{getTranslation(translations.common.type, language)}</th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase text-[#886644]">{getTranslation(translations.common.actions, language)}</th>
               </tr>
             </thead>
 
@@ -116,7 +130,7 @@ export default function ContentManagementPage() {
                       onClick={() => setDeleteConfirm({ show: true, id: item.id })}
                       className="px-3 py-1 bg-red-600 text-white rounded text-xs font-bold hover:bg-red-700"
                     >
-                      Delete
+                      {getTranslation(translations.common.delete, language)}
                     </button>
                   </td>
                 </tr>
@@ -128,9 +142,9 @@ export default function ContentManagementPage() {
 
       <ConfirmDialog
         isOpen={deleteConfirm.show}
-        title="Delete Content"
-        message="Sure to delete?"
-        confirmText="Delete"
+        title={t('admin.content.deleteTitle', 'Delete Content')}
+        message={t('admin.content.deleteMessage', 'Sure to delete?')}
+        confirmText={getTranslation(translations.common.delete, language)}
         onConfirm={() => deleteConfirm.id && handleDelete(deleteConfirm.id)}
         onCancel={() => setDeleteConfirm({ show: false, id: null })}
         variant="danger"

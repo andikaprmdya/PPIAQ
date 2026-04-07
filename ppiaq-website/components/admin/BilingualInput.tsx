@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useLanguage } from '@/lib/language-context';
+import { getTranslation, translations } from '@/lib/translations';
 
 interface BilingualInputProps {
   label: string;
@@ -25,6 +27,7 @@ export default function BilingualInput({
   placeholder,
   rows = 4,
 }: BilingualInputProps) {
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<'id' | 'en'>('id');
 
   return (
@@ -37,6 +40,7 @@ export default function BilingualInput({
       {/* Tabs */}
       <div className="flex gap-2 mb-3 border-b border-[#E4DBCA]">
         <button
+          type="button"
           onClick={() => setActiveTab('id')}
           className={`px-4 py-2 font-bold text-sm uppercase tracking-wider transition-all ${
             activeTab === 'id'
@@ -44,9 +48,10 @@ export default function BilingualInput({
               : 'text-[#886644] hover:text-[#B64847]'
           }`}
         >
-          Bahasa Indonesia
+          {getTranslation(translations.bilingualInput.indonesian, language)}
         </button>
         <button
+          type="button"
           onClick={() => setActiveTab('en')}
           className={`px-4 py-2 font-bold text-sm uppercase tracking-wider transition-all ${
             activeTab === 'en'
@@ -54,7 +59,7 @@ export default function BilingualInput({
               : 'text-[#886644] hover:text-[#B64847]'
           }`}
         >
-          English
+          {getTranslation(translations.bilingualInput.english, language)}
         </button>
       </div>
 
@@ -83,7 +88,7 @@ export default function BilingualInput({
 
       {/* Character count */}
       <p className="text-xs text-[#886644] mt-2 text-right">
-        {activeTab === 'id' ? valueId.length : valueEn.length} characters
+        {activeTab === 'id' ? valueId.length : valueEn.length} {getTranslation(translations.bilingualInput.characters, language)}
       </p>
     </div>
   );
