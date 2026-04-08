@@ -77,6 +77,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'PENDING' | 'APPROVED' | 'REJECTED' | 'newsletter'>('PENDING');
   const [approvedFilter, setApprovedFilter] = useState<'all' | 'active' | 'nonactive'>('all');
+  const [memberViewMode, setMemberViewMode] = useState<'cards' | 'table'>('cards');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [rejectionReason, setRejectionReason] = useState('');
@@ -586,44 +587,57 @@ export default function AdminDashboardPage() {
           ))}
         </div>
 
-        {activeTab === 'APPROVED' && (
-          <div className="mb-8 flex flex-wrap gap-3">
-            <span className="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-widest">
-              {language === 'id' ? 'Aktif' : 'Active'} ({activeApprovedUsers.length})
-            </span>
-            <span className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-widest">
-              {language === 'id' ? 'Non-Aktif' : 'Non-Active'} ({nonActiveApprovedUsers.length})
-            </span>
-            <button
-              onClick={() => setApprovedFilter('all')}
-              className={`px-4 py-2 rounded-full font-bold uppercase tracking-widest text-xs transition-all border-2 ${
-                approvedFilter === 'all'
-                  ? 'bg-[#B64847] text-white border-[#B64847]'
-                  : 'bg-white text-[#B64847] border-[#E4DBCA] hover:border-[#B64847]'
-              }`}
-            >
-              {language === 'id' ? 'Semua (Filter Off)' : 'All (Filter Off)'} ({approvedUsers.length})
-            </button>
-            <button
-              onClick={() => setApprovedFilter('active')}
-              className={`px-4 py-2 rounded-full font-bold uppercase tracking-widest text-xs transition-all border-2 ${
-                approvedFilter === 'active'
-                  ? 'bg-emerald-600 text-white border-emerald-600'
-                  : 'bg-white text-emerald-700 border-emerald-200 hover:border-emerald-600'
-              }`}
-            >
-              {language === 'id' ? 'Filter Aktif' : 'Filter Active'} ({activeApprovedUsers.length})
-            </button>
-            <button
-              onClick={() => setApprovedFilter('nonactive')}
-              className={`px-4 py-2 rounded-full font-bold uppercase tracking-widest text-xs transition-all border-2 ${
-                approvedFilter === 'nonactive'
-                  ? 'bg-gray-700 text-white border-gray-700'
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-gray-700'
-              }`}
-            >
-              {language === 'id' ? 'Filter Non-Aktif' : 'Filter Non-Active'} ({nonActiveApprovedUsers.length})
-            </button>
+        {activeTab !== 'newsletter' && (
+          <div className="mb-8 flex flex-wrap items-end gap-3">
+            {activeTab === 'APPROVED' && (
+              <>
+                <span className="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-widest">
+                  {language === 'id' ? 'Aktif' : 'Active'} ({activeApprovedUsers.length})
+                </span>
+                <span className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-widest">
+                  {language === 'id' ? 'Non-Aktif' : 'Non-Active'} ({nonActiveApprovedUsers.length})
+                </span>
+              </>
+            )}
+
+            <div className="ml-auto flex flex-wrap items-end gap-3">
+              {activeTab === 'APPROVED' && (
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#886644]">
+                    {language === 'id' ? 'Filter Keanggotaan' : 'Membership Filter'}
+                  </label>
+                  <select
+                    value={approvedFilter}
+                    onChange={(e) => setApprovedFilter(e.target.value as 'all' | 'active' | 'nonactive')}
+                    className="px-4 py-2 rounded-xl border-2 border-[#E4DBCA] bg-white text-[#303030] text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-[#B64847]"
+                  >
+                    <option value="all">
+                      {language === 'id' ? 'No Filter (Semua)' : 'No Filter (All)'}
+                    </option>
+                    <option value="active">
+                      {language === 'id' ? 'Filter Aktif' : 'Filter Active'}
+                    </option>
+                    <option value="nonactive">
+                      {language === 'id' ? 'Filter Non-Aktif' : 'Filter Non-Active'}
+                    </option>
+                  </select>
+                </div>
+              )}
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-[#886644]">
+                  {language === 'id' ? 'Format Tampilan' : 'View Format'}
+                </label>
+                <select
+                  value={memberViewMode}
+                  onChange={(e) => setMemberViewMode(e.target.value as 'cards' | 'table')}
+                  className="px-4 py-2 rounded-xl border-2 border-[#E4DBCA] bg-white text-[#303030] text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-[#B64847]"
+                >
+                  <option value="cards">{language === 'id' ? 'Kartu' : 'Cards'}</option>
+                  <option value="table">{language === 'id' ? 'Tabel' : 'Table'}</option>
+                </select>
+              </div>
+            </div>
           </div>
         )}
 
@@ -674,6 +688,111 @@ export default function AdminDashboardPage() {
                   : (language === 'id' ? 'Tidak ada pengguna yang disetujui' : 'No approved users'))}
               {activeTab === 'REJECTED' && (language === 'id' ? 'Tidak ada pengguna yang ditolak' : 'No rejected users')}
             </p>
+          </div>
+        ) : memberViewMode === 'table' ? (
+          <div className="bg-white rounded-2xl border border-[#E4DBCA] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[980px]">
+                <thead className="bg-[#B64847] text-white">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">
+                      {language === 'id' ? 'Nama' : 'Name'}
+                    </th>
+                    <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">Email</th>
+                    <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">
+                      {language === 'id' ? 'Universitas' : 'University'}
+                    </th>
+                    <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">
+                      {language === 'id' ? 'Jurusan' : 'Major'}
+                    </th>
+                    <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">
+                      {language === 'id' ? 'Keanggotaan' : 'Membership'}
+                    </th>
+                    {activeTab === 'APPROVED' && (
+                      <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">
+                        {language === 'id' ? 'Aktivitas' : 'Activity'}
+                      </th>
+                    )}
+                    <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">
+                      {language === 'id' ? 'Status' : 'Status'}
+                    </th>
+                    <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">
+                      {language === 'id' ? 'Tanggal' : 'Date'}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayUsers.map((appUser) => (
+                    <tr
+                      key={appUser.id}
+                      className="border-t border-[#E4DBCA] hover:bg-[#FFFAF5] transition-all cursor-pointer"
+                      onClick={() => setSelectedUser(appUser)}
+                    >
+                      <td className="px-4 py-3 text-sm font-semibold text-[#B64847]">
+                        {appUser.firstName} {appUser.lastName}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-[#303030]">{appUser.email}</td>
+                      <td className="px-4 py-3 text-sm text-[#303030]">{appUser.university}</td>
+                      <td className="px-4 py-3 text-sm text-[#303030]">{appUser.major}</td>
+                      <td className="px-4 py-3 text-sm text-[#303030]">
+                        {String(appUser.membershipType).toLowerCase() === 'ordinary'
+                          ? language === 'id'
+                            ? 'Biasa'
+                            : 'Ordinary'
+                          : language === 'id'
+                          ? 'Asosiasi'
+                          : 'Associate'}
+                      </td>
+                      {activeTab === 'APPROVED' && (
+                        <td className="px-4 py-3 text-sm">
+                          <span
+                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
+                              isMembershipActive(appUser)
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-gray-200 text-gray-700'
+                            }`}
+                          >
+                            {isMembershipActive(appUser)
+                              ? language === 'id'
+                                ? 'Aktif'
+                                : 'Active'
+                              : language === 'id'
+                              ? 'Non-Aktif'
+                              : 'Non-Active'}
+                          </span>
+                        </td>
+                      )}
+                      <td className="px-4 py-3 text-sm">
+                        <span
+                          className={`text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full ${
+                            appUser.status === 'PENDING'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : appUser.status === 'APPROVED'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {appUser.status === 'PENDING'
+                            ? language === 'id'
+                              ? 'Menunggu'
+                              : 'Pending'
+                            : appUser.status === 'APPROVED'
+                            ? language === 'id'
+                              ? 'Disetujui'
+                              : 'Approved'
+                            : language === 'id'
+                            ? 'Ditolak'
+                            : 'Rejected'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-500">
+                        {new Date(appUser.createdAt).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
