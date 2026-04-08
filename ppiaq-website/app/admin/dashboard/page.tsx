@@ -78,6 +78,8 @@ export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<'PENDING' | 'APPROVED' | 'REJECTED' | 'newsletter'>('PENDING');
   const [approvedFilter, setApprovedFilter] = useState<'all' | 'active' | 'nonactive'>('all');
   const [memberViewMode, setMemberViewMode] = useState<'cards' | 'table'>('cards');
+  const [rowsPerPage, setRowsPerPage] = useState<5 | 10 | 20 | 30 | 40 | 50 | 'all'>(10);
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [rejectionReason, setRejectionReason] = useState('');
@@ -395,6 +397,32 @@ export default function AdminDashboardPage() {
     : activeTab === 'REJECTED' ? rejectedUsers
     : [];
 
+  const totalItems = activeTab === 'newsletter' ? newsletterSubscribers.length : displayUsers.length;
+  const totalPages =
+    rowsPerPage === 'all'
+      ? 1
+      : Math.max(1, Math.ceil(totalItems / rowsPerPage));
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, approvedFilter, memberViewMode, rowsPerPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  const paginatedDisplayUsers =
+    rowsPerPage === 'all'
+      ? displayUsers
+      : displayUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  const paginatedNewsletterSubscribers =
+    rowsPerPage === 'all'
+      ? newsletterSubscribers
+      : newsletterSubscribers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
   if (loading) {
     return (
       <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6">
@@ -637,6 +665,35 @@ export default function AdminDashboardPage() {
                   <option value="table">{language === 'id' ? 'Tabel' : 'Table'}</option>
                 </select>
               </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-[#886644]">
+                  {language === 'id' ? 'Data per Halaman' : 'Rows Per Page'}
+                </label>
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === 'all') {
+                      setRowsPerPage('all');
+                    } else {
+                      const numericValue = Number(value);
+                      if ([5, 10, 20, 30, 40, 50].includes(numericValue)) {
+                        setRowsPerPage(numericValue as 5 | 10 | 20 | 30 | 40 | 50);
+                      }
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl border-2 border-[#E4DBCA] bg-white text-[#303030] text-xs font-bold uppercase tracking-widest focus:outline-none focus:border-[#B64847]"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={30}>30</option>
+                  <option value={40}>40</option>
+                  <option value={50}>50</option>
+                  <option value="all">{language === 'id' ? 'Semua' : 'All'}</option>
+                </select>
+              </div>
             </div>
           </div>
         )}
@@ -663,7 +720,7 @@ export default function AdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {newsletterSubscribers.map((sub) => (
+                    {paginatedNewsletterSubscribers.map((sub) => (
                       <tr key={sub.id} className="border-t border-[#E4DBCA] hover:bg-[#FFFAF5] transition-all">
                         <td className="px-6 py-4 text-sm font-medium">{sub.email}</td>
                         <td className="px-6 py-4 text-sm text-gray-500">
@@ -722,7 +779,7 @@ export default function AdminDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {displayUsers.map((appUser) => (
+                  {paginatedDisplayUsers.map((appUser) => (
                     <tr
                       key={appUser.id}
                       className="border-t border-[#E4DBCA] hover:bg-[#FFFAF5] transition-all cursor-pointer"
@@ -796,7 +853,7 @@ export default function AdminDashboardPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayUsers.map((appUser) => (
+            {paginatedDisplayUsers.map((appUser) => (
               <div
                 key={appUser.id}
                 className="bg-white rounded-2xl border border-[#E4DBCA] p-6 hover:shadow-lg transition-all cursor-pointer group"
@@ -877,6 +934,50 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {totalItems > 0 && (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 bg-white rounded-2xl border border-[#E4DBCA] px-4 py-3">
+            <p className="text-xs text-[#886644] font-semibold">
+              {rowsPerPage === 'all'
+                ? language === 'id'
+                  ? `Menampilkan semua ${totalItems} data`
+                  : `Showing all ${totalItems} records`
+                : language === 'id'
+                ? `Menampilkan ${Math.min((currentPage - 1) * rowsPerPage + 1, totalItems)}-${Math.min(currentPage * rowsPerPage, totalItems)} dari ${totalItems}`
+                : `Showing ${Math.min((currentPage - 1) * rowsPerPage + 1, totalItems)}-${Math.min(currentPage * rowsPerPage, totalItems)} of ${totalItems}`}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={rowsPerPage === 'all' || currentPage === 1}
+                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
+                  rowsPerPage === 'all' || currentPage === 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#B64847] text-white hover:bg-[#9a3a3e]'
+                }`}
+              >
+                {language === 'id' ? 'Sebelumnya' : 'Previous'}
+              </button>
+
+              <span className="text-xs font-bold text-[#303030] min-w-[88px] text-center">
+                {language === 'id' ? 'Halaman' : 'Page'} {currentPage}/{totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={rowsPerPage === 'all' || currentPage === totalPages}
+                className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${
+                  rowsPerPage === 'all' || currentPage === totalPages
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-[#B64847] text-white hover:bg-[#9a3a3e]'
+                }`}
+              >
+                {language === 'id' ? 'Berikutnya' : 'Next'}
+              </button>
+            </div>
           </div>
         )}
       </div>

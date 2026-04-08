@@ -5,6 +5,7 @@ import { checkAdmin } from '@/lib/auth/check-admin';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import bcryptjs from 'bcryptjs';
+import { createHash } from 'crypto';
 
 type ImportRow = Record<string, unknown>;
 
@@ -74,6 +75,17 @@ const splitFullName = (fullName: string): { firstName: string; lastName: string 
   };
 };
 
+const normalizeOrNA = (value: string): string => value.trim() || 'N/A';
+
+const buildFallbackEmail = (rowIndex: number, seeds: string[]): string => {
+  const seedBase = seeds
+    .map((value) => value.trim().toLowerCase())
+    .filter(Boolean)
+    .join('|') || `row-${rowIndex + 2}`;
+  const digest = createHash('sha1').update(seedBase).digest('hex').slice(0, 12);
+  return `na+${digest}@ppiaq.local`;
+};
+
 export async function POST(request: NextRequest) {
   try {
     const adminUser = await checkAdmin();
@@ -116,6 +128,7 @@ export async function POST(request: NextRequest) {
       skipped: 0,
       errors: [] as string[],
     };
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     const firstRow = data[0] || {};
     const isFinancialMemberFormat =
@@ -126,7 +139,7 @@ export async function POST(request: NextRequest) {
     for (let index = 0; index < data.length; index++) {
       const row = data[index];
       try {
-        const memberNo = getCellValue(row, ['Member No', 'Member Number', 'MemberNo']);
+        const rawMemberNo = getCellValue(row, ['Member No', 'Member Number', 'MemberNo']);
         const fullName = getCellValue(row, ['Nama Lengkap', 'Full Name', 'Name']);
         let firstName = getCellValue(row, ['First Name', 'FirstName']);
         let lastName = getCellValue(row, ['Last Name', 'LastName']);
@@ -136,38 +149,42 @@ export async function POST(request: NextRequest) {
           firstName = firstName || splitName.firstName;
           lastName = lastName || splitName.lastName;
         }
+        firstName = normalizeOrNA(firstName);
+        lastName = normalizeOrNA(lastName);
 
-        const email = getCellValue(row, ['Email address', 'Email Address', 'Email']).toLowerCase();
-        const phoneNumber = getCellValue(row, ['Telephone #', 'Phone Number', 'Phone']);
-        const studentId = getCellValue(row, ['Student ID']);
-        const branch = getCellValue(row, ['Ranting', 'Branch']);
-        const domicileCampus = getCellValue(row, ['Domisili / Kampus', 'Domisili/Kampus', 'Domicile / Campus']);
-        const educationLevel = getCellValue(row, ['Jenjang Studi', 'Education Level']) || 'Undergraduate';
-        const university = getCellValue(row, ['Universitas', 'University']) || 'University of Queensland';
-        const major = getCellValue(row, ['Jurusan', 'Major']) || '-';
-        const intake = getCellValue(row, ['Intake']);
-        const expectedGraduation = getCellValue(row, ['Expected Graduation']);
+        const rawEmail = getCellValue(row, ['Email address', 'Email Address', 'Email']).toLowerCase();
+        const hasValidEmail = emailRegex.test(rawEmail);
+        const email = hasValidEmail
+          ? rawEmail
+          : buildFallbackEmail(index, [
+              rawMemberNo,
+              fullName,
+              firstName,
+              lastName,
+              getCellValue(row, ['Telephone #', 'Phone Number', 'Phone']),
+              getCellValue(row, ['Ranting', 'Branch']),
+              getCellValue(row, ['Domisili / Kampus', 'Domisili/Kampus', 'Domicile / Campus']),
+              getCellValue(row, ['Universitas', 'University']),
+              getCellValue(row, ['Jurusan', 'Major']),
+              getCellValue(row, ['Intake']),
+            ]);
+
+        const memberNo = normalizeOrNA(rawMemberNo);
+        const phoneNumber = normalizeOrNA(getCellValue(row, ['Telephone #', 'Phone Number', 'Phone']));
+        const studentId = normalizeOrNA(getCellValue(row, ['Student ID']));
+        const branch = normalizeOrNA(getCellValue(row, ['Ranting', 'Branch']));
+        const domicileCampus = normalizeOrNA(getCellValue(row, ['Domisili / Kampus', 'Domisili/Kampus', 'Domicile / Campus']));
+        const educationLevel = normalizeOrNA(getCellValue(row, ['Jenjang Studi', 'Education Level']));
+        const university = normalizeOrNA(getCellValue(row, ['Universitas', 'University']));
+        const major = normalizeOrNA(getCellValue(row, ['Jurusan', 'Major']));
+        const intake = normalizeOrNA(getCellValue(row, ['Intake']));
+        const expectedGraduation = normalizeOrNA(getCellValue(row, ['Expected Graduation']));
         const nationality = getCellValue(row, ['Nationality']) || 'Indonesia';
 
         const rawMembership = getCellValue(row, ['Membership Type']).toLowerCase();
         const rawStatus = getCellValue(row, ['Status']).toLowerCase();
         const rawDateJoined = getCellValue(row, ['Date Joined']);
         const rawMembershipTermEnds = getCellValue(row, ['Membership term ends', 'Membership Term Ends']);
-
-        // Validate required fields
-        if (!firstName || !lastName || !email) {
-          results.errors.push(`Row ${index + 2}: Missing required fields (name and email)`);
-          results.skipped++;
-          continue;
-        }
-
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-          results.errors.push(`Row ${index + 2}: Invalid email format — "${email}"`);
-          results.skipped++;
-          continue;
-        }
 
         let membershipType: MembershipType = MembershipType.ORDINARY;
         if (rawMembership === 'ordinary') membershipType = MembershipType.ORDINARY;
@@ -203,65 +220,46 @@ export async function POST(request: NextRequest) {
           membershipTermEnds = plusOneYear(dateJoined);
         }
 
-        // Check if user already exists
-        const existingUser = await prisma.user.findUnique({ where: { email } });
+        const [existingByEmail, existingByMemberNo] = await Promise.all([
+          prisma.user.findUnique({ where: { email } }),
+          memberNo !== 'N/A' ? prisma.user.findFirst({ where: { memberNo } }) : Promise.resolve(null),
+        ]);
 
-        if (existingUser) {
-          // Update existing user
-          await prisma.user.update({
-            where: { email },
-            data: {
-              firstName,
-              lastName,
-              phoneNumber: phoneNumber || existingUser.phoneNumber,
-              studentId: studentId || existingUser.studentId,
-              memberNo: memberNo || existingUser.memberNo,
-              branch: branch || existingUser.branch,
-              domicileCampus: domicileCampus || existingUser.domicileCampus,
-              nationality: nationality || existingUser.nationality,
-              educationLevel: educationLevel || existingUser.educationLevel,
-              university: university || existingUser.university,
-              major: major || existingUser.major,
-              intake: intake || existingUser.intake,
-              expectedGraduation: expectedGraduation || existingUser.expectedGraduation,
-              membershipType,
-              status,
-              dateJoined: dateJoined || existingUser.dateJoined,
-              membershipTermEnds: membershipTermEnds || existingUser.membershipTermEnds,
-            },
-          });
-          results.updated++;
-        } else {
-          // Create new user with a temporary hashed password
-          const tempPassword = await bcryptjs.hash('TempPass123!', 10);
-          await prisma.user.create({
-            data: {
-              firstName,
-              lastName,
-              email,
-              password: tempPassword,
-              phoneNumber,
-              studentId,
-              memberNo: memberNo || null,
-              branch: branch || null,
-              domicileCampus: domicileCampus || null,
-              nationality,
-              educationLevel,
-              university,
-              major,
-              intake: intake || null,
-              expectedGraduation: expectedGraduation || null,
-              birthDate: '1990-01-01',
-              membershipType,
-              status,
-              paymentProofUrl: '',
-              role: 'USER',
-              dateJoined: dateJoined,
-              membershipTermEnds: membershipTermEnds,
-            },
-          });
-          results.imported++;
+        // Skip duplicates instead of updating existing records.
+        if (existingByEmail || existingByMemberNo) {
+          results.skipped++;
+          continue;
         }
+
+        // Create new user with a temporary hashed password
+        const tempPassword = await bcryptjs.hash('TempPass123!', 10);
+        await prisma.user.create({
+          data: {
+            firstName,
+            lastName,
+            email,
+            password: tempPassword,
+            phoneNumber,
+            studentId,
+            memberNo,
+            branch,
+            domicileCampus,
+            nationality,
+            educationLevel,
+            university,
+            major,
+            intake,
+            expectedGraduation,
+            birthDate: '1990-01-01',
+            membershipType,
+            status,
+            paymentProofUrl: '',
+            role: 'USER',
+            dateJoined: dateJoined,
+            membershipTermEnds: membershipTermEnds,
+          },
+        });
+        results.imported++;
       } catch (error) {
         results.errors.push(`Row ${index + 2}: ${String(error)}`);
         results.skipped++;
