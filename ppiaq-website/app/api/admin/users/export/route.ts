@@ -4,7 +4,7 @@ import { checkAdmin } from '@/lib/auth/check-admin';
 import * as XLSX from 'xlsx';
 import { UserStatus } from '@prisma/client';
 
-type ExportScope = 'all' | 'pending' | 'approved' | 'rejected' | 'newsletter';
+type ExportScope = 'all' | 'pending' | 'approved' | 'rejected' | 'active' | 'newsletter';
 const USER_HEADERS = [
   'Member No',
   'Nama Lengkap',
@@ -54,6 +54,21 @@ const getMembershipTermEnds = (
   return end;
 };
 
+const isActiveMember = (
+  user: {
+    membershipTermEnds?: Date | null;
+    dateJoined?: Date | null;
+    approvedAt?: Date | null;
+    createdAt: Date;
+    status: UserStatus;
+  }
+): boolean => {
+  if (user.status !== UserStatus.APPROVED) return false;
+  const end = getMembershipTermEnds(user);
+  if (!end) return false;
+  return end.getTime() > Date.now();
+};
+
 export async function GET(request: NextRequest) {
   try {
     const adminUser = await checkAdmin();
@@ -64,7 +79,7 @@ export async function GET(request: NextRequest) {
     // Get query params
     const format = request.nextUrl.searchParams.get('format') || 'excel';
     const rawScope = (request.nextUrl.searchParams.get('scope') || 'all').toLowerCase();
-    const scope: ExportScope = ['pending', 'approved', 'rejected', 'newsletter', 'all'].includes(rawScope)
+    const scope: ExportScope = ['pending', 'approved', 'rejected', 'active', 'newsletter', 'all'].includes(rawScope)
       ? rawScope as ExportScope
       : 'all';
 
@@ -85,6 +100,8 @@ export async function GET(request: NextRequest) {
       const users =
         scope === 'pending' || scope === 'approved' || scope === 'rejected'
           ? await getUsersByStatus(scope)
+          : scope === 'active'
+          ? (await getUsersByStatus('approved')).filter(isActiveMember)
           : await getAllUsers();
 
       exportData = users.map((user) => ({
@@ -105,6 +122,8 @@ export async function GET(request: NextRequest) {
       filenameBase =
         scope === 'all'
           ? 'ppiaq-members'
+          : scope === 'active'
+          ? 'ppiaq-active-members'
           : `ppiaq-${scope}-members`;
     }
 

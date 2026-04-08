@@ -43,6 +43,35 @@ export default function ProfilePage() {
     return () => clearInterval(timer);
   }, []);
 
+  const membershipStart = useMemo(
+    () =>
+      parseDateValue(user?.dateJoined) ||
+      parseDateValue(user?.approvedAt) ||
+      parseDateValue(user?.createdAt) ||
+      new Date(),
+    [user?.dateJoined, user?.approvedAt, user?.createdAt]
+  );
+
+  const membershipEnd = useMemo(
+    () => parseDateValue(user?.membershipTermEnds) || addOneYear(membershipStart),
+    [user?.membershipTermEnds, membershipStart]
+  );
+
+  const remainingMs = membershipEnd.getTime() - now;
+  const isApprovedMember = user?.status === 'APPROVED';
+  const isActiveMember = isApprovedMember && remainingMs > 0;
+  const countdown = formatCountdown(Math.abs(remainingMs));
+  const displayMemberId = user?.memberNo || (user?.id ? user.id.padStart(6, '0') : '-');
+  const membershipTypeLabel =
+    user?.membershipType === 'ORDINARY'
+      ? language === 'id'
+        ? 'Anggota Biasa'
+        : 'Ordinary Member'
+      : language === 'id'
+      ? 'Anggota Asosiasi'
+      : 'Associate Member';
+  const locale = language === 'id' ? 'id-ID' : 'en-US';
+
   if (!user) {
     return (
       <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6">
@@ -52,35 +81,6 @@ export default function ProfilePage() {
       </main>
     );
   }
-
-  const membershipStart = useMemo(
-    () =>
-      parseDateValue(user.dateJoined) ||
-      parseDateValue(user.approvedAt) ||
-      parseDateValue(user.createdAt) ||
-      new Date(),
-    [user.dateJoined, user.approvedAt, user.createdAt]
-  );
-
-  const membershipEnd = useMemo(
-    () => parseDateValue(user.membershipTermEnds) || addOneYear(membershipStart),
-    [user.membershipTermEnds, membershipStart]
-  );
-
-  const remainingMs = membershipEnd.getTime() - now;
-  const isApprovedMember = user.status === 'APPROVED';
-  const isActiveMember = isApprovedMember && remainingMs > 0;
-  const countdown = formatCountdown(Math.abs(remainingMs));
-  const displayMemberId = user.memberNo || user.id.padStart(6, '0');
-  const membershipTypeLabel =
-    user.membershipType === 'ORDINARY'
-      ? language === 'id'
-        ? 'Anggota Biasa'
-        : 'Ordinary Member'
-      : language === 'id'
-      ? 'Anggota Asosiasi'
-      : 'Associate Member';
-  const locale = language === 'id' ? 'id-ID' : 'en-US';
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6 overflow-x-hidden">
@@ -102,20 +102,27 @@ export default function ProfilePage() {
             {language === 'id' ? 'Kartu Anggota' : 'Membership Card'}
           </h2>
 
-          <div className="relative h-[250px] sm:h-[300px] md:h-[360px] rounded-3xl text-white shadow-2xl border-2 border-[#FEB602] overflow-hidden">
-            <div className="absolute inset-0 bg-[url('/images/membership/ppiaq-2026-membership-card-design.png')] bg-cover bg-center" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/50" />
+          <div className="relative w-full aspect-[2000/1111] text-white shadow-2xl border-2 border-[#FEB602] bg-[#101010] overflow-hidden">
+            <img
+              src="/images/membership/ppiaq-2026-membership-card-design.png"
+              alt="PPIA Queensland membership card background"
+              className="absolute inset-0 h-full w-full object-contain"
+              draggable={false}
+            />
 
-            <div className="relative z-10 h-full p-4 sm:p-6 md:p-8">
-              <div className="pt-[23%] sm:pt-[20%] md:pt-[18%] max-w-[90%] sm:max-w-[76%]">
-                <h3 className="font-tan-angleton text-xl sm:text-2xl md:text-4xl font-bold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]">
-                  {user.firstName} {user.lastName}
-                </h3>
-                <p className="mt-1 text-[10px] sm:text-xs uppercase tracking-[0.16em] font-semibold text-white/95">
-                  {membershipTypeLabel}
-                </p>
+            {/* Content area aligned to Y:305-715 and using top-right free space */}
+            <div className="absolute left-[4.5%] right-[4.5%] top-[27.5%] h-[36.9%] grid grid-cols-[2.8fr_1fr] gap-[1.2%]">
+              <div className="h-full rounded-lg border border-white/15 bg-black/30 px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 backdrop-blur-[1px] flex flex-col justify-between">
+                <div>
+                  <h3 className="font-tan-angleton text-[12px] sm:text-[18px] md:text-[34px] font-bold leading-tight drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">
+                    {user.firstName} {user.lastName}
+                  </h3>
+                  <p className="mt-0.5 text-[7px] sm:text-[9px] md:text-[11px] uppercase tracking-[0.14em] font-semibold text-white/95">
+                    {membershipTypeLabel}
+                  </p>
+                </div>
 
-                <div className="mt-3 sm:mt-4 grid grid-cols-2 gap-x-4 gap-y-2 text-[10px] sm:text-xs">
+                <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1 text-[7px] sm:text-[9px] md:text-[11px]">
                   <div>
                     <p className="uppercase tracking-widest text-white/70">
                       {language === 'id' ? 'ID Anggota' : 'Member ID'}
@@ -140,18 +147,37 @@ export default function ProfilePage() {
                     </p>
                     <p className="font-semibold truncate">{user.domicileCampus || '-'}</p>
                   </div>
-                  <div>
-                    <p className="uppercase tracking-widest text-white/70">
-                      {language === 'id' ? 'Berlaku Sejak' : 'Valid From'}
-                    </p>
-                    <p className="font-semibold">{membershipStart.toLocaleDateString(locale)}</p>
-                  </div>
-                  <div>
-                    <p className="uppercase tracking-widest text-white/70">
-                      {language === 'id' ? 'Berlaku Hingga' : 'Valid Until'}
-                    </p>
-                    <p className="font-semibold">{membershipEnd.toLocaleDateString(locale)}</p>
-                  </div>
+                </div>
+              </div>
+
+              <div className="h-full rounded-lg border border-white/15 bg-black/35 px-2 py-2 sm:px-3 sm:py-3 md:px-4 md:py-3 backdrop-blur-[1px] flex flex-col justify-between text-[7px] sm:text-[9px] md:text-[11px]">
+                <div>
+                  <p className="uppercase tracking-widest text-white/70">
+                    {language === 'id' ? 'Ranting' : 'Branch'}
+                  </p>
+                  <p className="font-semibold truncate">{user.branch || '-'}</p>
+                </div>
+                <div>
+                  <p className="uppercase tracking-widest text-white/70">
+                    {language === 'id' ? 'Berlaku Sejak' : 'Valid From'}
+                  </p>
+                  <p className="font-semibold">{membershipStart.toLocaleDateString(locale)}</p>
+                </div>
+                <div>
+                  <p className="uppercase tracking-widest text-white/70">
+                    {language === 'id' ? 'Berlaku Hingga' : 'Valid Until'}
+                  </p>
+                  <p className="font-semibold">{membershipEnd.toLocaleDateString(locale)}</p>
+                </div>
+                <div>
+                  <p className="uppercase tracking-widest text-white/70">
+                    {language === 'id' ? 'Status' : 'Status'}
+                  </p>
+                  <p className="font-semibold">
+                    {isActiveMember
+                      ? (language === 'id' ? 'Aktif' : 'Active')
+                      : (language === 'id' ? 'Non-Aktif' : 'Non-Active')}
+                  </p>
                 </div>
               </div>
             </div>

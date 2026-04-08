@@ -270,9 +270,12 @@ export default function AdminDashboardPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleExport = async (format: 'csv' | 'excel') => {
+  const handleExport = async (
+    format: 'csv' | 'excel',
+    scopeOverride?: 'pending' | 'approved' | 'rejected' | 'newsletter' | 'active'
+  ) => {
     try {
-      const scope = activeTab === 'newsletter' ? 'newsletter' : activeTab.toLowerCase();
+      const scope = scopeOverride || (activeTab === 'newsletter' ? 'newsletter' : activeTab.toLowerCase());
       const response = await fetch(`/api/admin/users/export?format=${format}&scope=${scope}`);
       if (response.ok) {
         const blob = await response.blob();
@@ -571,6 +574,18 @@ export default function AdminDashboardPage() {
             <span className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-widest">
               {language === 'id' ? 'Non-Aktif' : 'Non-Active'} ({approvedUsers.filter((u) => !isMembershipActive(u)).length})
             </span>
+            <button
+              onClick={() => handleExport('csv', 'active')}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 font-bold uppercase tracking-widest text-xs transition-all"
+            >
+              📥 {language === 'id' ? 'Export Aktif CSV' : 'Export Active CSV'}
+            </button>
+            <button
+              onClick={() => handleExport('excel', 'active')}
+              className="px-4 py-2 bg-emerald-700 text-white rounded-full hover:bg-emerald-800 font-bold uppercase tracking-widest text-xs transition-all"
+            >
+              📥 {language === 'id' ? 'Export Aktif Excel' : 'Export Active Excel'}
+            </button>
           </div>
         )}
 

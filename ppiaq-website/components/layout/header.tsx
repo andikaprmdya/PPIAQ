@@ -6,13 +6,22 @@ import { useLanguage } from '@/lib/language-context';
 import { useAuth } from '@/lib/auth-context';
 import { getTranslation, translations } from '@/lib/translations';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const { language, setLanguage } = useLanguage();
   const { user, isAuthenticated, isAdmin, isCurator, logout } = useAuth();
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isContentDropdownOpen, setIsContentDropdownOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    setIsMenuOpen(false);
+    setIsContentDropdownOpen(false);
+    router.push('/auth/login');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -171,7 +180,7 @@ export default function Header() {
                       {language === 'id' ? 'Profil' : 'Profile'}
                     </Link>
                     <button
-                      onClick={logout}
+                      onClick={handleLogout}
                       className="bg-[#B64847] text-white px-6 py-2.5 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95 group-hover/nav:bg-white group-hover/nav:text-[#B64847] hover:bg-[#FEB602]! hover:text-[#B64847]! hover:scale-105"
                     >
                       {language === 'id' ? 'Keluar' : 'Logout'}
@@ -236,10 +245,7 @@ export default function Header() {
                       {language === 'id' ? 'Profil' : 'Profile'}
                     </Link>
                     <button
-                      onClick={() => {
-                        logout();
-                        setIsMenuOpen(false);
-                      }}
+                      onClick={handleLogout}
                       className="bg-[#B64847] text-white px-6 py-3 rounded-full text-[11px] font-bold uppercase tracking-widest transition-all duration-300 shadow-lg active:scale-95"
                     >
                       {language === 'id' ? 'Keluar' : 'Logout'}
