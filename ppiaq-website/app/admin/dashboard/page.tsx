@@ -76,6 +76,7 @@ export default function AdminDashboardPage() {
   const [newsletterSubscribers, setNewsletterSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'PENDING' | 'APPROVED' | 'REJECTED' | 'newsletter'>('PENDING');
+  const [approvedFilter, setApprovedFilter] = useState<'all' | 'active' | 'nonactive'>('all');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [rejectionReason, setRejectionReason] = useState('');
@@ -270,12 +271,18 @@ export default function AdminDashboardPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleExport = async (
-    format: 'csv' | 'excel',
-    scopeOverride?: 'pending' | 'approved' | 'rejected' | 'newsletter' | 'active'
-  ) => {
+  const handleExport = async (format: 'csv' | 'excel') => {
     try {
-      const scope = scopeOverride || (activeTab === 'newsletter' ? 'newsletter' : activeTab.toLowerCase());
+      const scope =
+        activeTab === 'newsletter'
+          ? 'newsletter'
+          : activeTab === 'APPROVED'
+          ? approvedFilter === 'active'
+            ? 'active'
+            : approvedFilter === 'nonactive'
+            ? 'nonactive'
+            : 'approved'
+          : activeTab.toLowerCase();
       const response = await fetch(`/api/admin/users/export?format=${format}&scope=${scope}`);
       if (response.ok) {
         const blob = await response.blob();
@@ -372,9 +379,18 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const activeApprovedUsers = approvedUsers.filter(isMembershipActive);
+  const nonActiveApprovedUsers = approvedUsers.filter((u) => !isMembershipActive(u));
+  const filteredApprovedUsers =
+    approvedFilter === 'active'
+      ? activeApprovedUsers
+      : approvedFilter === 'nonactive'
+      ? nonActiveApprovedUsers
+      : approvedUsers;
+
   const displayUsers =
     activeTab === 'PENDING' ? pendingUsers
-    : activeTab === 'APPROVED' ? approvedUsers
+    : activeTab === 'APPROVED' ? filteredApprovedUsers
     : activeTab === 'REJECTED' ? rejectedUsers
     : [];
 
@@ -424,7 +440,11 @@ export default function AdminDashboardPage() {
           </button>
           <p className="text-xs text-[#886644] font-semibold self-center">
             {language === 'id'
-              ? 'Export mengikuti tab yang sedang dipilih'
+              ? activeTab === 'APPROVED'
+                ? 'Export mengikuti tab + filter aktif/non-aktif yang dipilih'
+                : 'Export mengikuti tab yang sedang dipilih'
+              : activeTab === 'APPROVED'
+              ? 'Export follows the selected tab + active/non-active filter'
               : 'Export follows the currently selected tab'}
           </p>
         </div>
@@ -569,22 +589,40 @@ export default function AdminDashboardPage() {
         {activeTab === 'APPROVED' && (
           <div className="mb-8 flex flex-wrap gap-3">
             <span className="px-4 py-2 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-widest">
-              {language === 'id' ? 'Aktif' : 'Active'} ({approvedUsers.filter(isMembershipActive).length})
+              {language === 'id' ? 'Aktif' : 'Active'} ({activeApprovedUsers.length})
             </span>
             <span className="px-4 py-2 rounded-full bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-widest">
-              {language === 'id' ? 'Non-Aktif' : 'Non-Active'} ({approvedUsers.filter((u) => !isMembershipActive(u)).length})
+              {language === 'id' ? 'Non-Aktif' : 'Non-Active'} ({nonActiveApprovedUsers.length})
             </span>
             <button
-              onClick={() => handleExport('csv', 'active')}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-full hover:bg-emerald-700 font-bold uppercase tracking-widest text-xs transition-all"
+              onClick={() => setApprovedFilter('all')}
+              className={`px-4 py-2 rounded-full font-bold uppercase tracking-widest text-xs transition-all border-2 ${
+                approvedFilter === 'all'
+                  ? 'bg-[#B64847] text-white border-[#B64847]'
+                  : 'bg-white text-[#B64847] border-[#E4DBCA] hover:border-[#B64847]'
+              }`}
             >
-              📥 {language === 'id' ? 'Export Aktif CSV' : 'Export Active CSV'}
+              {language === 'id' ? 'Semua (Filter Off)' : 'All (Filter Off)'} ({approvedUsers.length})
             </button>
             <button
-              onClick={() => handleExport('excel', 'active')}
-              className="px-4 py-2 bg-emerald-700 text-white rounded-full hover:bg-emerald-800 font-bold uppercase tracking-widest text-xs transition-all"
+              onClick={() => setApprovedFilter('active')}
+              className={`px-4 py-2 rounded-full font-bold uppercase tracking-widest text-xs transition-all border-2 ${
+                approvedFilter === 'active'
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-white text-emerald-700 border-emerald-200 hover:border-emerald-600'
+              }`}
             >
-              📥 {language === 'id' ? 'Export Aktif Excel' : 'Export Active Excel'}
+              {language === 'id' ? 'Filter Aktif' : 'Filter Active'} ({activeApprovedUsers.length})
+            </button>
+            <button
+              onClick={() => setApprovedFilter('nonactive')}
+              className={`px-4 py-2 rounded-full font-bold uppercase tracking-widest text-xs transition-all border-2 ${
+                approvedFilter === 'nonactive'
+                  ? 'bg-gray-700 text-white border-gray-700'
+                  : 'bg-white text-gray-700 border-gray-300 hover:border-gray-700'
+              }`}
+            >
+              {language === 'id' ? 'Filter Non-Aktif' : 'Filter Non-Active'} ({nonActiveApprovedUsers.length})
             </button>
           </div>
         )}
@@ -628,7 +666,12 @@ export default function AdminDashboardPage() {
           <div className="text-center py-16">
             <p className="text-gray-500 text-lg">
               {activeTab === 'PENDING' && (language === 'id' ? 'Tidak ada aplikasi menunggu' : 'No pending applications')}
-              {activeTab === 'APPROVED' && (language === 'id' ? 'Tidak ada pengguna yang disetujui' : 'No approved users')}
+              {activeTab === 'APPROVED' &&
+                (approvedFilter === 'active'
+                  ? (language === 'id' ? 'Tidak ada anggota aktif' : 'No active members')
+                  : approvedFilter === 'nonactive'
+                  ? (language === 'id' ? 'Tidak ada anggota non-aktif' : 'No non-active members')
+                  : (language === 'id' ? 'Tidak ada pengguna yang disetujui' : 'No approved users'))}
               {activeTab === 'REJECTED' && (language === 'id' ? 'Tidak ada pengguna yang ditolak' : 'No rejected users')}
             </p>
           </div>

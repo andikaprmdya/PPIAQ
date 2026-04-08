@@ -4,7 +4,7 @@ import { checkAdmin } from '@/lib/auth/check-admin';
 import * as XLSX from 'xlsx';
 import { UserStatus } from '@prisma/client';
 
-type ExportScope = 'all' | 'pending' | 'approved' | 'rejected' | 'active' | 'newsletter';
+type ExportScope = 'all' | 'pending' | 'approved' | 'rejected' | 'active' | 'nonactive' | 'newsletter';
 const USER_HEADERS = [
   'Member No',
   'Nama Lengkap',
@@ -79,8 +79,9 @@ export async function GET(request: NextRequest) {
     // Get query params
     const format = request.nextUrl.searchParams.get('format') || 'excel';
     const rawScope = (request.nextUrl.searchParams.get('scope') || 'all').toLowerCase();
-    const scope: ExportScope = ['pending', 'approved', 'rejected', 'active', 'newsletter', 'all'].includes(rawScope)
-      ? rawScope as ExportScope
+    const normalizedScope = rawScope === 'inactive' ? 'nonactive' : rawScope;
+    const scope: ExportScope = ['pending', 'approved', 'rejected', 'active', 'nonactive', 'newsletter', 'all'].includes(normalizedScope)
+      ? normalizedScope as ExportScope
       : 'all';
 
     let exportData: Array<Record<string, string>> = [];
@@ -102,6 +103,8 @@ export async function GET(request: NextRequest) {
           ? await getUsersByStatus(scope)
           : scope === 'active'
           ? (await getUsersByStatus('approved')).filter(isActiveMember)
+          : scope === 'nonactive'
+          ? (await getUsersByStatus('approved')).filter((user) => !isActiveMember(user))
           : await getAllUsers();
 
       exportData = users.map((user) => ({
@@ -124,6 +127,8 @@ export async function GET(request: NextRequest) {
           ? 'ppiaq-members'
           : scope === 'active'
           ? 'ppiaq-active-members'
+          : scope === 'nonactive'
+          ? 'ppiaq-nonactive-members'
           : `ppiaq-${scope}-members`;
     }
 
