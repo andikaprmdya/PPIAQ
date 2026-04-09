@@ -199,11 +199,17 @@ export default function AboutPage() {
             ))}
           </div>
 
-          {/* View More Button */}
+          {/* View More Button (temporarily disabled until full team data is ready) */}
           <div className="mt-12 flex justify-center">
-            <a href="/meet-the-team" className="px-8 py-3 bg-[#B64847] text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#303030] transition-all shadow-lg active:scale-95 inline-block">
-              View More Members
-            </a>
+            <button
+              type="button"
+              disabled
+              aria-disabled="true"
+              title={language === 'id' ? 'Belum tersedia' : 'Not available yet'}
+              className="px-8 py-3 bg-[#B64847]/60 text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg inline-block cursor-not-allowed opacity-80"
+            >
+              {language === 'id' ? 'Lebih Banyak Anggota (Segera)' : 'View More Members (Soon)'}
+            </button>
           </div>
         </div>
       </section>

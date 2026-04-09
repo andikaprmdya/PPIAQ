@@ -26,6 +26,17 @@ interface EventItem {
   registrationUrl?: string;
 }
 
+const HERO_SLIDER_IMAGES = [
+  '/images/pesra 1.jpg',
+  '/images/pesra 2.jpg',
+  '/images/pesra 3.jpg',
+  '/images/pesra 4.jpg',
+  '/images/pesra biggest box.jpg',
+  '/images/pesra rectangle.jpg',
+  '/images/qutmarketday.jpg',
+  '/images/uqmarketday.jpg',
+];
+
 const eventDetailRoutes: Record<string, string> = {
   'Pre-Departure Briefing - Semester 1, 2026': '/events/pre-departure-briefing',
   'QUT Market Day - Join ISAQ / PPIA QUT': '/events/qut-market-day',
@@ -42,17 +53,6 @@ export default function HomePage() {
   const [eventsLoading, setEventsLoading] = useState(true);
   const [currentBg, setCurrentBg] = useState(0);
   const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
-
-  const backgroundImages = [
-    '/images/pesra 1.jpg',
-    '/images/pesra 2.jpg',
-    '/images/pesra 3.jpg',
-    '/images/pesra 4.jpg',
-    '/images/pesra biggest box.jpg',
-    '/images/pesra rectangle.jpg',
-    '/images/qutmarketday.jpg',
-    '/images/uqmarketday.jpg',
-  ];
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -87,8 +87,8 @@ export default function HomePage() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentBg((prev) => (prev + 1) % backgroundImages.length);
-    }, 5000);
+      setCurrentBg((prev) => (prev + 1) % HERO_SLIDER_IMAGES.length);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -110,28 +110,11 @@ export default function HomePage() {
   };
 
   const displayFAQ = getFAQDisplay();
-  const upcomingEvents = events.slice(0, 3);
+  const communityEvents = events.slice(0, 3);
 
   return (
     <main className="font-montserrat text-[#303030] bg-[#FFFAF5] overflow-x-hidden">
-      <section className="text-white py-20 px-6 min-h-[70vh] flex items-center relative overflow-hidden">
-        <div className="absolute inset-0 w-full h-full overflow-hidden">
-          {backgroundImages.map((image, index) => (
-            <Image
-              key={index}
-              src={image}
-              alt={`Background ${index}`}
-              fill
-              className={`object-cover transition-opacity duration-1000 ${
-                currentBg === index ? 'opacity-100' : 'opacity-0'
-              }`}
-              priority={index === 0}
-            />
-          ))}
-        </div>
-
-        <div className="absolute inset-0 bg-black/40" />
-
+      <section className="text-white py-20 px-6 min-h-[70vh] flex items-center relative overflow-hidden bg-[#B64847]">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 relative z-10">
           <Image
             src="/images/Cendrawasih_Up.png"
@@ -151,52 +134,53 @@ export default function HomePage() {
                 ? 'Selamat datang! Kami menghubungkan pelajar Indonesia di seluruh Queensland dengan berbagai peluang, dan satu sama lain.'
                 : 'Welcome! We connect Indonesian students all over Queensland to opportunities, and to each other.'}
             </p>
-            <div className="flex flex-wrap justify-center md:justify-start gap-4">
-              <button className="px-8 py-3 bg-white text-[#B64847] font-bold rounded-sm hover:bg-[#FEB602] transition-colors uppercase tracking-wider text-sm">
-                {language === 'id' ? 'Pelajari Tentang Kami' : 'Learn More About Us'}
-              </button>
-              <button className="px-8 py-3 border-2 border-white text-white font-bold rounded-sm hover:bg-white hover:text-[#B64847] transition-all uppercase tracking-wider text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Link
+                href="/membership"
+                className="px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
+              >
                 {language === 'id' ? 'Jadilah Anggota' : 'Become a Member'}
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = '/EOI guide.pdf';
+                  link.download = 'EOI guide.pdf';
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+                className="px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
+              >
+                {language === 'id' ? 'Panduan Queensland' : 'Guide to Queensland Booklet'}
               </button>
+              <Link
+                href="/about"
+                className="px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
+              >
+                {language === 'id' ? 'Pelajari Tentang Kami' : 'Learn More About Us'}
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-24 px-6 text-center">
-        <div className="max-w-5xl mx-auto">
-          <Image
-            src="/images/PPIAQ_logo.png"
-            alt="PPIA Queensland Logo"
-            width={96}
-            height={96}
-            className="mx-auto mb-8"
-          />
-
-          <h2 className="font-tan-angleton font-bold text-3xl md:text-5xl text-[#B64847] mb-8">
-            {language === 'id' ? 'Kami ada untuk pelajar Indonesia di Queensland' : "We're here for Indonesian students in Queensland"}
-          </h2>
-
-          <p className="text-gray-600 text-lg mb-12 italic leading-relaxed max-w-3xl mx-auto">
-            {language === 'id'
-              ? 'Baik ini pertama kalinya Anda jauh dari rumah, atau Anda adalah mahasiswa internasional kawakan, kami di sini untuk menjadi komunitas Anda. Sekarang, bagaimana kami bisa membantu Anda hari ini?'
-              : "Whether this is your first time away from home, or you're a seasoned international student, we're here for you to be your community. Now, how can we help you today?"}
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 max-w-md mx-auto">
-            <button
-              onClick={() => {
-                const link = document.createElement('a');
-                link.href = '/EOI guide.pdf';
-                link.download = 'EOI guide.pdf';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-              }}
-              className="p-6 bg-black text-white font-bold hover:bg-[#B64847] transition-colors uppercase tracking-widest text-sm"
-            >
-              {language === 'id' ? 'Panduan Queensland' : 'Guide to Queensland Booklet'}
-            </button>
+      <section className="py-14 px-6 bg-[#FFFAF5]">
+        <div className="max-w-6xl mx-auto">
+          <div className="relative w-full aspect-[16/7] rounded-2xl overflow-hidden border border-[#E4DBCA] shadow-md bg-white">
+            {HERO_SLIDER_IMAGES.map((image, index) => (
+              <Image
+                key={image}
+                src={image}
+                alt={`PPIAQ activities ${index + 1}`}
+                fill
+                className={`object-cover transition-opacity duration-700 ${
+                  currentBg === index ? 'opacity-100' : 'opacity-0'
+                }`}
+                priority={index === 0}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -204,20 +188,20 @@ export default function HomePage() {
       <section className="py-24 px-6 bg-[#E4DBCA]/20">
         <div className="max-w-6xl mx-auto">
           <h2 className="font-tan-angleton font-bold text-4xl text-[#B64847] text-center mb-16">
-            {language === 'id' ? 'Acara Mendatang' : 'Upcoming events'}
+            {language === 'id' ? 'Acara Komunitas' : 'Community Event'}
           </h2>
 
           {eventsLoading ? (
             <div className="text-center py-8 text-[#886644]">
               {language === 'id' ? 'Memuat acara...' : 'Loading events...'}
             </div>
-          ) : upcomingEvents.length === 0 ? (
+          ) : communityEvents.length === 0 ? (
             <div className="text-center py-8 text-[#886644]">
-              {language === 'id' ? 'Belum ada acara mendatang' : 'No upcoming events available'}
+              {language === 'id' ? 'Belum ada acara komunitas' : 'No community events available'}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {upcomingEvents.map((event) => {
+              {communityEvents.map((event) => {
                 const title = language === 'id' ? event.title.id : event.title.en;
                 const location = language === 'id' ? event.location.id : event.location.en;
                 const href = eventDetailRoutes[event.title.en] || event.registrationUrl || '#';

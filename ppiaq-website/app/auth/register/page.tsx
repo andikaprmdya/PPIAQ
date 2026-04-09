@@ -20,6 +20,7 @@ interface FormData {
   // Step 2: Education
   educationLevel: string;
   university: string;
+  otherUniversity: string;
   major: string;
   expectedGraduationSemester: string;
   expectedGraduationYear: string;
@@ -40,7 +41,7 @@ const UNIVERSITIES = [
   'Other',
 ];
 
-const EDUCATION_LEVELS = ['S1 (Bachelor)', 'S2 (Master)', 'S3 (Doctorate)'];
+const EDUCATION_LEVELS = ['Diploma', 'S1 (Bachelor)', 'S2 (Master)', 'S3 (Doctorate)', 'Postdoctoral'];
 const GRADUATION_SEMESTERS = ['Semester 1', 'Semester 2'];
 const GRADUATION_YEARS = Array.from({ length: 10 }, (_, i) => String(new Date().getFullYear() + i));
 
@@ -61,6 +62,7 @@ export default function RegisterPage() {
     studentId: '',
     educationLevel: '',
     university: '',
+    otherUniversity: '',
     major: '',
     expectedGraduationSemester: '',
     expectedGraduationYear: '',
@@ -140,6 +142,16 @@ export default function RegisterPage() {
       return;
     }
 
+    if (name === 'university') {
+      setRubricLinkClicked(false);
+      setFormData((prev) => ({
+        ...prev,
+        university: value,
+        otherUniversity: value === 'Other' ? prev.otherUniversity : '',
+      }));
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -205,6 +217,14 @@ export default function RegisterPage() {
       }
       if (!formData.university) {
         setError(language === 'id' ? 'Universitas harus dipilih' : 'University is required');
+        return false;
+      }
+      if (formData.university === 'Other' && !formData.otherUniversity.trim()) {
+        setError(
+          language === 'id'
+            ? 'Nama universitas harus diisi jika memilih Other'
+            : 'University name is required when selecting Other'
+        );
         return false;
       }
       if (!formData.major.trim()) {
@@ -313,6 +333,11 @@ export default function RegisterPage() {
       // Submit form
       setIsLoading(true);
       try {
+        const finalUniversity =
+          formData.university === 'Other'
+            ? formData.otherUniversity.trim()
+            : formData.university;
+
         // Convert file to base64
         let paymentProofUrl = '';
         if (formData.paymentProofFile) {
@@ -329,7 +354,7 @@ export default function RegisterPage() {
             password: formData.password,
             nationality: formData.nationality,
             educationLevel: formData.educationLevel,
-            university: formData.university,
+            university: finalUniversity,
             major: formData.major.trim(),
             expectedGraduationSemester: formData.expectedGraduationSemester,
             expectedGraduationYear: formData.expectedGraduationYear,
@@ -587,6 +612,22 @@ export default function RegisterPage() {
                       ))}
                     </select>
                   </div>
+
+                  {formData.university === 'Other' && (
+                    <div className="group">
+                      <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
+                        {language === 'id' ? 'Nama Universitas' : 'University Name'} *
+                      </label>
+                      <input
+                        type="text"
+                        name="otherUniversity"
+                        value={formData.otherUniversity}
+                        onChange={handleInputChange}
+                        className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                        placeholder={language === 'id' ? 'Tulis nama universitas Anda' : 'Type your university name'}
+                      />
+                    </div>
+                  )}
 
                   <div className="group">
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
