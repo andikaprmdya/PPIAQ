@@ -7,7 +7,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
-    "create:curator": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/create-curator-user.ts"
+    "create:curator": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/create-curator-user.ts",
+    "sync:partner-obligations": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/sync-partner-obligations.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

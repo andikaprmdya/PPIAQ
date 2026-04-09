@@ -69,6 +69,7 @@ export async function registerUser(
   educationLevel: string,
   university: string,
   major: string,
+  expectedGraduation: string,
   birthDate: string,
   membershipType: 'ordinary' | 'associate',
   paymentProofUrl: string,
@@ -88,6 +89,7 @@ export async function registerUser(
       educationLevel,
       university,
       major,
+      expectedGraduation,
       birthDate,
       membershipType: (mapEnum('membershipType', membershipType) || 'ORDINARY') as MembershipType,
       paymentProofUrl,
@@ -211,6 +213,7 @@ export async function updateUser(userId: string, updates: Record<string, unknown
     'membershipTermEnds',
     'membershipType',
     'status',
+    'rejectionReason',
   ];
 
   const cleanedUpdates: Record<string, unknown> = {};

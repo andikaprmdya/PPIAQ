@@ -147,20 +147,12 @@ export default function HomePage() {
               >
                 {language === 'id' ? 'Jadilah Anggota' : 'Become a Member'}
               </Link>
-              <button
-                type="button"
-                onClick={() => {
-                  const link = document.createElement('a');
-                  link.href = '/EOI guide.pdf';
-                  link.download = 'EOI guide.pdf';
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                }}
+              <Link
+                href="/guide-to-queensland"
                 className="px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
               >
                 {language === 'id' ? 'Panduan Queensland' : 'Guide to Queensland Booklet'}
-              </button>
+              </Link>
               <Link
                 href="/about"
                 className="px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"

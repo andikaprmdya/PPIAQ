@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "",
     "/about",
     "/membership",
+    "/guide-to-queensland",
     "/contact",
     "/pesta-rakyat",
     "/meet-the-team",

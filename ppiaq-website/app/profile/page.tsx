@@ -5,6 +5,8 @@ import { useLanguage } from '@/lib/language-context';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
+const INITIAL_NOW = Date.now();
+
 const parseDateValue = (value: string | Date | undefined): Date | null => {
   if (!value) return null;
   const parsed = new Date(value);
@@ -30,7 +32,7 @@ export default function ProfilePage() {
   const { user, isAuthenticated } = useAuth();
   const { language } = useLanguage();
   const router = useRouter();
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(INITIAL_NOW);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -71,6 +73,12 @@ export default function ProfilePage() {
       ? 'Anggota Asosiasi'
       : 'Associate Member';
   const locale = language === 'id' ? 'id-ID' : 'en-US';
+  const expectedGraduationDate = parseDateValue(user?.expectedGraduation);
+  const expectedGraduationDisplay = user?.expectedGraduation
+    ? (expectedGraduationDate
+        ? expectedGraduationDate.toLocaleDateString(locale)
+        : user.expectedGraduation)
+    : '-';
 
   if (!user) {
     return (
@@ -244,6 +252,13 @@ export default function ProfilePage() {
                   {language === 'id' ? 'Jurusan' : 'Major'}
                 </p>
                 <p className="text-sm font-medium">{user.major}</p>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                  {language === 'id' ? 'Tanggal Perkiraan Kelulusan' : 'Expected Graduation Date'}
+                </p>
+                <p className="text-sm font-medium">{expectedGraduationDisplay}</p>
               </div>
             </div>
           </div>

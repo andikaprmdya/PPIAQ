@@ -82,6 +82,7 @@ Current import behavior:
 - Empty optional fields are accepted and stored as `N/A`.
 - Duplicate records are skipped.
 - Only new records are imported.
+- For `Griffith University`, non-Indonesian nationality rows are skipped from membership list import.
 
 ## 6. Export Data (CSV/Excel)
 
@@ -109,7 +110,22 @@ To edit a member:
 
 Use this for corrections like member number, branch, campus, dates, or status notes.
 
-## 8. Other Admin Pages
+## 8. Member Access Flow (Important)
+
+Admin should follow this flow:
+
+1. User registers first from the public register page.
+2. User status starts as **Pending**.
+3. User cannot login while status is pending/rejected.
+4. Admin reviews and sets final status (Approved/Rejected).
+5. User receives email status notification for:
+   - Pending (after registration)
+   - Approved
+   - Rejected
+
+Only **Approved** users can sign in and access member pages.
+
+## 9. Other Admin Pages
 
 You also have these admin pages:
 
@@ -122,7 +138,7 @@ You also have these admin pages:
 - Content pages (from top nav "Content")
   - Home, About, Membership, and Pesta Rakyat text/content updates
 
-## 9. Logout
+## 10. Logout
 
 To log out:
 
@@ -131,7 +147,7 @@ To log out:
 
 You will return to the login/public page.
 
-## 10. Quick Troubleshooting
+## 11. Quick Troubleshooting
 
 ### Import says skipped
 - Usually because data is duplicate (already in database).

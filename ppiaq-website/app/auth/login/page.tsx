@@ -5,12 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/language-context';
 import { useAuth } from '@/lib/auth-context';
-import { getTranslation, translations } from '@/lib/translations';
 
 export default function LoginPage() {
   const { language } = useLanguage();
   const router = useRouter();
-  const { login, loading: authLoading } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -32,7 +31,7 @@ export default function LoginPage() {
 
       const redirectUrl = result.redirectTo || '/community-board';
       router.push(redirectUrl);
-    } catch (err) {
+    } catch {
       setError(language === 'id' ? 'Terjadi kesalahan jaringan' : 'Network error. Please try again.');
       setIsLoading(false);
     }
@@ -121,9 +120,16 @@ export default function LoginPage() {
 
         {/* Info Note */}
         <div className="mt-8 text-center text-xs text-gray-500 italic">
-          {language === 'id'
-            ? '🔐 Data Anda dilindungi dengan enkripsi'
-            : '🔐 Your data is protected with encryption'}
+          <p>
+            {language === 'id'
+              ? '🔐 Data Anda dilindungi dengan enkripsi'
+              : '🔐 Your data is protected with encryption'}
+          </p>
+          <p className="mt-2 not-italic text-gray-600">
+            {language === 'id'
+              ? 'Daftar akun terlebih dahulu. Login hanya bisa setelah admin approve. Email status akan dikirim saat pending, approved, atau rejected.'
+              : 'Register first. Sign in is available only after admin approval. Status emails are sent for pending, approved, and rejected.'}
+          </p>
         </div>
       </div>
     </main>

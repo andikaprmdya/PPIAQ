@@ -3,6 +3,18 @@
 This guide is for people who use a member account on the website.
 It explains daily usage in simple steps.
 
+## 0. Registration and Approval Flow
+
+Before login:
+
+1. Register account first from `https://ppiaqueensland.org/auth/register`.
+2. Your first status is **Pending**.
+3. You will get status email updates:
+   - Pending
+   - Approved
+   - Rejected
+4. You can only login after status is **Approved**.
+
 ## 1. Member Login
 
 Test account (for demo/testing):

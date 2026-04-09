@@ -85,7 +85,7 @@ export default function CommunityBoardPage() {
       setNewsletterSuccess(true);
       setNewsletterEmail('');
       setTimeout(() => setNewsletterSuccess(false), 4000);
-    } catch (err) {
+    } catch {
       setNewsletterError(language === 'id' ? 'Terjadi kesalahan' : 'An error occurred');
     } finally {
       setNewsletterLoading(false);
@@ -103,9 +103,42 @@ export default function CommunityBoardPage() {
   }
 
   const fallbackDiscounts = [
-    { name: language === 'id' ? 'Restoran Indonesia' : 'Indonesian Restaurant', description: language === 'id' ? 'Diskon 20% untuk member' : '20% discount for members', code: 'PPIA20', validUntil: '2026-12-31' },
-    { name: language === 'id' ? 'Tempat Fotokopi' : 'Copy Center', description: language === 'id' ? 'Diskon 15% untuk penggandaan dokumen' : '15% off document copying', code: 'PPIA15COPY', validUntil: '2026-12-31' },
-    { name: language === 'id' ? 'Toko Buku' : 'Bookstore', description: language === 'id' ? 'Diskon 10% untuk semua buku' : '10% off all books', code: 'PPIA10BOOKS', validUntil: '2026-12-31' },
+    {
+      name: 'RACC',
+      description: '- Financial support of AUD 1,500 over 3 years (paid - lumpsum)\n- Discounted service fee for TR - 485 visa\n- In-person event attendees: $200 RACC vouchers, win lucky draw prizes\n- O-Week participants will also be given goody bags supplied by RACC.',
+      code: '- Instagram static posts: Once every two months. [Google Drive Link Provided]\n- Instagram story posts: 2x Monthly\n- Liking RACC posts.',
+      validUntil: 'May 1, 2028',
+    },
+    {
+      name: 'Happy Shop',
+      description: '- Provide 5% discount for PPIA cardholders\n- Acknowledge PPIA Queensland as one of Happy Shop Indonesian Groceries proud partners (Posters to be put up)',
+      code: '- 1 Instagram story and 1 post per month\n- 5% Discount when opening a stall at Pesta Rakyat\n- Adlibs on PPIAQ\'s events (opening and closing)\n- Medium logo size on event publication materials (e.g. "Sponsored by:")',
+      validUntil: 'July 28, 2027',
+    },
+    {
+      name: 'Shalom St Lucia',
+      description: '- Provide 5% discount for PPIA cardholders - cash terms only\n- Acknowledge PPIA Queensland as one of Happy Shop Indonesian Groceries proud partners (Posters to be put up)',
+      code: '- 1 Instagram story and 1 post per month\n- 5% Discount when opening a stall at Pesta Rakyat\n- Adlibs on PPIAQ\'s events (opening and closing)\n- Medium logo size on event publication materials (e.g. "Sponsored by:")',
+      validUntil: 'March 18, 2027',
+    },
+    {
+      name: 'Sendok Garpu [TBD]',
+      description: '- Provide 10% discount for PPIA cardholders\n- Acknowledge PPIA Queensland as one of Happy Shop Indonesian Groceries proud partners (Posters to be put up)',
+      code: '- 1 Instagram story and 1 post per month\n- Re-sharing of SG\'s Instagram post on PPIAQ\'s IG story\n- 10% Discount when opening a stall at Pesta Rakyat\n- Adlibs on PPIAQ\'s events (opening and closing)\n- Large logo size on event publication materials (e.g. "Sponsored by:")',
+      validUntil: 'March 4, 2027',
+    },
+    {
+      name: "Tuya's Taste",
+      description: '- Provide 10% discount on agreed items for PPIA cardholders (direct buying from Tuya Taste store, including online store), Tuya Taste weekly market, and any Tuya Taste stall at special events such as Pesta Rakyat).\n- Acknowledge PPIA Queensland as one of Tuya Taste proud partners',
+      code: '- 2 Instagram story and 1 post per month\n- 10% Discount when opening a stall at Pesta Rakyat\n- Adlibs on PPIAQ\'s events (opening and closing)\n- Large logo size on event publication materials (e.g. "Sponsored by:")',
+      validUntil: 'May 14, 2027',
+    },
+    {
+      name: 'Uumu Tea',
+      description: '- Buy 1 Large drink get 1 free (limited to 1 person per pop up)\n- 10% off catering orders',
+      code: '- Guarantee a 10% discount for tenant fee at Pesta Rakyat 2026 (either pre or main event)\n- 2 Instagram posts on PPIAQ feed per MoU period\n- 2 Instagram reels / TikTok video per MoU period',
+      validUntil: 'December 31, 2026',
+    },
   ];
 
   const discounts = dbLoaded && dbDiscounts.length > 0
@@ -129,6 +162,9 @@ export default function CommunityBoardPage() {
   const resources = dbLoaded && dbResources.length > 0
     ? Object.entries(dbResourcesByCategory).map(([category, items]) => ({ category, items }))
     : fallbackResources;
+  const filteredResources = resources.filter(
+    (resource) => !['Accommodation & Housing', 'Akomodasi & Perumahan'].includes(resource.category)
+  );
 
   const fallbackAnnouncements = [
     { title: language === 'id' ? 'Pesta Rakyat 2026' : 'Pesta Rakyat 2026', date: '2026-08-17', description: language === 'id' ? 'Bergabunglah dengan perayaan Indonesian Independence Day terbesar di Queensland!' : 'Join the biggest Indonesian Independence Day celebration in Queensland!' },
@@ -163,52 +199,38 @@ export default function CommunityBoardPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {discounts.map((discount, i) => (
               <div key={i} className="bg-white rounded-2xl border-2 border-[#FEB602] p-6 hover:shadow-lg transition-all">
-                <h3 className="font-bold text-lg text-[#B64847] mb-2">{discount.name}</h3>
-                <p className="text-gray-600 text-sm mb-4">{discount.description}</p>
+                <h3 className="font-bold text-lg text-[#B64847] mb-4">{discount.name}</h3>
+
+                <div className="mb-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-2">
+                    {language === 'id' ? 'Benefit untuk PPIAQ' : 'Benefits for PPIAQ'}
+                  </p>
+                  <p className="text-gray-600 text-sm whitespace-pre-line leading-relaxed">{discount.description}</p>
+                </div>
 
                 <div className="bg-[#FEB602]/10 rounded-xl p-4 mb-4">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
-                    {language === 'id' ? 'Kode Diskon' : 'Discount Code'}
+                    {language === 'id' ? 'Kewajiban Partnership' : 'Partnership Obligation'}
                   </p>
-                  <p className="text-2xl font-bold text-[#B64847] font-mono">{discount.code}</p>
+                  <p className="text-sm font-semibold text-[#B64847] whitespace-pre-line leading-relaxed">{discount.code}</p>
                 </div>
 
                 <p className="text-[10px] text-gray-400">
-                  {language === 'id' ? 'Berlaku hingga' : 'Valid until'}: {new Date(discount.validUntil).toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')}
+                  {language === 'id' ? 'Kontrak berakhir' : 'Contract end date'}:{' '}
+                  {(() => {
+                    const parsedDate = new Date(discount.validUntil);
+                    return Number.isNaN(parsedDate.getTime())
+                      ? discount.validUntil
+                      : parsedDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US');
+                  })()}
                 </p>
               </div>
             ))}
           </div>
         </section>
 
-        {/* Resources */}
-        <section className="mb-16">
-          <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-8">
-            {language === 'id' ? 'Sumber Daya & Vendor' : 'Resources & Vendors'}
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {resources.map((resource, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-[#E4DBCA] p-6 hover:shadow-lg transition-all">
-                <h3 className="font-bold text-lg text-[#B64847] mb-4">{resource.category}</h3>
-
-                <div className="space-y-3">
-                  {resource.items.map((item, j) => (
-                    <div key={j} className="border-l-4 border-[#FEB602] pl-4 py-2">
-                      <p className="font-bold text-sm">{item.name}</p>
-                      <p className="text-[10px] text-gray-500 flex items-center gap-1">
-                        📍 {item.location}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Announcements */}
-        <section>
+        <section className="mb-16">
           <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-8">
             {language === 'id' ? 'Pengumuman & Update' : 'Announcements & Updates'}
           </h2>
@@ -223,6 +245,32 @@ export default function CommunityBoardPage() {
                   </span>
                 </div>
                 <p className="text-gray-600">{announcement.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Resources */}
+        <section>
+          <h2 className="font-tan-angleton font-bold text-3xl text-[#B64847] mb-8">
+            {language === 'id' ? 'Sumber Daya & Vendor' : 'Resources & Vendors'}
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {filteredResources.map((resource, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-[#E4DBCA] p-6 hover:shadow-lg transition-all">
+                <h3 className="font-bold text-lg text-[#B64847] mb-4">{resource.category}</h3>
+
+                <div className="space-y-3">
+                  {resource.items.map((item, j) => (
+                    <div key={j} className="border-l-4 border-[#FEB602] pl-4 py-2">
+                      <p className="font-bold text-sm">{item.name}</p>
+                      <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                        📍 {item.location}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>

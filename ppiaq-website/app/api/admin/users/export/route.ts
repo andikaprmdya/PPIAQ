@@ -3,6 +3,7 @@ import { getAllNewsletterSubscribers, getAllUsers, getUsersByStatus } from '@/li
 import { checkAdmin } from '@/lib/auth/check-admin';
 import * as XLSX from 'xlsx';
 import { UserStatus } from '@prisma/client';
+import { isEligibleForMembershipList } from '@/lib/membership-rules';
 
 type ExportScope = 'all' | 'pending' | 'approved' | 'rejected' | 'active' | 'nonactive' | 'newsletter';
 const USER_HEADERS = [
@@ -106,8 +107,14 @@ export async function GET(request: NextRequest) {
           : scope === 'nonactive'
           ? (await getUsersByStatus('approved')).filter((user) => !isActiveMember(user))
           : await getAllUsers();
+      const filteredUsers = users.filter((member) =>
+        isEligibleForMembershipList({
+          university: member.university,
+          nationality: member.nationality,
+        })
+      );
 
-      exportData = users.map((user) => ({
+      exportData = filteredUsers.map((user) => ({
         'Member No': user.memberNo || '',
         'Nama Lengkap': `${user.firstName} ${user.lastName}`.trim(),
         'Email address': user.email,

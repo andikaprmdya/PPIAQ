@@ -6,6 +6,7 @@ import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import bcryptjs from 'bcryptjs';
 import { createHash } from 'crypto';
+import { isEligibleForMembershipList } from '@/lib/membership-rules';
 
 type ImportRow = Record<string, unknown>;
 
@@ -180,6 +181,19 @@ export async function POST(request: NextRequest) {
         const intake = normalizeOrNA(getCellValue(row, ['Intake']));
         const expectedGraduation = normalizeOrNA(getCellValue(row, ['Expected Graduation']));
         const nationality = getCellValue(row, ['Nationality']) || 'Indonesia';
+
+        if (
+          !isEligibleForMembershipList({
+            university,
+            nationality,
+          })
+        ) {
+          results.skipped++;
+          results.errors.push(
+            `Row ${index + 2}: Griffith University membership list only accepts Indonesian nationality`
+          );
+          continue;
+        }
 
         const rawMembership = getCellValue(row, ['Membership Type']).toLowerCase();
         const rawStatus = getCellValue(row, ['Status']).toLowerCase();

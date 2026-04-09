@@ -44,6 +44,50 @@ function BilingualInput({
   );
 }
 
+function BilingualTextarea({
+  label,
+  value,
+  onChange,
+  englishLabel,
+  indonesianLabel,
+  englishPlaceholder,
+  indonesianPlaceholder,
+}: {
+  label: string;
+  value: BilingualField;
+  onChange: (v: BilingualField) => void;
+  englishLabel: string;
+  indonesianLabel: string;
+  englishPlaceholder: string;
+  indonesianPlaceholder: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <p className={labelClass}>{label}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div>
+          <p className="text-[9px] font-bold text-[#886644] mb-1">{englishLabel}</p>
+          <textarea
+            className={`${inputClass} min-h-28 resize-y`}
+            placeholder={englishPlaceholder}
+            value={value.en}
+            onChange={e => onChange({ ...value, en: e.target.value })}
+          />
+        </div>
+        <div>
+          <p className="text-[9px] font-bold text-[#886644] mb-1">{indonesianLabel}</p>
+          <textarea
+            className={`${inputClass} min-h-28 resize-y`}
+            placeholder={indonesianPlaceholder}
+            value={value.id}
+            onChange={e => onChange({ ...value, id: e.target.value })}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface Discount {
   id: string;
   name: BilingualField;
@@ -145,7 +189,7 @@ export default function AdminCommunityBoardPage() {
     if (res.ok) setAnnouncements(await res.json());
   };
 
-  // ── DISCOUNTS ──────────────────────────────────────────────────
+  // ── PARTNER BENEFITS ───────────────────────────────────────────
   const handleDiscountSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -317,34 +361,47 @@ export default function AdminCommunityBoardPage() {
           {/* Form */}
           <div className="bg-white rounded-2xl border border-[#E4DBCA] p-6">
             <h3 className="font-bold text-lg text-[#B64847] mb-4">
-              {editingDiscount ? t('admin.communityBoard.discount.edit', 'Edit Discount') : t('admin.communityBoard.discount.add', 'Add Discount')}
+              {editingDiscount ? t('admin.communityBoard.discount.edit', 'Edit Partner Entry') : t('admin.communityBoard.discount.add', 'Add Partner Entry')}
             </h3>
             <form onSubmit={handleDiscountSubmit} className="space-y-4">
               <BilingualInput
-                label={getTranslation(translations.common.name, language)}
+                label={t('admin.communityBoard.discount.partnerName', 'Partner Name')}
                 value={discountForm.name}
                 onChange={v => setDiscountForm(f => ({ ...f, name: v }))}
                 englishLabel={getTranslation(translations.bilingualInput.english, language)}
                 indonesianLabel={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
-                englishPlaceholder={getTranslation(translations.bilingualInput.english, language)}
-                indonesianPlaceholder={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+                englishPlaceholder={t('admin.communityBoard.discount.partnerNamePlaceholderEn', 'e.g. RACC')}
+                indonesianPlaceholder={t('admin.communityBoard.discount.partnerNamePlaceholderId', 'mis. RACC')}
               />
-              <BilingualInput
-                label={getTranslation(translations.common.description, language)}
+              <BilingualTextarea
+                label={t('admin.communityBoard.discount.benefits', 'Benefits for PPIAQ')}
                 value={discountForm.description}
                 onChange={v => setDiscountForm(f => ({ ...f, description: v }))}
                 englishLabel={getTranslation(translations.bilingualInput.english, language)}
                 indonesianLabel={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
-                englishPlaceholder={getTranslation(translations.bilingualInput.english, language)}
-                indonesianPlaceholder={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
+                englishPlaceholder={t('admin.communityBoard.discount.benefitsPlaceholderEn', 'Write partner benefits for PPIAQ')}
+                indonesianPlaceholder={t('admin.communityBoard.discount.benefitsPlaceholderId', 'Tulis benefit partner untuk PPIAQ')}
               />
               <div>
-                <label className={labelClass}>{t('admin.communityBoard.discount.code', 'Discount Code')}</label>
-                <input className={inputClass} placeholder={t('admin.communityBoard.discount.codePlaceholder', 'e.g. PPIA20')} value={discountForm.code} onChange={e => setDiscountForm(f => ({ ...f, code: e.target.value }))} required />
+                <label className={labelClass}>{t('admin.communityBoard.discount.code', 'Partnership Obligation')}</label>
+                <textarea
+                  className={`${inputClass} min-h-28 resize-y`}
+                  placeholder={t('admin.communityBoard.discount.codePlaceholder', 'Write obligations agreed with the partner')}
+                  value={discountForm.code}
+                  onChange={e => setDiscountForm(f => ({ ...f, code: e.target.value }))}
+                  required
+                />
               </div>
               <div>
-                <label className={labelClass}>{t('admin.communityBoard.discount.validUntil', 'Valid Until')}</label>
-                <input type="date" className={inputClass} value={discountForm.validUntil} onChange={e => setDiscountForm(f => ({ ...f, validUntil: e.target.value }))} required />
+                <label className={labelClass}>{t('admin.communityBoard.discount.validUntil', 'Contract End Date')}</label>
+                <input
+                  type="text"
+                  className={inputClass}
+                  placeholder={t('admin.communityBoard.discount.validUntilPlaceholder', 'e.g. May 1, 2028')}
+                  value={discountForm.validUntil}
+                  onChange={e => setDiscountForm(f => ({ ...f, validUntil: e.target.value }))}
+                  required
+                />
               </div>
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="discountActive" checked={discountForm.isActive} onChange={e => setDiscountForm(f => ({ ...f, isActive: e.target.checked }))} />
@@ -366,17 +423,29 @@ export default function AdminCommunityBoardPage() {
 
           {/* List */}
           <div className="space-y-3">
-            {discounts.length === 0 && <p className="text-gray-400 text-sm">{t('admin.communityBoard.discount.noData', 'No discounts yet. Add one!')}</p>}
+            {discounts.length === 0 && <p className="text-gray-400 text-sm">{t('admin.communityBoard.discount.noData', 'No partner entries yet. Add one!')}</p>}
             {discounts.map(d => (
               <div key={d.id} className={`bg-white rounded-2xl border p-4 ${d.isActive ? 'border-[#FEB602]' : 'border-[#E4DBCA] opacity-60'}`}>
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <p className="font-bold text-[#B64847]">{language === 'id' ? d.name.id : d.name.en}</p>
-                    <p className="text-xs text-gray-500">{language === 'id' ? d.description.id : d.description.en}</p>
-                  </div>
-                  <span className="font-mono font-bold text-sm bg-[#FEB602]/20 text-[#B64847] px-2 py-1 rounded-lg">{d.code}</span>
+                <div className="mb-3">
+                  <p className="font-bold text-[#B64847] text-base">{language === 'id' ? d.name.id : d.name.en}</p>
                 </div>
-                <p className="text-[10px] text-gray-400 mb-3">{t('admin.communityBoard.discount.validUntilLabel', 'Valid until:')} {d.validUntil} · {d.isActive ? `✅ ${t('admin.communityBoard.statusActive', 'Active')}` : `❌ ${t('admin.communityBoard.statusInactive', 'Inactive')}`}</p>
+                <div className="space-y-3 mb-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      {t('admin.communityBoard.discount.benefitsLabel', 'Benefits for PPIAQ')}
+                    </p>
+                    <p className="text-xs text-gray-600 whitespace-pre-line leading-relaxed">{language === 'id' ? d.description.id : d.description.en}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      {t('admin.communityBoard.discount.obligationLabel', 'Partnership Obligation')}
+                    </p>
+                    <p className="text-xs text-[#B64847] font-semibold whitespace-pre-line leading-relaxed">{d.code}</p>
+                  </div>
+                </div>
+                <p className="text-[10px] text-gray-400 mb-3">
+                  {t('admin.communityBoard.discount.validUntilLabel', 'Contract end date:')} {d.validUntil} · {d.isActive ? `✅ ${t('admin.communityBoard.statusActive', 'Active')}` : `❌ ${t('admin.communityBoard.statusInactive', 'Inactive')}`}
+                </p>
                 <div className="flex gap-2">
                   <button onClick={() => startEditDiscount(d)} className="px-3 py-1 bg-[#FFFAF5] border border-[#E4DBCA] text-[#B64847] font-bold rounded-lg text-xs hover:border-[#B64847] transition-all">{getTranslation(translations.common.edit, language)}</button>
                   <button onClick={() => handleDeleteDiscount(d.id)} className="px-3 py-1 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-all">{getTranslation(translations.common.delete, language)}</button>

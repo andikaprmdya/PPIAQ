@@ -476,6 +476,11 @@ export default function AdminDashboardPage() {
               ? 'Export follows the selected tab + active/non-active filter'
               : 'Export follows the currently selected tab'}
           </p>
+          <p className="text-xs text-[#886644] font-semibold self-center">
+            {language === 'id'
+              ? 'Catatan: daftar Griffith University hanya menampilkan kewarganegaraan Indonesia.'
+              : 'Note: Griffith University list only includes Indonesian nationality.'}
+          </p>
         </div>
 
         {/* Import Modal */}
@@ -763,6 +768,9 @@ export default function AdminDashboardPage() {
                       {language === 'id' ? 'Jurusan' : 'Major'}
                     </th>
                     <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">
+                      {language === 'id' ? 'Tgl Kelulusan' : 'Grad Date'}
+                    </th>
+                    <th className="px-4 py-3 text-left font-bold uppercase text-xs tracking-widest">
                       {language === 'id' ? 'Keanggotaan' : 'Membership'}
                     </th>
                     {activeTab === 'APPROVED' && (
@@ -791,6 +799,14 @@ export default function AdminDashboardPage() {
                       <td className="px-4 py-3 text-sm text-[#303030]">{appUser.email}</td>
                       <td className="px-4 py-3 text-sm text-[#303030]">{appUser.university}</td>
                       <td className="px-4 py-3 text-sm text-[#303030]">{appUser.major}</td>
+                      <td className="px-4 py-3 text-sm text-[#303030]">
+                        {(() => {
+                          const gradDate = parseDateValue(appUser.expectedGraduation);
+                          return gradDate
+                            ? gradDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')
+                            : (appUser.expectedGraduation || '-');
+                        })()}
+                      </td>
                       <td className="px-4 py-3 text-sm text-[#303030]">
                         {String(appUser.membershipType).toLowerCase() === 'ordinary'
                           ? language === 'id'
@@ -878,6 +894,15 @@ export default function AdminDashboardPage() {
                   <p>
                     <span className="font-bold text-[#886644]">{language === 'id' ? 'Tingkat:' : 'Level:'}</span>{' '}
                     {appUser.educationLevel}
+                  </p>
+                  <p>
+                    <span className="font-bold text-[#886644]">{language === 'id' ? 'Tgl Kelulusan:' : 'Grad Date:'}</span>{' '}
+                    {(() => {
+                      const gradDate = parseDateValue(appUser.expectedGraduation);
+                      return gradDate
+                        ? gradDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')
+                        : (appUser.expectedGraduation || '-');
+                    })()}
                   </p>
                   <p>
                     <span className="font-bold text-[#886644]">{language === 'id' ? 'Keanggotaan:' : 'Type:'}</span>{' '}
@@ -1070,9 +1095,16 @@ export default function AdminDashboardPage() {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
-                      {language === 'id' ? 'Perkiraan Lulus' : 'Expected Graduation'}
+                      {language === 'id' ? 'Tanggal Perkiraan Kelulusan' : 'Expected Graduation Date'}
                     </p>
-                    <p className="text-sm font-medium">{selectedUser.expectedGraduation || '-'}</p>
+                    <p className="text-sm font-medium">
+                      {(() => {
+                        const gradDate = parseDateValue(selectedUser.expectedGraduation);
+                        return gradDate
+                          ? gradDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US')
+                          : (selectedUser.expectedGraduation || '-');
+                      })()}
+                    </p>
                   </div>
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">

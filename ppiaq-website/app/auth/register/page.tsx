@@ -22,8 +22,7 @@ interface FormData {
   university: string;
   otherUniversity: string;
   major: string;
-  expectedGraduationSemester: string;
-  expectedGraduationYear: string;
+  expectedGraduationDate: string;
 
   // Step 3: Account & Payment
   email: string;
@@ -42,8 +41,6 @@ const UNIVERSITIES = [
 ];
 
 const EDUCATION_LEVELS = ['Diploma', 'S1 (Bachelor)', 'S2 (Master)', 'S3 (Doctorate)', 'Postdoctoral'];
-const GRADUATION_SEMESTERS = ['Semester 1', 'Semester 2'];
-const GRADUATION_YEARS = Array.from({ length: 10 }, (_, i) => String(new Date().getFullYear() + i));
 
 export default function RegisterPage() {
   const { language } = useLanguage();
@@ -64,8 +61,7 @@ export default function RegisterPage() {
     university: '',
     otherUniversity: '',
     major: '',
-    expectedGraduationSemester: '',
-    expectedGraduationYear: '',
+    expectedGraduationDate: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -231,12 +227,8 @@ export default function RegisterPage() {
         setError(language === 'id' ? 'Jurusan harus diisi' : 'Major is required');
         return false;
       }
-      if (!formData.expectedGraduationSemester) {
-        setError(language === 'id' ? 'Semester kelulusan harus dipilih' : 'Graduation semester is required');
-        return false;
-      }
-      if (!formData.expectedGraduationYear) {
-        setError(language === 'id' ? 'Tahun kelulusan harus dipilih' : 'Graduation year is required');
+      if (!formData.expectedGraduationDate) {
+        setError(language === 'id' ? 'Tanggal perkiraan kelulusan harus diisi' : 'Expected graduation date is required');
         return false;
       }
       // Check if Rubric link was clicked for UQ, QUT, Griffith, JCU
@@ -356,8 +348,7 @@ export default function RegisterPage() {
             educationLevel: formData.educationLevel,
             university: finalUniversity,
             major: formData.major.trim(),
-            expectedGraduationSemester: formData.expectedGraduationSemester,
-            expectedGraduationYear: formData.expectedGraduationYear,
+            expectedGraduationDate: formData.expectedGraduationDate,
             birthDate: formData.birthDate,
             phoneNumber: formData.phoneNumber.trim(),
             studentId: formData.studentId.trim(),
@@ -645,37 +636,15 @@ export default function RegisterPage() {
 
                   <div className="group">
                     <label className="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 group-focus-within:text-[#B64847] transition-colors">
-                      {language === 'id' ? 'Perkiraan Kelulusan' : 'Expected Graduation'} *
+                      {language === 'id' ? 'Tanggal Perkiraan Kelulusan' : 'Expected Graduation Date'} *
                     </label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <select
-                        name="expectedGraduationSemester"
-                        value={formData.expectedGraduationSemester}
-                        onChange={handleInputChange}
-                        className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium appearance-none cursor-pointer"
-                      >
-                        <option value="">{language === 'id' ? 'Pilih semester' : 'Select semester'}</option>
-                        {GRADUATION_SEMESTERS.map((semester) => (
-                          <option key={semester} value={semester}>
-                            {semester}
-                          </option>
-                        ))}
-                      </select>
-
-                      <select
-                        name="expectedGraduationYear"
-                        value={formData.expectedGraduationYear}
-                        onChange={handleInputChange}
-                        className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium appearance-none cursor-pointer"
-                      >
-                        <option value="">{language === 'id' ? 'Pilih tahun' : 'Select year'}</option>
-                        {GRADUATION_YEARS.map((year) => (
-                          <option key={year} value={year}>
-                            {year}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <input
+                      type="date"
+                      name="expectedGraduationDate"
+                      value={formData.expectedGraduationDate}
+                      onChange={handleInputChange}
+                      className="w-full bg-transparent border-b border-[#E4DBCA] py-2 focus:outline-none focus:border-[#B64847] transition-all text-sm font-medium"
+                    />
                   </div>
 
                   {/* University-specific registration link */}

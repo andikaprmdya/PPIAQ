@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getUsersByStatus, updateUser, getUserById } from '@/lib/database/db';
 import { checkAdmin } from '@/lib/auth/check-admin';
+import { isEligibleForMembershipList } from '@/lib/membership-rules';
+import { getMembershipApplicationTemplate, sendEmail } from '@/lib/email/brevo';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,9 +23,19 @@ export async function GET(request: NextRequest) {
     }
 
     const users = await getUsersByStatus(status);
+    const filteredUsers = users.filter((member) =>
+      isEligibleForMembershipList({
+        university: member.university,
+        nationality: member.nationality,
+      })
+    );
 
     // Return users without password
-    const usersWithoutPassword = users.map(({ password, ...u }) => u);
+    const usersWithoutPassword = filteredUsers.map((member) => {
+      const userWithoutPassword = { ...member };
+      delete (userWithoutPassword as { password?: string }).password;
+      return userWithoutPassword;
+    });
 
     return NextResponse.json(usersWithoutPassword, { status: 200 });
   } catch (error) {
@@ -56,6 +68,14 @@ export async function PUT(request: NextRequest) {
     const updates = await request.json();
     console.log('Updating user', userId, 'with data:', updates);
 
+    const existingUser = await getUserById(userId);
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
     // Update the user
     const user = await updateUser(userId, updates);
 
@@ -66,8 +86,46 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    const previousStatus = String(existingUser.status || '').toUpperCase();
+    const nextStatus = String(user.status || '').toUpperCase();
+    const statusChanged = previousStatus !== nextStatus;
+
+    if (statusChanged) {
+      const statusForTemplateMap: Record<string, 'pending' | 'approved' | 'rejected'> = {
+        PENDING: 'pending',
+        APPROVED: 'approved',
+        REJECTED: 'rejected',
+      };
+      const statusForTemplate = statusForTemplateMap[nextStatus];
+
+      if (statusForTemplate) {
+        try {
+          const rejectionReason =
+            typeof updates?.rejectionReason === 'string' && updates.rejectionReason.trim()
+              ? updates.rejectionReason.trim()
+              : user.rejectionReason || undefined;
+
+          const emailTemplate = getMembershipApplicationTemplate(
+            user.firstName,
+            user.lastName,
+            statusForTemplate,
+            rejectionReason
+          );
+
+          await sendEmail({
+            to: [{ email: user.email, name: `${user.firstName} ${user.lastName}` }],
+            subject: `PPIAQ Membership Application - ${nextStatus}`,
+            htmlContent: emailTemplate,
+          });
+        } catch (emailError) {
+          console.error('Failed to send status update email:', emailError);
+        }
+      }
+    }
+
     // Return user without password
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user };
+    delete (userWithoutPassword as { password?: string }).password;
 
     return NextResponse.json(
       {

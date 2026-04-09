@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
       educationLevel,
       university,
       major,
+      expectedGraduationDate,
       expectedGraduationSemester,
       expectedGraduationYear,
       birthDate,
@@ -39,6 +40,10 @@ export async function POST(request: NextRequest) {
 
     const normalizedMembershipTypeRaw = String(membershipType || '').toLowerCase();
     const normalizedNationality = String(nationality || '').trim();
+    const normalizedExpectedGraduation = String(
+      expectedGraduationDate ||
+      [expectedGraduationSemester, expectedGraduationYear].filter(Boolean).join(' ')
+    ).trim();
 
     // Validation
     if (
@@ -50,8 +55,7 @@ export async function POST(request: NextRequest) {
       !educationLevel ||
       !university ||
       !major ||
-      !expectedGraduationSemester ||
-      !expectedGraduationYear ||
+      !normalizedExpectedGraduation ||
       !birthDate ||
       !normalizedMembershipTypeRaw ||
       !paymentProofUrl
@@ -129,6 +133,7 @@ export async function POST(request: NextRequest) {
       educationLevel,
       university,
       major,
+      normalizedExpectedGraduation,
       birthDate,
       normalizedMembershipType,
       paymentProofUrl,
@@ -162,7 +167,7 @@ export async function POST(request: NextRequest) {
                 <p><strong>University:</strong> ${university}</p>
                 <p><strong>Major:</strong> ${major}</p>
                 <p><strong>Education Level:</strong> ${educationLevel}</p>
-                <p><strong>Expected Graduation:</strong> ${expectedGraduationSemester} ${expectedGraduationYear}</p>
+                <p><strong>Expected Graduation:</strong> ${normalizedExpectedGraduation}</p>
                 <p><strong>Nationality:</strong> ${normalizedNationality}</p>
                 <p><strong>Birth Date:</strong> ${birthDate}</p>
                 <p><strong>Membership Type:</strong> ${normalizedMembershipType}</p>
