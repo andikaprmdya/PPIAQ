@@ -111,6 +111,12 @@ export default function HomePage() {
 
   const displayFAQ = getFAQDisplay();
   const communityEvents = events.slice(0, 3);
+  const handlePreviousImage = () => {
+    setCurrentBg((prev) => (prev - 1 + HERO_SLIDER_IMAGES.length) % HERO_SLIDER_IMAGES.length);
+  };
+  const handleNextImage = () => {
+    setCurrentBg((prev) => (prev + 1) % HERO_SLIDER_IMAGES.length);
+  };
 
   return (
     <main className="font-montserrat text-[#303030] bg-[#FFFAF5] overflow-x-hidden">
@@ -169,6 +175,22 @@ export default function HomePage() {
       <section className="py-14 px-6 bg-[#FFFAF5]">
         <div className="max-w-6xl mx-auto">
           <div className="relative w-full aspect-[16/7] rounded-2xl overflow-hidden border border-[#E4DBCA] shadow-md bg-white">
+            <button
+              type="button"
+              onClick={handlePreviousImage}
+              aria-label={language === 'id' ? 'Gambar sebelumnya' : 'Previous image'}
+              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 w-10 h-10 rounded-full bg-black/45 text-white font-bold text-lg hover:bg-black/65 transition-all"
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              onClick={handleNextImage}
+              aria-label={language === 'id' ? 'Gambar selanjutnya' : 'Next image'}
+              className="absolute right-3 top-1/2 z-20 -translate-y-1/2 w-10 h-10 rounded-full bg-black/45 text-white font-bold text-lg hover:bg-black/65 transition-all"
+            >
+              →
+            </button>
             {HERO_SLIDER_IMAGES.map((image, index) => (
               <Image
                 key={image}
