@@ -297,6 +297,7 @@ export async function createCMSEvent(data: Record<string, unknown>) {
       month: data.month as string,
       title: data.title as Prisma.InputJsonValue,
       date: data.date as string,
+      organizer: data.organizer as string | undefined,
       location: data.location as Prisma.InputJsonValue,
       description: data.description as Prisma.InputJsonValue,
       image: data.image as string,

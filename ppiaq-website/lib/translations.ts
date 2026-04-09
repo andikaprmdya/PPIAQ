@@ -187,6 +187,7 @@ export const translations = {
     month: { id: 'Bulan', en: 'Month' },
     title: { id: 'Judul', en: 'Title' },
     date: { id: 'Tanggal', en: 'Date' },
+    organizer: { id: 'Penyelenggara', en: 'Organizer' },
     location: { id: 'Lokasi', en: 'Location' },
     description: { id: 'Deskripsi', en: 'Description' },
     question: { id: 'Pertanyaan', en: 'Question' },

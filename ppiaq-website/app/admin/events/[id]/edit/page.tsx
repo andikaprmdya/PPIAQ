@@ -17,6 +17,7 @@ interface EventData {
   month: string;
   title: { id: string; en: string };
   date: string;
+  organizer?: string;
   location: { id: string; en: string };
   description: { id: string; en: string };
   image: string;
@@ -132,6 +133,26 @@ export default function EditEventPage() {
             required
             className="w-full px-4 py-3 border border-[#E4DBCA] rounded-xl focus:outline-none focus:border-[#B64847]"
           />
+        </FormField>
+
+        <FormField label={getTranslation(translations.common.organizer, language)} required>
+          <input
+            type="text"
+            value={formData.organizer || ''}
+            onChange={(e) => setFormData({ ...formData, organizer: e.target.value })}
+            placeholder={language === 'id' ? 'mis. PPIAQ, UQISA, QUT' : 'e.g., PPIAQ, UQISA, QUT'}
+            list="event-organizer-suggestions"
+            required
+            className="w-full px-4 py-3 border border-[#E4DBCA] rounded-xl focus:outline-none focus:border-[#B64847]"
+          />
+          <datalist id="event-organizer-suggestions">
+            <option value="PPIAQ" />
+            <option value="UQISA" />
+            <option value="QUT" />
+            <option value="Griffith" />
+            <option value="JCU" />
+            <option value="Other" />
+          </datalist>
         </FormField>
 
         <BilingualInput

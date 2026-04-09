@@ -13,6 +13,7 @@ interface Event {
   month: string;
   title: { id: string; en: string };
   date: string;
+  organizer?: string;
   location: { id: string; en: string };
   status: 'DRAFT' | 'PUBLISHED';
   createdAt: Date;
@@ -131,6 +132,9 @@ export default function EventsManagementPage() {
                   {getTranslation(translations.common.title, language)}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-[#886644]">
+                  {getTranslation(translations.common.organizer, language)}
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-[#886644]">
                   {getTranslation(translations.common.location, language)}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest text-[#886644]">
@@ -150,6 +154,9 @@ export default function EventsManagementPage() {
                   </td>
                   <td className="px-6 py-4 text-sm text-[#303030]">
                     {language === 'id' ? event.title.id : event.title.en}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-[#303030] whitespace-nowrap">
+                    {event.organizer || 'Other'}
                   </td>
                   <td className="px-6 py-4 text-sm text-[#303030]">
                     {language === 'id' ? event.location.id : event.location.en}

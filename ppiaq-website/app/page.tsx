@@ -21,10 +21,13 @@ interface EventItem {
   month: string;
   title: { id: string; en: string };
   date: string;
+  organizer?: string | null;
   location: { id: string; en: string };
   image: string;
   registrationUrl?: string;
 }
+
+type EventOrganizerFilter = 'all' | 'ppiaq' | 'uqisa' | 'qut' | 'griffith' | 'jcu' | 'other';
 
 const HERO_SLIDER_IMAGES = [
   '/images/pesra 1.jpg',
@@ -43,6 +46,49 @@ const eventDetailRoutes: Record<string, string> = {
   'UQ St. Lucia Market Day - Join UQISA / PPIA UQ': '/events/uq-market-day',
 };
 
+const EVENT_ORGANIZER_FILTERS: Array<{ key: EventOrganizerFilter; label: { id: string; en: string } }> = [
+  { key: 'all', label: { id: 'Semua', en: 'All' } },
+  { key: 'ppiaq', label: { id: 'PPIAQ', en: 'PPIAQ' } },
+  { key: 'uqisa', label: { id: 'UQISA', en: 'UQISA' } },
+  { key: 'qut', label: { id: 'QUT', en: 'QUT' } },
+  { key: 'griffith', label: { id: 'Griffith', en: 'Griffith' } },
+  { key: 'jcu', label: { id: 'JCU', en: 'JCU' } },
+  { key: 'other', label: { id: 'Lainnya', en: 'Other' } },
+];
+
+const EVENT_ORGANIZER_LABELS: Record<EventOrganizerFilter, { id: string; en: string }> = {
+  all: { id: 'Semua', en: 'All' },
+  ppiaq: { id: 'PPIAQ', en: 'PPIAQ' },
+  uqisa: { id: 'UQISA', en: 'UQISA' },
+  qut: { id: 'QUT', en: 'QUT' },
+  griffith: { id: 'Griffith', en: 'Griffith' },
+  jcu: { id: 'JCU', en: 'JCU' },
+  other: { id: 'Lainnya', en: 'Other' },
+};
+
+const mapOrganizerTextToKey = (organizerText: string): Exclude<EventOrganizerFilter, 'all'> => {
+  const normalized = organizerText.toLowerCase();
+
+  if (/uqisa|\buq\b|ppia uq/.test(normalized)) return 'uqisa';
+  if (/qut|isaq|ppia qut/.test(normalized)) return 'qut';
+  if (/griffith|griffin|gisa/.test(normalized)) return 'griffith';
+  if (/jcu|jcuisa/.test(normalized)) return 'jcu';
+  if (/ppiaq|ppiaqueensland|ppia queensland|ppi queensland|queensland chapter/.test(normalized)) return 'ppiaq';
+
+  return 'other';
+};
+
+const getEventOrganizerKey = (event: EventItem): Exclude<EventOrganizerFilter, 'all'> => {
+  if (event.organizer && event.organizer.trim()) {
+    return mapOrganizerTextToKey(event.organizer);
+  }
+
+  const searchableText = `${event.title.en} ${event.title.id} ${event.location.en} ${event.location.id} ${event.registrationUrl || ''}`.toLowerCase();
+
+  if (searchableText.includes('pre-departure')) return 'ppiaq';
+  return mapOrganizerTextToKey(searchableText);
+};
+
 export default function HomePage() {
   const { language } = useLanguage();
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -51,6 +97,7 @@ export default function HomePage() {
   const [faqLoading, setFaqLoading] = useState(true);
   const [events, setEvents] = useState<EventItem[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [selectedOrganizer, setSelectedOrganizer] = useState<EventOrganizerFilter>('all');
   const [currentBg, setCurrentBg] = useState(0);
   const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
 
@@ -110,7 +157,12 @@ export default function HomePage() {
   };
 
   const displayFAQ = getFAQDisplay();
-  const communityEvents = events.slice(0, 3);
+  const communityEvents = events
+    .filter((event) => {
+      if (selectedOrganizer === 'all') return true;
+      return getEventOrganizerKey(event) === selectedOrganizer;
+    })
+    .slice(0, 3);
   const handlePreviousImage = () => {
     setCurrentBg((prev) => (prev - 1 + HERO_SLIDER_IMAGES.length) % HERO_SLIDER_IMAGES.length);
   };
@@ -205,6 +257,26 @@ export default function HomePage() {
             {language === 'id' ? 'Acara Komunitas' : 'Community Event'}
           </h2>
 
+          <div className="flex flex-wrap justify-center gap-3 mb-10">
+            {EVENT_ORGANIZER_FILTERS.map((filterItem) => {
+              const isActive = selectedOrganizer === filterItem.key;
+              return (
+                <button
+                  key={filterItem.key}
+                  type="button"
+                  onClick={() => setSelectedOrganizer(filterItem.key)}
+                  className={`px-4 py-2 rounded-full border text-xs md:text-sm font-bold uppercase tracking-wider transition-all ${
+                    isActive
+                      ? 'bg-[#B64847] text-white border-[#B64847] shadow-sm'
+                      : 'bg-white text-[#886644] border-[#E4DBCA] hover:border-[#B64847] hover:text-[#B64847]'
+                  }`}
+                >
+                  {language === 'id' ? filterItem.label.id : filterItem.label.en}
+                </button>
+              );
+            })}
+          </div>
+
           {eventsLoading ? (
             <div className="text-center py-8 text-[#886644]">
               {language === 'id' ? 'Memuat acara...' : 'Loading events...'}
@@ -218,6 +290,7 @@ export default function HomePage() {
               {communityEvents.map((event) => {
                 const title = language === 'id' ? event.title.id : event.title.en;
                 const location = language === 'id' ? event.location.id : event.location.en;
+                const organizer = getEventOrganizerKey(event);
                 const href = eventDetailRoutes[event.title.en] || event.registrationUrl || '#';
                 const imageSrc = event.image || '/images/PPIAQ_logo.png';
 
@@ -235,6 +308,9 @@ export default function HomePage() {
                       <div className="absolute top-4 left-4 bg-[#B64847] text-white p-2 min-w-12 text-center rounded-md">
                         <p className="text-xl font-bold leading-none">{event.day}</p>
                         <p className="text-xs">{event.month}</p>
+                      </div>
+                      <div className="absolute top-4 right-4 bg-white/95 text-[#B64847] px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border border-[#E4DBCA]">
+                        {language === 'id' ? EVENT_ORGANIZER_LABELS[organizer].id : EVENT_ORGANIZER_LABELS[organizer].en}
                       </div>
                     </div>
                     <div className="p-6">

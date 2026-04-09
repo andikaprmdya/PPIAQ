@@ -122,6 +122,7 @@ model Event {
   description     Json        // { id: string, en: string }
 
   date            String
+  organizer       String?
   image           String      @db.Text // Base64 or URL
   registrationUrl String?
 

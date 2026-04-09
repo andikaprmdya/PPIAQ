@@ -13,6 +13,7 @@ interface Event {
   month: string;
   title: { id: string; en: string };
   date: string;
+  organizer?: string;
   location: { id: string; en: string };
   image: string;
   status: 'DRAFT' | 'PUBLISHED';
@@ -31,6 +32,7 @@ export default function CuratorEventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'DRAFT' | 'PUBLISHED'>('all');
+  const [organizerFilter, setOrganizerFilter] = useState<string>('all');
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; id: string | null }>({
     show: false,
     id: null,
@@ -53,7 +55,18 @@ export default function CuratorEventsPage() {
     }
   };
 
-  const filteredEvents = filter === 'all' ? events : events.filter((event) => event.status === filter);
+  const organizerOptions = Array.from(
+    new Set(events.map((event) => (event.organizer || '').trim()).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b));
+
+  const filteredEvents = events.filter((event) => {
+    const statusMatch = filter === 'all' ? true : event.status === filter;
+    const organizerMatch = organizerFilter === 'all'
+      ? true
+      : (event.organizer || '').trim().toLowerCase() === organizerFilter.toLowerCase();
+
+    return statusMatch && organizerMatch;
+  });
   const publishedCount = events.filter((event) => event.status === 'PUBLISHED').length;
   const draftCount = events.filter((event) => event.status === 'DRAFT').length;
 
@@ -143,6 +156,27 @@ export default function CuratorEventsPage() {
                     : t('curator.events.filters.published', 'Published')}
               </button>
             ))}
+
+            <div className="min-w-[220px]">
+              <label htmlFor="curator-organizer-filter" className="sr-only">
+                {getTranslation(translations.common.organizer, language)}
+              </label>
+              <select
+                id="curator-organizer-filter"
+                value={organizerFilter}
+                onChange={(e) => setOrganizerFilter(e.target.value)}
+                className="w-full rounded-2xl border border-[#E4DBCA] bg-[#FFFAF5] px-4 py-3 text-xs font-bold uppercase tracking-[0.2em] text-[#886644] outline-none transition-all hover:border-[#B64847] focus:border-[#B64847] focus:bg-white"
+              >
+                <option value="all">
+                  {getTranslation(translations.common.all, language)} {getTranslation(translations.common.organizer, language)}
+                </option>
+                {organizerOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
       </section>
@@ -225,12 +259,20 @@ export default function CuratorEventsPage() {
                   </h3>
                 </div>
 
-                <div className="grid gap-4 text-sm font-semibold text-[#303030] sm:grid-cols-2">
+                <div className="grid gap-4 text-sm font-semibold text-[#303030] sm:grid-cols-3">
                   <div className="rounded-[24px] border border-[#E4DBCA] bg-[#FFFAF5] p-4">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#886644]">
                       {getTranslation(translations.common.date, language)}
                     </p>
                     <p className="mt-2 text-lg font-bold">{event.date}</p>
+                  </div>
+                  <div className="rounded-[24px] border border-[#E4DBCA] bg-[#FFFAF5] p-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#886644]">
+                      {getTranslation(translations.common.organizer, language)}
+                    </p>
+                    <p className="mt-2 text-lg font-bold">
+                      {event.organizer || 'Other'}
+                    </p>
                   </div>
                   <div className="rounded-[24px] border border-[#E4DBCA] bg-[#FFFAF5] p-4">
                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#886644]">

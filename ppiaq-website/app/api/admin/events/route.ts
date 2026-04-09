@@ -47,9 +47,9 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // Validation
-    if (!body.day || !body.month || !body.title || !body.date || !body.location) {
+    if (!body.day || !body.month || !body.title || !body.date || !body.location || !body.organizer) {
       return NextResponse.json(
-        { error: 'Missing required fields: day, month, title, date, location' },
+        { error: 'Missing required fields: day, month, title, date, location, organizer' },
         { status: 400 }
       );
     }
@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
       month: body.month,
       title: body.title,
       date: body.date,
+      organizer: body.organizer,
       location: body.location,
       description: body.description || { id: '', en: '' },
       image: body.image || '',

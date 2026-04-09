@@ -42,6 +42,7 @@ export default function CommunityBoardPage() {
   const [dbAnnouncements, setDbAnnouncements] = useState<DBAnnouncement[]>([]);
   const [dbLoaded, setDbLoaded] = useState(false);
   const [selectedDiscountIndex, setSelectedDiscountIndex] = useState(0);
+  const [showDiscountModal, setShowDiscountModal] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -148,11 +149,34 @@ export default function CommunityBoardPage() {
   const safeSelectedDiscountIndex =
     discounts.length === 0 ? -1 : Math.min(selectedDiscountIndex, discounts.length - 1);
   const selectedDiscount = safeSelectedDiscountIndex >= 0 ? discounts[safeSelectedDiscountIndex] : null;
+  const discountCardGradients = [
+    'linear-gradient(135deg, #B64847 0%, #E36D5D 100%)',
+    'linear-gradient(135deg, #886644 0%, #B28859 100%)',
+    'linear-gradient(135deg, #5A7A5E 0%, #8DB596 100%)',
+    'linear-gradient(135deg, #42567B 0%, #6982B4 100%)',
+    'linear-gradient(135deg, #8A4F7D 0%, #C97DB8 100%)',
+    'linear-gradient(135deg, #6B5C4A 0%, #A1856E 100%)',
+  ];
   const formatDiscountDate = (value: string): string => {
     const parsedDate = new Date(value);
     return Number.isNaN(parsedDate.getTime())
       ? value
       : parsedDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US');
+  };
+  const getDiscountBadge = (description: string): string => {
+    const lower = description.toLowerCase();
+    const percentMatch = lower.match(/(\d+)\s*%/);
+    if (percentMatch) return `${percentMatch[1]}%`;
+    if (lower.includes('buy 1') && lower.includes('get 1')) {
+      return 'B1G1';
+    }
+    return language === 'id' ? 'spesial' : 'special';
+  };
+  const getShortHeadline = (description: string): string => {
+    const firstLine = (description.split('\n').find((line) => line.trim()) || '')
+      .replace(/^-+\s*/, '')
+      .trim();
+    return firstLine.length > 70 ? `${firstLine.slice(0, 67)}...` : firstLine;
   };
 
   // Group DB resources by category
@@ -211,100 +235,127 @@ export default function CommunityBoardPage() {
               <button
                 key={i}
                 type="button"
-                onClick={() => setSelectedDiscountIndex(i)}
-                className={`text-left rounded-2xl border-2 p-5 transition-all hover:shadow-lg ${
+                onClick={() => {
+                  setSelectedDiscountIndex(i);
+                  setShowDiscountModal(true);
+                }}
+                style={{ background: discountCardGradients[i % discountCardGradients.length] }}
+                className={`relative overflow-hidden text-left rounded-3xl p-6 min-h-[220px] shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
                   safeSelectedDiscountIndex === i
-                    ? 'bg-white border-[#B64847] shadow-md ring-2 ring-[#FEB602]/40'
-                    : 'bg-white border-[#FEB602]'
+                    ? 'ring-2 ring-[#FEB602]/60'
+                    : ''
                 }`}
               >
-                <div className="flex items-start justify-between gap-3 mb-3">
-                  <h3 className="font-bold text-base text-[#B64847]">{discount.name}</h3>
-                  <span
-                    className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${
-                      safeSelectedDiscountIndex === i
-                        ? 'bg-[#B64847] text-white'
-                        : 'bg-[#FEB602]/20 text-[#886644]'
-                    }`}
-                  >
-                    {safeSelectedDiscountIndex === i
-                      ? (language === 'id' ? 'dipilih' : 'selected')
-                      : (language === 'id' ? 'lihat' : 'view')}
-                  </span>
+                <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-white/15"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/20 to-transparent"></div>
+
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between gap-2 mb-5">
+                    <p className="text-white/90 text-[10px] font-bold uppercase tracking-widest">
+                      {language === 'id' ? 'penawaran mitra' : 'partner offer'}
+                    </p>
+                    <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white/20 text-white">
+                      {getDiscountBadge(discount.description)}
+                    </span>
+                  </div>
+
+                  <h3 className="font-tan-angleton text-2xl leading-tight text-white mb-4">
+                    {discount.name}
+                  </h3>
+
+                  <p className="text-xs text-white/90 mb-6 leading-relaxed">
+                    {getShortHeadline(discount.description)}
+                  </p>
+
+                  <div className="flex items-center justify-between text-[10px] text-white/85">
+                    <span className="font-bold uppercase tracking-widest">
+                      {language === 'id' ? 'lihat detail' : 'view details'}
+                    </span>
+                    <span>
+                      {formatDiscountDate(discount.validUntil)}
+                    </span>
+                  </div>
                 </div>
-
-                <p className="text-[10px] text-gray-500 mb-3">
-                  {language === 'id' ? 'Kontrak berakhir' : 'Contract end date'}:{' '}
-                  {formatDiscountDate(discount.validUntil)}
-                </p>
-
-                <div className="flex flex-wrap gap-2 mb-3">
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-[#FEB602]/20 text-[#886644]">
-                    {(discount.description.split('\n').filter(line => line.trim()).length)}{' '}
-                    {language === 'id' ? 'benefit' : 'benefits'}
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-[#B64847]/10 text-[#B64847]">
-                    {(discount.code.split('\n').filter(line => line.trim()).length)}{' '}
-                    {language === 'id' ? 'kewajiban' : 'obligations'}
-                  </span>
-                </div>
-
-                <p className="text-xs text-gray-600 leading-relaxed">
-                  {(discount.description.split('\n').find(line => line.trim()) || '')
-                    .replace(/^-+\s*/, '')
-                    .slice(0, 110)}
-                  ...
-                </p>
               </button>
             ))}
           </div>
 
-          {selectedDiscount && (
-            <div className="mt-6 bg-white border-2 border-[#E4DBCA] rounded-3xl p-6 md:p-8 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-                <h3 className="font-tan-angleton font-bold text-2xl text-[#B64847]">
-                  {selectedDiscount.name}
-                </h3>
-                <div className="flex items-center gap-2">
+          {showDiscountModal && selectedDiscount && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div
+                className="absolute inset-0 bg-black/55 backdrop-blur-sm"
+                onClick={() => setShowDiscountModal(false)}
+              />
+              <div className="relative bg-white rounded-3xl border border-[#E4DBCA] shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-md border-b border-[#E4DBCA] p-5 flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                      {language === 'id' ? 'detail mitra' : 'partner details'}
+                    </p>
+                    <h3 className="font-tan-angleton text-3xl text-[#B64847]">{selectedDiscount.name}</h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {language === 'id' ? 'Kontrak berakhir' : 'Contract end date'}: {formatDiscountDate(selectedDiscount.validUntil)}
+                    </p>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setSelectedDiscountIndex((prev) => (prev - 1 + discounts.length) % discounts.length)}
-                    className="px-3 py-2 rounded-xl border border-[#E4DBCA] text-[#886644] text-xs font-bold uppercase tracking-widest hover:border-[#B64847] hover:text-[#B64847] transition-all"
+                    onClick={() => setShowDiscountModal(false)}
+                    className="w-10 h-10 rounded-full border border-[#E4DBCA] text-[#886644] font-bold hover:border-[#B64847] hover:text-[#B64847] transition-all"
+                    aria-label={language === 'id' ? 'Tutup' : 'Close'}
                   >
-                    {language === 'id' ? 'sebelumnya' : 'previous'}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedDiscountIndex((prev) => (prev + 1) % discounts.length)}
-                    className="px-3 py-2 rounded-xl bg-[#B64847] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#303030] transition-all"
-                  >
-                    {language === 'id' ? 'berikutnya' : 'next'}
+                    ×
                   </button>
                 </div>
-              </div>
 
-              <p className="text-[11px] text-gray-500 mb-5">
-                {language === 'id' ? 'Kontrak berakhir' : 'Contract end date'}:{' '}
-                {formatDiscountDate(selectedDiscount.validUntil)}
-              </p>
+                <div className="p-6 md:p-8">
+                  <div className="flex items-center gap-2 mb-6">
+                    <span className="text-xs font-black uppercase tracking-widest px-3 py-1 rounded-full bg-[#B64847] text-white">
+                      {getDiscountBadge(selectedDiscount.description)}
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-[#FEB602]/20 text-[#886644]">
+                      {(selectedDiscount.description.split('\n').filter(line => line.trim()).length)} {language === 'id' ? 'manfaat' : 'benefits'}
+                    </span>
+                    <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-[#B64847]/10 text-[#B64847]">
+                      {(selectedDiscount.code.split('\n').filter(line => line.trim()).length)} {language === 'id' ? 'kewajiban' : 'obligations'}
+                    </span>
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="rounded-2xl border border-[#E4DBCA] p-5 bg-[#FFFAF5]">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-2">
-                    {language === 'id' ? 'Benefit untuk PPIAQ' : 'Benefits for PPIAQ'}
-                  </p>
-                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
-                    {selectedDiscount.description}
-                  </p>
-                </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="rounded-2xl border border-[#E4DBCA] p-5 bg-[#FFFAF5]">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-3">
+                        {language === 'id' ? 'Benefit untuk PPIAQ' : 'Benefits for PPIAQ'}
+                      </p>
+                      <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                        {selectedDiscount.description}
+                      </p>
+                    </div>
 
-                <div className="rounded-2xl border border-[#FEB602]/50 p-5 bg-[#FEB602]/10">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-2">
-                    {language === 'id' ? 'Kewajiban Partnership' : 'Partnership Obligation'}
-                  </p>
-                  <p className="text-sm font-semibold text-[#B64847] whitespace-pre-line leading-relaxed">
-                    {selectedDiscount.code}
-                  </p>
+                    <div className="rounded-2xl border border-[#FEB602]/50 p-5 bg-[#FEB602]/10">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-3">
+                        {language === 'id' ? 'Kewajiban Partnership' : 'Partnership Obligation'}
+                      </p>
+                      <p className="text-sm font-semibold text-[#B64847] whitespace-pre-line leading-relaxed">
+                        {selectedDiscount.code}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-7 flex flex-wrap gap-2 justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDiscountIndex((prev) => (prev - 1 + discounts.length) % discounts.length)}
+                      className="px-4 py-2 rounded-xl border border-[#E4DBCA] text-[#886644] text-xs font-bold uppercase tracking-widest hover:border-[#B64847] hover:text-[#B64847] transition-all"
+                    >
+                      {language === 'id' ? 'mitra sebelumnya' : 'previous partner'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDiscountIndex((prev) => (prev + 1) % discounts.length)}
+                      className="px-4 py-2 rounded-xl bg-[#B64847] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#303030] transition-all"
+                    >
+                      {language === 'id' ? 'mitra berikutnya' : 'next partner'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
