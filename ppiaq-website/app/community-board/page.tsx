@@ -41,6 +41,7 @@ export default function CommunityBoardPage() {
   const [dbResources, setDbResources] = useState<DBResource[]>([]);
   const [dbAnnouncements, setDbAnnouncements] = useState<DBAnnouncement[]>([]);
   const [dbLoaded, setDbLoaded] = useState(false);
+  const [selectedDiscountIndex, setSelectedDiscountIndex] = useState(0);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -144,6 +145,15 @@ export default function CommunityBoardPage() {
   const discounts = dbLoaded && dbDiscounts.length > 0
     ? dbDiscounts.map(d => ({ name: language === 'id' ? d.name.id : d.name.en, description: language === 'id' ? d.description.id : d.description.en, code: d.code, validUntil: d.validUntil }))
     : fallbackDiscounts;
+  const safeSelectedDiscountIndex =
+    discounts.length === 0 ? -1 : Math.min(selectedDiscountIndex, discounts.length - 1);
+  const selectedDiscount = safeSelectedDiscountIndex >= 0 ? discounts[safeSelectedDiscountIndex] : null;
+  const formatDiscountDate = (value: string): string => {
+    const parsedDate = new Date(value);
+    return Number.isNaN(parsedDate.getTime())
+      ? value
+      : parsedDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US');
+  };
 
   // Group DB resources by category
   const dbResourcesByCategory = dbResources.reduce((acc, r) => {
@@ -198,35 +208,107 @@ export default function CommunityBoardPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {discounts.map((discount, i) => (
-              <div key={i} className="bg-white rounded-2xl border-2 border-[#FEB602] p-6 hover:shadow-lg transition-all">
-                <h3 className="font-bold text-lg text-[#B64847] mb-4">{discount.name}</h3>
+              <button
+                key={i}
+                type="button"
+                onClick={() => setSelectedDiscountIndex(i)}
+                className={`text-left rounded-2xl border-2 p-5 transition-all hover:shadow-lg ${
+                  safeSelectedDiscountIndex === i
+                    ? 'bg-white border-[#B64847] shadow-md ring-2 ring-[#FEB602]/40'
+                    : 'bg-white border-[#FEB602]'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <h3 className="font-bold text-base text-[#B64847]">{discount.name}</h3>
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full ${
+                      safeSelectedDiscountIndex === i
+                        ? 'bg-[#B64847] text-white'
+                        : 'bg-[#FEB602]/20 text-[#886644]'
+                    }`}
+                  >
+                    {safeSelectedDiscountIndex === i
+                      ? (language === 'id' ? 'dipilih' : 'selected')
+                      : (language === 'id' ? 'lihat' : 'view')}
+                  </span>
+                </div>
 
-                <div className="mb-4">
+                <p className="text-[10px] text-gray-500 mb-3">
+                  {language === 'id' ? 'Kontrak berakhir' : 'Contract end date'}:{' '}
+                  {formatDiscountDate(discount.validUntil)}
+                </p>
+
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-[#FEB602]/20 text-[#886644]">
+                    {(discount.description.split('\n').filter(line => line.trim()).length)}{' '}
+                    {language === 'id' ? 'benefit' : 'benefits'}
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-[#B64847]/10 text-[#B64847]">
+                    {(discount.code.split('\n').filter(line => line.trim()).length)}{' '}
+                    {language === 'id' ? 'kewajiban' : 'obligations'}
+                  </span>
+                </div>
+
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  {(discount.description.split('\n').find(line => line.trim()) || '')
+                    .replace(/^-+\s*/, '')
+                    .slice(0, 110)}
+                  ...
+                </p>
+              </button>
+            ))}
+          </div>
+
+          {selectedDiscount && (
+            <div className="mt-6 bg-white border-2 border-[#E4DBCA] rounded-3xl p-6 md:p-8 shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                <h3 className="font-tan-angleton font-bold text-2xl text-[#B64847]">
+                  {selectedDiscount.name}
+                </h3>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDiscountIndex((prev) => (prev - 1 + discounts.length) % discounts.length)}
+                    className="px-3 py-2 rounded-xl border border-[#E4DBCA] text-[#886644] text-xs font-bold uppercase tracking-widest hover:border-[#B64847] hover:text-[#B64847] transition-all"
+                  >
+                    {language === 'id' ? 'sebelumnya' : 'previous'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDiscountIndex((prev) => (prev + 1) % discounts.length)}
+                    className="px-3 py-2 rounded-xl bg-[#B64847] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#303030] transition-all"
+                  >
+                    {language === 'id' ? 'berikutnya' : 'next'}
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-gray-500 mb-5">
+                {language === 'id' ? 'Kontrak berakhir' : 'Contract end date'}:{' '}
+                {formatDiscountDate(selectedDiscount.validUntil)}
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="rounded-2xl border border-[#E4DBCA] p-5 bg-[#FFFAF5]">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-2">
                     {language === 'id' ? 'Benefit untuk PPIAQ' : 'Benefits for PPIAQ'}
                   </p>
-                  <p className="text-gray-600 text-sm whitespace-pre-line leading-relaxed">{discount.description}</p>
+                  <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
+                    {selectedDiscount.description}
+                  </p>
                 </div>
 
-                <div className="bg-[#FEB602]/10 rounded-xl p-4 mb-4">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-1">
+                <div className="rounded-2xl border border-[#FEB602]/50 p-5 bg-[#FEB602]/10">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-2">
                     {language === 'id' ? 'Kewajiban Partnership' : 'Partnership Obligation'}
                   </p>
-                  <p className="text-sm font-semibold text-[#B64847] whitespace-pre-line leading-relaxed">{discount.code}</p>
+                  <p className="text-sm font-semibold text-[#B64847] whitespace-pre-line leading-relaxed">
+                    {selectedDiscount.code}
+                  </p>
                 </div>
-
-                <p className="text-[10px] text-gray-400">
-                  {language === 'id' ? 'Kontrak berakhir' : 'Contract end date'}:{' '}
-                  {(() => {
-                    const parsedDate = new Date(discount.validUntil);
-                    return Number.isNaN(parsedDate.getTime())
-                      ? discount.validUntil
-                      : parsedDate.toLocaleDateString(language === 'id' ? 'id-ID' : 'en-US');
-                  })()}
-                </p>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </section>
 
         {/* Announcements */}
