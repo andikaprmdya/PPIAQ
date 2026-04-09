@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/lib/language-context';
 
 type AccommodationOption = {
   name: { id: string; en: string };
   website: string;
   photoLink: string;
+  logoUrl: string;
 };
 
 type AccommodationCategory = {
@@ -30,16 +31,19 @@ const ACCOMMODATION_CATEGORIES: AccommodationCategory[] = [
         name: { id: 'Student One', en: 'Student One' },
         website: 'https://studentone.com/',
         photoLink: 'https://www.google.com/search?tbm=isch&q=student+one+brisbane',
+        logoUrl: 'https://www.google.com/s2/favicons?domain_url=studentone.com&sz=256',
       },
       {
         name: { id: 'UniLodge', en: 'UniLodge' },
         website: 'https://www.unilodge.com.au/',
         photoLink: 'https://www.google.com/search?tbm=isch&q=unilodge+brisbane',
+        logoUrl: 'https://www.google.com/s2/favicons?domain_url=unilodge.com.au&sz=256',
       },
       {
         name: { id: 'Scape', en: 'Scape' },
         website: 'https://www.scape.com.au/',
         photoLink: 'https://www.google.com/search?tbm=isch&q=scape+brisbane',
+        logoUrl: 'https://www.google.com/s2/favicons?domain_url=scape.com.au&sz=256',
       },
     ],
   },
@@ -55,16 +59,19 @@ const ACCOMMODATION_CATEGORIES: AccommodationCategory[] = [
         name: { id: 'Flatmates', en: 'Flatmates' },
         website: 'https://flatmates.com.au/',
         photoLink: 'https://www.google.com/search?tbm=isch&q=flatmates+brisbane+apartment',
+        logoUrl: 'https://www.google.com/s2/favicons?domain_url=flatmates.com.au&sz=256',
       },
       {
         name: { id: 'Flatmate Finders', en: 'Flatmate Finders' },
         website: 'https://flatmatefinders.com.au/',
         photoLink: 'https://www.google.com/search?tbm=isch&q=shared+apartment+brisbane',
+        logoUrl: 'https://www.google.com/s2/favicons?domain_url=flatmatefinders.com.au&sz=256',
       },
       {
         name: { id: 'Gumtree Flatshare', en: 'Gumtree Flatshare' },
         website: 'https://www.gumtree.com.au/s-flatshare-houseshare/brisbane/c18294l3005721',
         photoLink: 'https://www.google.com/search?tbm=isch&q=gumtree+flatshare+brisbane',
+        logoUrl: 'https://www.google.com/s2/favicons?domain_url=gumtree.com.au&sz=256',
       },
     ],
   },
@@ -80,16 +87,19 @@ const ACCOMMODATION_CATEGORIES: AccommodationCategory[] = [
         name: { id: 'Realestate.com.au', en: 'Realestate.com.au' },
         website: 'https://www.realestate.com.au/rent/',
         photoLink: 'https://www.google.com/search?tbm=isch&q=brisbane+rental+house',
+        logoUrl: 'https://www.google.com/s2/favicons?domain_url=realestate.com.au&sz=256',
       },
       {
         name: { id: 'Domain', en: 'Domain' },
         website: 'https://www.domain.com.au/rent/',
         photoLink: 'https://www.google.com/search?tbm=isch&q=domain+brisbane+rent',
+        logoUrl: 'https://www.google.com/s2/favicons?domain_url=domain.com.au&sz=256',
       },
       {
         name: { id: 'Rent.com.au', en: 'Rent.com.au' },
         website: 'https://www.rent.com.au/',
         photoLink: 'https://www.google.com/search?tbm=isch&q=rent.com.au+brisbane',
+        logoUrl: 'https://www.google.com/s2/favicons?domain_url=rent.com.au&sz=256',
       },
     ],
   },
@@ -100,7 +110,24 @@ const GUIDE_BOOKLET_URL =
 
 export default function GuideToQueenslandPage() {
   const { language } = useLanguage();
-  const [openCategoryId, setOpenCategoryId] = useState<string | null>(ACCOMMODATION_CATEGORIES[0]?.id || null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const selectedCategory = useMemo(
+    () => ACCOMMODATION_CATEGORIES.find((item) => item.id === selectedCategoryId) || null,
+    [selectedCategoryId]
+  );
+
+  useEffect(() => {
+    if (!selectedCategoryId) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedCategoryId(null);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selectedCategoryId]);
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen py-16 px-6 overflow-x-hidden">
@@ -129,86 +156,36 @@ export default function GuideToQueenslandPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {ACCOMMODATION_CATEGORIES.map((category) => {
-              const isOpen = openCategoryId === category.id;
-
               return (
                 <div
                   key={category.id}
-                  className={`rounded-2xl border p-5 transition-all ${
-                    isOpen
-                      ? 'bg-[#B64847] text-white border-[#B64847] shadow-lg'
-                      : 'bg-[#FFFAF5] border-[#E4DBCA] text-[#303030] hover:border-[#B64847] hover:shadow-md'
-                  }`}
+                  className="rounded-2xl border p-5 transition-all bg-[#FFFAF5] border-[#E4DBCA] text-[#303030] hover:border-[#B64847] hover:shadow-lg"
                 >
+                  <div className="w-12 h-12 rounded-xl bg-white border border-[#E4DBCA] flex items-center justify-center mb-4 shadow-sm">
+                    <img
+                      src={category.options[0]?.logoUrl || '/favicon.ico'}
+                      alt={`${language === 'id' ? category.title.id : category.title.en} logo`}
+                      className="w-8 h-8 object-contain"
+                      loading="lazy"
+                    />
+                  </div>
                   <h3 className="font-bold text-lg mb-2">
                     {language === 'id' ? category.title.id : category.title.en}
                   </h3>
-                  <p className={`text-sm mb-4 ${isOpen ? 'text-white/90' : 'text-[#6a5f54]'}`}>
+                  <p className="text-sm mb-4 text-[#6a5f54]">
                     {language === 'id' ? category.summary.id : category.summary.en}
                   </p>
                   <button
                     type="button"
-                    onClick={() => setOpenCategoryId((prev) => (prev === category.id ? null : category.id))}
-                    className={`w-full rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all ${
-                      isOpen
-                        ? 'bg-white text-[#B64847] hover:bg-[#FFF3DA]'
-                        : 'bg-[#B64847] text-white hover:bg-[#9a3a3e]'
-                    }`}
+                    onClick={() => setSelectedCategoryId(category.id)}
+                    className="w-full rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-widest transition-all bg-[#B64847] text-white hover:bg-[#9a3a3e]"
                   >
-                    {isOpen
-                      ? language === 'id'
-                        ? 'Sembunyikan Detail'
-                        : 'Hide Details'
-                      : language === 'id'
-                        ? 'Lihat Detail'
-                        : 'View More'}
+                    {language === 'id' ? 'Lihat Detail' : 'View More'}
                   </button>
                 </div>
               );
             })}
           </div>
-
-          {openCategoryId && (
-            <div className="mt-6 bg-[#FFFAF5] border border-[#E4DBCA] rounded-2xl p-4 md:p-5">
-              <h3 className="font-bold text-base text-[#B64847] mb-4">
-                {(() => {
-                  const activeCategory = ACCOMMODATION_CATEGORIES.find((item) => item.id === openCategoryId);
-                  if (!activeCategory) return '';
-                  return language === 'id' ? activeCategory.title.id : activeCategory.title.en;
-                })()}
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {(ACCOMMODATION_CATEGORIES.find((item) => item.id === openCategoryId)?.options || []).map((option) => (
-                  <div key={option.name.en} className="bg-white border border-[#E4DBCA] rounded-xl p-4">
-                    <p className="font-semibold text-[#303030] mb-3">
-                      {language === 'id' ? option.name.id : option.name.en}
-                    </p>
-                    <div className="space-y-2 text-sm">
-                      <a
-                        href={option.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-[#B64847] font-semibold hover:text-[#9a3a3e] hover:underline break-all"
-                      >
-                        {language === 'id' ? 'Website: ' : 'Website: '}
-                        {option.website}
-                      </a>
-                      <a
-                        href={option.photoLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-[#886644] font-semibold hover:text-[#B64847] hover:underline break-all"
-                      >
-                        {language === 'id' ? 'Foto Google: ' : 'Google Photos: '}
-                        {option.photoLink}
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="flex flex-wrap gap-3">
@@ -228,6 +205,83 @@ export default function GuideToQueenslandPage() {
           </Link>
         </div>
       </div>
+
+      {selectedCategory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <button
+            type="button"
+            aria-label={language === 'id' ? 'Tutup popup' : 'Close popup'}
+            onClick={() => setSelectedCategoryId(null)}
+            className="absolute inset-0 bg-[#303030]/65 backdrop-blur-sm"
+          />
+
+          <div className="relative w-full max-w-4xl max-h-[88vh] overflow-y-auto rounded-3xl border border-[#E4DBCA] bg-white shadow-[0_30px_80px_rgba(48,48,48,0.25)]">
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur border-b border-[#E4DBCA] px-5 py-4 sm:px-7">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#886644]">
+                    {language === 'id' ? 'Detail Akomodasi' : 'Accommodation Details'}
+                  </p>
+                  <h3 className="mt-1 font-tan-angleton text-3xl text-[#B64847] font-bold">
+                    {language === 'id' ? selectedCategory.title.id : selectedCategory.title.en}
+                  </h3>
+                  <p className="mt-2 text-sm text-[#6a5f54]">
+                    {language === 'id' ? selectedCategory.summary.id : selectedCategory.summary.en}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedCategoryId(null)}
+                  className="w-10 h-10 rounded-full border border-[#E4DBCA] bg-[#FFFAF5] text-[#886644] font-bold hover:border-[#B64847] hover:text-[#B64847] transition-all"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="p-5 sm:p-7 grid grid-cols-1 md:grid-cols-2 gap-5">
+              {selectedCategory.options.map((option) => (
+                <div
+                  key={option.name.en}
+                  className="rounded-2xl border border-[#E4DBCA] overflow-hidden bg-[#FFFAF5] shadow-sm hover:shadow-md transition-all"
+                >
+                  <div className="h-36 bg-gradient-to-br from-[#FFF3DA] via-white to-[#FFE7CC] border-b border-[#E4DBCA] flex items-center justify-center">
+                    <img
+                      src={option.logoUrl}
+                      alt={`${language === 'id' ? option.name.id : option.name.en} logo`}
+                      className="w-20 h-20 object-contain rounded-2xl border border-[#E4DBCA] bg-white p-3 shadow-sm"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <p className="font-semibold text-[#303030] mb-3 text-lg">
+                      {language === 'id' ? option.name.id : option.name.en}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      <a
+                        href={option.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-widest bg-[#B64847] text-white hover:bg-[#9a3a3e] transition-all"
+                      >
+                        {language === 'id' ? 'Buka Website' : 'Open Website'}
+                      </a>
+                      <a
+                        href={option.photoLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-widest border border-[#E4DBCA] text-[#886644] bg-white hover:border-[#B64847] hover:text-[#B64847] transition-all"
+                      >
+                        {language === 'id' ? 'Lihat Foto Google' : 'View Google Photos'}
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

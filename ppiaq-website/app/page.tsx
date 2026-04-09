@@ -46,6 +46,48 @@ const eventDetailRoutes: Record<string, string> = {
   'UQ St. Lucia Market Day - Join UQISA / PPIA UQ': '/events/uq-market-day',
 };
 
+const FALLBACK_COMMUNITY_EVENTS: EventItem[] = [
+  {
+    id: 'fallback-predeparture',
+    day: '5',
+    month: 'FEB',
+    title: {
+      id: 'Pre-Departure Briefing - Semester 1, 2026',
+      en: 'Pre-Departure Briefing - Semester 1, 2026',
+    },
+    date: 'Thursday, February 5, 2026',
+    organizer: 'PPIAQ',
+    location: { id: 'Zoom', en: 'Zoom' },
+    image: '/images/predeparture.jpg',
+  },
+  {
+    id: 'fallback-qut',
+    day: '16',
+    month: 'FEB',
+    title: {
+      id: 'QUT Market Day - Join ISAQ / PPIA QUT',
+      en: 'QUT Market Day - Join ISAQ / PPIA QUT',
+    },
+    date: 'Monday, February 16, 2026',
+    organizer: 'QUT',
+    location: { id: 'QUT', en: 'QUT' },
+    image: '/images/qutmarketday.jpg',
+  },
+  {
+    id: 'fallback-uq',
+    day: '18',
+    month: 'FEB',
+    title: {
+      id: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ',
+      en: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ',
+    },
+    date: 'Wednesday, February 18, 2026',
+    organizer: 'UQISA',
+    location: { id: 'UQ St. Lucia', en: 'UQ St. Lucia' },
+    image: '/images/uqmarketday.jpg',
+  },
+];
+
 const EVENT_ORGANIZER_FILTERS: Array<{ key: EventOrganizerFilter; label: { id: string; en: string } }> = [
   { key: 'all', label: { id: 'Semua', en: 'All' } },
   { key: 'ppiaq', label: { id: 'PPIAQ', en: 'PPIAQ' } },
@@ -106,9 +148,11 @@ export default function HomePage() {
       try {
         const res = await fetch('/api/events');
         const data = await res.json();
-        setEvents(data.data || []);
+        const fetchedEvents = Array.isArray(data.data) ? data.data : [];
+        setEvents(fetchedEvents.length > 0 ? fetchedEvents : FALLBACK_COMMUNITY_EVENTS);
       } catch (error) {
         console.error('Error fetching events:', error);
+        setEvents(FALLBACK_COMMUNITY_EVENTS);
       } finally {
         setEventsLoading(false);
       }
