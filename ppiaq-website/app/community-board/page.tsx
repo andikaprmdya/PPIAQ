@@ -315,27 +315,15 @@ export default function CommunityBoardPage() {
                     <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-[#FEB602]/20 text-[#886644]">
                       {(selectedDiscount.description.split('\n').filter(line => line.trim()).length)} {language === 'id' ? 'manfaat' : 'benefits'}
                     </span>
-                    <span className="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-[#B64847]/10 text-[#B64847]">
-                      {(selectedDiscount.code.split('\n').filter(line => line.trim()).length)} {language === 'id' ? 'kewajiban' : 'obligations'}
-                    </span>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 gap-5">
                     <div className="rounded-2xl border border-[#E4DBCA] p-5 bg-[#FFFAF5]">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-3">
                         {language === 'id' ? 'Benefit untuk PPIAQ' : 'Benefits for PPIAQ'}
                       </p>
                       <p className="text-sm text-gray-700 whitespace-pre-line leading-relaxed">
                         {selectedDiscount.description}
-                      </p>
-                    </div>
-
-                    <div className="rounded-2xl border border-[#FEB602]/50 p-5 bg-[#FEB602]/10">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-[#886644] mb-3">
-                        {language === 'id' ? 'Kewajiban Partnership' : 'Partnership Obligation'}
-                      </p>
-                      <p className="text-sm font-semibold text-[#B64847] whitespace-pre-line leading-relaxed">
-                        {selectedDiscount.code}
                       </p>
                     </div>
                   </div>
