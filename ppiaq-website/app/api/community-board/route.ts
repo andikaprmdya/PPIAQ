@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/database/prisma';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const [discounts, resources, announcements] = await Promise.all([
@@ -19,7 +22,7 @@ export async function GET() {
     ]);
 
     return NextResponse.json({ discounts, resources, announcements });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -7,6 +7,8 @@ export interface User {
   firstName: string;
   lastName: string;
   email: string;
+  phoneNumber?: string;
+  studentId?: string;
   memberNo?: string;
   branch?: string;
   domicileCampus?: string;

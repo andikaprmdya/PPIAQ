@@ -11,7 +11,7 @@ Semua fitur authentication dan member management sudah terimplementasi dengan ba
 **Role:** Admin - Full access to admin dashboard and member approval system
 
 ```
-Email:    admin@ppiaq.org
+Email:    ppiaqldmaster@gmail.com
 Password: Admin123!
 ```
 
@@ -39,7 +39,7 @@ Password: Admin123!
 **Role:** Curator - Manage Acara Mendatang / Upcoming Events (view, add, edit, delete)
 
 ```
-Email:    curator@ppiaq.org
+Email:    qld@ppi-australia.org
 Password: Curator123!
 ```
 
@@ -103,7 +103,7 @@ Password: Test12345
 6. Coba login sebagai applicant → akan dapat pesan "Pending approval"
 
 ### Scenario 2: Admin Approval Workflow
-1. Login as admin (admin@ppiaq.org)
+1. Login as admin (ppiaqldmaster@gmail.com)
 2. Akses Admin Dashboard
 3. View pending applications
 4. Click aplikasi untuk lihat detail & payment proof
@@ -147,6 +147,7 @@ Password: Test12345
 ## 📝 Important Notes
 
 - Default admin password: `Admin123!` (recommended to change in production)
+- Imported members with temporary password must use **Forgot Password** and email reset before first login
 - Member payment proof disimpan sebagai base64 string di database
 - Middleware di `/middleware.ts` protect routes berdasarkan role & status
 - Auth context (`/lib/auth-context.tsx`) manage global auth state
@@ -168,8 +169,8 @@ npm run dev
 3. Use credentials di atas untuk testing
 
 **Test All Features:**
-- Admin: admin@ppiaq.org / Admin123!
-- Curator: curator@ppiaq.org / Curator123!
+- Admin: ppiaqldmaster@gmail.com / Admin123!
+- Curator: qld@ppi-australia.org / Curator123!
 - Member: budi@example.com / Test12345
 
 ---

@@ -51,7 +51,7 @@ export default function CommunityBoardPage() {
   }, [isAuthenticated, router]);
 
   useEffect(() => {
-    fetch('/api/community-board')
+    fetch('/api/community-board', { cache: 'no-store' })
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data) {
@@ -193,12 +193,9 @@ export default function CommunityBoardPage() {
     { category: language === 'id' ? 'Sumber Belajar' : 'Learning Resources', items: [{ name: language === 'id' ? 'Perpustakaan Universitas' : 'University Library', location: 'Each Campus' }, { name: language === 'id' ? 'Pusat Bahasa' : 'Language Center', location: 'City' }, { name: language === 'id' ? 'Studio Belajar Bersama' : 'Study Group Studio', location: 'Online' }] },
   ];
 
-  const resources = dbLoaded && dbResources.length > 0
+  const resources = dbLoaded
     ? Object.entries(dbResourcesByCategory).map(([category, items]) => ({ category, items }))
     : fallbackResources;
-  const filteredResources = resources.filter(
-    (resource) => !['Accommodation & Housing', 'Akomodasi & Perumahan'].includes(resource.category)
-  );
 
   const fallbackAnnouncements = [
     { title: language === 'id' ? 'Pesta Rakyat 2026' : 'Pesta Rakyat 2026', date: '2026-08-17', description: language === 'id' ? 'Bergabunglah dengan perayaan Indonesian Independence Day terbesar di Queensland!' : 'Join the biggest Indonesian Independence Day celebration in Queensland!' },
@@ -378,7 +375,7 @@ export default function CommunityBoardPage() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {filteredResources.map((resource, i) => (
+            {resources.map((resource, i) => (
               <div key={i} className="bg-white rounded-2xl border border-[#E4DBCA] p-6 hover:shadow-lg transition-all">
                 <h3 className="font-bold text-lg text-[#B64847] mb-4">{resource.category}</h3>
 
@@ -395,6 +392,13 @@ export default function CommunityBoardPage() {
               </div>
             ))}
           </div>
+          {dbLoaded && resources.length === 0 && (
+            <p className="mt-4 text-sm text-gray-500">
+              {language === 'id'
+                ? 'Belum ada data resources & vendors saat ini.'
+                : 'No resources & vendors data available right now.'}
+            </p>
+          )}
         </section>
 
         {/* Newsletter Signup */}

@@ -6,6 +6,7 @@ import {
   isAssociateNationality,
   ORDINARY_NATIONALITY,
 } from '@/lib/countries';
+import { validateFirstLastName } from '@/lib/name-validation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +40,8 @@ export async function POST(request: NextRequest) {
     } = await request.json();
 
     const normalizedMembershipTypeRaw = String(membershipType || '').toLowerCase();
+    const normalizedFirstName = String(firstName || '').trim();
+    const normalizedLastName = String(lastName || '').trim();
     const normalizedNationality = String(nationality || '').trim();
     const normalizedExpectedGraduation = String(
       expectedGraduationDate ||
@@ -62,6 +65,14 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    const nameValidationError = validateFirstLastName(normalizedFirstName, normalizedLastName);
+    if (nameValidationError) {
+      return NextResponse.json(
+        { error: nameValidationError },
         { status: 400 }
       );
     }
@@ -125,8 +136,8 @@ export async function POST(request: NextRequest) {
 
     // Register user with status 'pending' (requires admin approval)
     const user = await registerUser(
-      firstName,
-      lastName,
+      normalizedFirstName,
+      normalizedLastName,
       email,
       password,
       normalizedNationality,
@@ -142,9 +153,9 @@ export async function POST(request: NextRequest) {
     );
 
     // Send email notification to user
-    const emailTemplate = getMembershipApplicationTemplate(firstName, lastName, 'pending');
+    const emailTemplate = getMembershipApplicationTemplate(normalizedFirstName, normalizedLastName, 'pending');
     await sendEmail({
-      to: [{ email, name: `${firstName} ${lastName}` }],
+      to: [{ email, name: `${normalizedFirstName} ${normalizedLastName}` }],
       subject: 'PPIAQ Membership Application - Pending Review',
       htmlContent: emailTemplate,
     });
@@ -160,7 +171,7 @@ export async function POST(request: NextRequest) {
             <div style="padding: 20px;">
               <p>A new member has registered for PPIAQ membership!</p>
               <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+                <p><strong>Name:</strong> ${normalizedFirstName} ${normalizedLastName}</p>
                 <p><strong>Email:</strong> ${email}</p>
                 <p><strong>Phone:</strong> ${phoneNumber || 'Not provided'}</p>
                 <p><strong>Student ID:</strong> ${studentId || 'Not provided'}</p>
@@ -185,7 +196,7 @@ export async function POST(request: NextRequest) {
     `;
     await sendEmail({
       to: [{ email: 'qld@ppi-australia.org', name: 'PPIAQ Admin' }],
-      subject: `New Member Registration: ${firstName} ${lastName}`,
+      subject: `New Member Registration: ${normalizedFirstName} ${normalizedLastName}`,
       htmlContent: adminNotificationTemplate,
     });
 

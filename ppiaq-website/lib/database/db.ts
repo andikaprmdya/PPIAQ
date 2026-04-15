@@ -2,6 +2,7 @@
 import bcryptjs from 'bcryptjs';
 import { prisma } from './prisma';
 import { MembershipType, UserStatus, EventStatus, Division, ImageCategory, Prisma } from '@prisma/client';
+import { validateFirstLastName } from '../name-validation';
 
 // ==========================================
 // ENUM MAPPING UTILITIES
@@ -76,6 +77,11 @@ export async function registerUser(
   phoneNumber?: string,
   studentId?: string
 ) {
+  const nameValidationError = validateFirstLastName(firstName, lastName);
+  if (nameValidationError) {
+    throw new Error(nameValidationError);
+  }
+
   const hashedPassword = bcryptjs.hashSync(password, 10);
   return await prisma.user.create({
     data: {
@@ -222,6 +228,26 @@ export async function updateUser(userId: string, updates: Record<string, unknown
       cleanedUpdates[field] = updates[field];
     }
   });
+
+  const nextFirstName = typeof cleanedUpdates.firstName === 'string' ? cleanedUpdates.firstName : null;
+  const nextLastName = typeof cleanedUpdates.lastName === 'string' ? cleanedUpdates.lastName : null;
+  if (nextFirstName !== null || nextLastName !== null) {
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { firstName: true, lastName: true },
+    });
+
+    if (!existingUser) {
+      throw new Error('User not found');
+    }
+
+    const finalFirstName = nextFirstName ?? existingUser.firstName;
+    const finalLastName = nextLastName ?? existingUser.lastName;
+    const nameValidationError = validateFirstLastName(finalFirstName, finalLastName);
+    if (nameValidationError) {
+      throw new Error(nameValidationError);
+    }
+  }
 
   // Map enum values
   if (cleanedUpdates.membershipType) {

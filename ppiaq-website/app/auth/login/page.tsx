@@ -94,6 +94,15 @@ export default function LoginPage() {
               />
             </div>
 
+            <div className="text-right -mt-2">
+              <Link
+                href="/auth/forgot-password"
+                className="text-xs font-semibold text-[#B64847] hover:underline"
+              >
+                {language === 'id' ? 'Lupa Password?' : 'Forgot Password?'}
+              </Link>
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -127,8 +136,8 @@ export default function LoginPage() {
           </p>
           <p className="mt-2 not-italic text-gray-600">
             {language === 'id'
-              ? 'Daftar akun terlebih dahulu. Login hanya bisa setelah admin approve. Email status akan dikirim saat pending, approved, atau rejected.'
-              : 'Register first. Sign in is available only after admin approval. Status emails are sent for pending, approved, and rejected.'}
+              ? 'Daftar akun terlebih dahulu. Login hanya bisa setelah admin approve. Untuk member hasil import, gunakan "Lupa Password" dan reset via email sebelum login pertama.'
+              : 'Register first. Sign in is available only after admin approval. Imported members must use "Forgot Password" and reset through email before first login.'}
           </p>
         </div>
       </div>

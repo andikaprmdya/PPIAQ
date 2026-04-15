@@ -6,6 +6,7 @@ import { useLanguage } from '@/lib/language-context';
 import { createTranslator, getTranslation, translations } from '@/lib/translations';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
+import { isInvalidNameValue } from '@/lib/name-validation';
 
 interface User {
   id: string;
@@ -88,6 +89,15 @@ export default function EditMemberPage() {
     e.preventDefault();
     setSaving(true);
     setMessage(null);
+
+    if (isInvalidNameValue(formData.firstName || '') || isInvalidNameValue(formData.lastName || '')) {
+      setMessage({
+        type: 'error',
+        text: t('admin.members.invalidName', 'First name and last name cannot use N/A'),
+      });
+      setSaving(false);
+      return;
+    }
 
     try {
       const response = await fetch(`/api/admin/users/${memberId}`, {

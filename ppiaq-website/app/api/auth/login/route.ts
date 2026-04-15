@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserStatus, Role } from '@prisma/client';
+import bcryptjs from 'bcryptjs';
 import { loginUser } from '@/lib/database/db';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { TEMP_IMPORTED_MEMBER_PASSWORD } from '@/lib/auth/password-reset';
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,6 +55,20 @@ export async function POST(request: NextRequest) {
           error: 'Application rejected',
           message: `Your application was rejected: ${user.rejectionReason || 'No reason provided'}`,
           user: undefined,
+        },
+        { status: 403 }
+      );
+    }
+
+    if (
+      user.role === Role.USER &&
+      bcryptjs.compareSync(TEMP_IMPORTED_MEMBER_PASSWORD, user.password)
+    ) {
+      return NextResponse.json(
+        {
+          error: 'Password reset required',
+          message:
+            'Please use Forgot Password first and complete the email confirmation reset before first login.',
         },
         { status: 403 }
       );

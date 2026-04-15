@@ -7,6 +7,7 @@ import {
   ASSOCIATE_NATIONALITY_OPTIONS,
   ORDINARY_NATIONALITY,
 } from '@/lib/countries';
+import { isInvalidNameValue } from '@/lib/name-validation';
 
 interface FormData {
   // Step 1: Personal
@@ -183,6 +184,14 @@ export default function RegisterPage() {
       }
       if (!formData.lastName.trim()) {
         setError(language === 'id' ? 'Nama belakang harus diisi' : 'Last name is required');
+        return false;
+      }
+      if (isInvalidNameValue(formData.firstName) || isInvalidNameValue(formData.lastName)) {
+        setError(
+          language === 'id'
+            ? 'Nama depan dan nama belakang tidak boleh menggunakan N/A'
+            : 'First name and last name cannot use N/A'
+        );
         return false;
       }
       if (!formData.nationality) {

@@ -7,6 +7,8 @@ import * as XLSX from 'xlsx';
 import bcryptjs from 'bcryptjs';
 import { createHash } from 'crypto';
 import { isEligibleForMembershipList } from '@/lib/membership-rules';
+import { validateFirstLastName } from '@/lib/name-validation';
+import { TEMP_IMPORTED_MEMBER_PASSWORD } from '@/lib/auth/password-reset';
 
 type ImportRow = Record<string, unknown>;
 
@@ -150,8 +152,15 @@ export async function POST(request: NextRequest) {
           firstName = firstName || splitName.firstName;
           lastName = lastName || splitName.lastName;
         }
-        firstName = normalizeOrNA(firstName);
-        lastName = normalizeOrNA(lastName);
+        firstName = firstName.trim();
+        lastName = lastName.trim();
+
+        const nameValidationError = validateFirstLastName(firstName, lastName);
+        if (nameValidationError) {
+          results.skipped++;
+          results.errors.push(`Row ${index + 2}: ${nameValidationError}`);
+          continue;
+        }
 
         const rawEmail = getCellValue(row, ['Email address', 'Email Address', 'Email']).toLowerCase();
         const hasValidEmail = emailRegex.test(rawEmail);
@@ -246,7 +255,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create new user with a temporary hashed password
-        const tempPassword = await bcryptjs.hash('TempPass123!', 10);
+        const tempPassword = await bcryptjs.hash(TEMP_IMPORTED_MEMBER_PASSWORD, 10);
         await prisma.user.create({
           data: {
             firstName,

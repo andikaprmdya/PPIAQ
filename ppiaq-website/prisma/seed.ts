@@ -27,7 +27,7 @@ async function main() {
     data: {
       firstName: 'Admin',
       lastName: 'User',
-      email: 'admin@ppiaq.org',
+      email: 'ppiaqldmaster@gmail.com',
       password: bcryptjs.hashSync('Admin123!', 10),
       nationality: 'Indonesia',
       educationLevel: 'S2',
@@ -51,7 +51,7 @@ async function main() {
     data: {
       firstName: 'Curator',
       lastName: 'Events',
-      email: 'curator@ppiaq.org',
+      email: 'qld@ppi-australia.org',
       password: bcryptjs.hashSync('Curator123!', 10),
       nationality: 'Indonesia',
       educationLevel: 'S1 (Bachelor)',

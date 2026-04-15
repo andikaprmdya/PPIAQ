@@ -7,7 +7,7 @@ It focuses on daily usage on the web interface, not technical setup.
 
 Use this account:
 
-- Email: `admin@ppiaq.org`
+- Email: `ppiaqldmaster@gmail.com`
 - Password: `Admin123!`
 
 Login steps:
@@ -156,6 +156,7 @@ You will return to the login/public page.
 ### Member cannot login
 - Confirm member status is not pending/rejected.
 - Confirm email and password are correct.
+- For imported members, ask them to click **Forgot Password** first and reset from email link.
 
 ### Export file is not what you expected
 - Check active tab before exporting.

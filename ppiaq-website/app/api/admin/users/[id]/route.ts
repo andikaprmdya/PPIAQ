@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateUser, getUserById } from '@/lib/database/db';
 import { checkAdmin } from '@/lib/auth/check-admin';
+import { validateFirstLastName } from '@/lib/name-validation';
 
 export async function GET(
   request: NextRequest,
@@ -25,7 +26,8 @@ export async function GET(
     }
 
     // Return user without password
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user };
+    delete (userWithoutPassword as { password?: string }).password;
 
     return NextResponse.json(userWithoutPassword, { status: 200 });
   } catch (error) {
@@ -52,6 +54,23 @@ export async function PUT(
     const updates = await request.json();
     console.log('Updating user', userId, 'with data:', updates);
 
+    const existingUser = await getUserById(userId);
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: 'User not found' },
+        { status: 404 }
+      );
+    }
+
+    const nextFirstName =
+      typeof updates?.firstName === 'string' ? updates.firstName : existingUser.firstName;
+    const nextLastName =
+      typeof updates?.lastName === 'string' ? updates.lastName : existingUser.lastName;
+    const nameValidationError = validateFirstLastName(nextFirstName, nextLastName);
+    if (nameValidationError) {
+      return NextResponse.json({ error: nameValidationError }, { status: 400 });
+    }
+
     // Update the user
     const user = await updateUser(userId, updates);
 
@@ -63,7 +82,8 @@ export async function PUT(
     }
 
     // Return user without password
-    const { password, ...userWithoutPassword } = user;
+    const userWithoutPassword = { ...user };
+    delete (userWithoutPassword as { password?: string }).password;
 
     return NextResponse.json(
       {

@@ -7,7 +7,7 @@ It focuses only on daily usage: login, create event, edit event, delete event, a
 
 Use this account:
 
-- Email: `curator@ppiaq.org`
+- Email: `qld@ppi-australia.org`
 - Password: `Curator123!`
 
 Login steps:

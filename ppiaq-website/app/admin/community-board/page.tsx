@@ -119,6 +119,15 @@ interface Announcement {
 type Tab = 'discounts' | 'resources' | 'announcements';
 
 const emptyBilingual = (): BilingualField => ({ id: '', en: '' });
+const RESOURCE_CATEGORY_OPTIONS: BilingualField[] = [
+  { en: 'Apartment', id: 'Apartemen' },
+  { en: 'Housing', id: 'Perumahan' },
+  { en: 'Accommodation & Housing', id: 'Akomodasi & Perumahan' },
+  { en: 'Restaurants & Cafes', id: 'Restoran & Kafe' },
+  { en: 'Learning Resources', id: 'Sumber Belajar' },
+  { en: 'Transport & Mobility', id: 'Transportasi & Mobilitas' },
+  { en: 'Health & Wellness', id: 'Kesehatan & Kebugaran' },
+];
 
 export default function AdminCommunityBoardPage() {
   const { language } = useLanguage();
@@ -181,7 +190,7 @@ export default function AdminCommunityBoardPage() {
   };
 
   const fetchResources = async () => {
-    const res = await fetch('/api/admin/community-board/resources');
+    const res = await fetch('/api/admin/community-board/resources', { cache: 'no-store' });
     if (res.ok) setResources(await res.json());
   };
 
@@ -280,9 +289,40 @@ export default function AdminCommunityBoardPage() {
     else showMessage('error', t('admin.crud.failedToDelete', 'Failed to delete data'));
   };
 
+  const handleToggleResourceActive = async (resource: Resource) => {
+    const nextIsActive = !resource.isActive;
+    const res = await fetch(`/api/admin/community-board/resources?id=${resource.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...resource, isActive: nextIsActive }),
+    });
+
+    if (res.ok) {
+      showMessage(
+        'success',
+        nextIsActive
+          ? t('admin.communityBoard.resource.activated', 'Resource activated!')
+          : t('admin.communityBoard.resource.deactivated', 'Resource deactivated!')
+      );
+      fetchResources();
+      if (editingResource?.id === resource.id) {
+        setEditingResource({ ...resource, isActive: nextIsActive });
+        setResourceForm((prev) => ({ ...prev, isActive: nextIsActive }));
+      }
+    } else {
+      showMessage('error', t('admin.crud.failedToUpdate', 'Failed to update data'));
+    }
+  };
+
   const startEditResource = (r: Resource) => {
     setEditingResource(r);
     setResourceForm({ category: r.category, name: r.name, location: r.location, isActive: r.isActive, order: r.order });
+  };
+  const isKnownResourceCategory = RESOURCE_CATEGORY_OPTIONS.some((option) => option.en === resourceForm.category.en);
+  const handleResourceCategoryChange = (nextEnLabel: string) => {
+    const selectedCategory = RESOURCE_CATEGORY_OPTIONS.find((option) => option.en === nextEnLabel);
+    if (!selectedCategory) return;
+    setResourceForm((form) => ({ ...form, category: selectedCategory }));
   };
 
   // ── ANNOUNCEMENTS ──────────────────────────────────────────────
@@ -469,15 +509,29 @@ export default function AdminCommunityBoardPage() {
               {editingResource ? t('admin.communityBoard.resource.edit', 'Edit Resource') : t('admin.communityBoard.resource.add', 'Add Resource')}
             </h3>
             <form onSubmit={handleResourceSubmit} className="space-y-4">
-              <BilingualInput
-                label={t('admin.communityBoard.resource.category', 'Category')}
-                value={resourceForm.category}
-                onChange={v => setResourceForm(f => ({ ...f, category: v }))}
-                englishLabel={getTranslation(translations.bilingualInput.english, language)}
-                indonesianLabel={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
-                englishPlaceholder={getTranslation(translations.bilingualInput.english, language)}
-                indonesianPlaceholder={t('admin.communityBoard.indonesianPlaceholder', 'Indonesian')}
-              />
+              <div>
+                <label className={labelClass}>{t('admin.communityBoard.resource.category', 'Category')}</label>
+                <select
+                  className={inputClass}
+                  value={resourceForm.category.en}
+                  onChange={(e) => handleResourceCategoryChange(e.target.value)}
+                  required
+                >
+                  <option value="" disabled>
+                    {language === 'id' ? 'Pilih kategori' : 'Select category'}
+                  </option>
+                  {!isKnownResourceCategory && resourceForm.category.en && (
+                    <option value={resourceForm.category.en}>
+                      {language === 'id' ? resourceForm.category.id : resourceForm.category.en}
+                    </option>
+                  )}
+                  {RESOURCE_CATEGORY_OPTIONS.map((option) => (
+                    <option key={option.en} value={option.en}>
+                      {language === 'id' ? option.id : option.en}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <BilingualInput
                 label={getTranslation(translations.common.name, language)}
                 value={resourceForm.name}
@@ -521,6 +575,18 @@ export default function AdminCommunityBoardPage() {
                 </div>
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => startEditResource(r)} className="px-3 py-1 bg-[#FFFAF5] border border-[#E4DBCA] text-[#B64847] font-bold rounded-lg text-xs hover:border-[#B64847] transition-all">{getTranslation(translations.common.edit, language)}</button>
+                  <button
+                    onClick={() => handleToggleResourceActive(r)}
+                    className={`px-3 py-1 font-bold rounded-lg text-xs transition-all ${
+                      r.isActive
+                        ? 'bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100'
+                        : 'bg-green-50 border border-green-200 text-green-700 hover:bg-green-100'
+                    }`}
+                  >
+                    {r.isActive
+                      ? (language === 'id' ? 'Nonaktifkan' : 'Deactivate')
+                      : (language === 'id' ? 'Aktifkan' : 'Activate')}
+                  </button>
                   <button onClick={() => handleDeleteResource(r.id)} className="px-3 py-1 bg-red-50 border border-red-200 text-red-600 font-bold rounded-lg text-xs hover:bg-red-100 transition-all">{getTranslation(translations.common.delete, language)}</button>
                 </div>
               </div>

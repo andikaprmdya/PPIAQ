@@ -536,9 +536,8 @@ export default function AdminDashboardPage() {
                   </div>
                   <p className="text-[10px] text-gray-400 mt-2">
                     {language === 'id'
-                      ? 'Format ini cocok dengan file financial members. Member baru otomatis dibuat dengan password sementara:'
-                      : 'This format matches your financial members file. New users are created with temporary password:'}{' '}
-                    <code>TempPass123!</code>
+                      ? 'Format ini cocok dengan file financial members. Member baru dibuat dengan password sementara, lalu wajib klik "Lupa Password" sebelum login pertama.'
+                      : 'This format matches your financial members file. New users are created with a temporary password, then must use "Forgot Password" before first login.'}
                   </p>
                 </div>
 

@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/lib/auth-context';
 import { useLanguage } from '@/lib/language-context';
+import { isInvalidNameValue } from '@/lib/name-validation';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -28,11 +29,45 @@ const formatCountdown = (milliseconds: number) => {
   return { days, hours, minutes, seconds };
 };
 
+const EDUCATION_LEVEL_OPTIONS = ['Diploma', 'S1 (Bachelor)', 'S2 (Master)', 'S3 (Doctorate)', 'Postdoctoral'];
+
+type ProfileFormData = {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  studentId: string;
+  domicileCampus: string;
+  nationality: string;
+  educationLevel: string;
+  university: string;
+  major: string;
+  intake: string;
+  expectedGraduation: string;
+  birthDate: string;
+};
+
 export default function ProfilePage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, refetchUser } = useAuth();
   const { language } = useLanguage();
   const router = useRouter();
   const [now, setNow] = useState(INITIAL_NOW);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [profileMessage, setProfileMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [profileForm, setProfileForm] = useState<ProfileFormData>({
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
+    studentId: '',
+    domicileCampus: '',
+    nationality: '',
+    educationLevel: '',
+    university: '',
+    major: '',
+    intake: '',
+    expectedGraduation: '',
+    birthDate: '',
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -44,6 +79,24 @@ export default function ProfilePage() {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    setProfileForm({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      phoneNumber: user.phoneNumber || '',
+      studentId: user.studentId || '',
+      domicileCampus: user.domicileCampus || '',
+      nationality: user.nationality || '',
+      educationLevel: user.educationLevel || '',
+      university: user.university || '',
+      major: user.major || '',
+      intake: user.intake || '',
+      expectedGraduation: user.expectedGraduation || '',
+      birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
+    });
+  }, [user]);
 
   const membershipStart = useMemo(
     () =>
@@ -79,6 +132,80 @@ export default function ProfilePage() {
         ? expectedGraduationDate.toLocaleDateString(locale)
         : user.expectedGraduation)
     : '-';
+  const isKnownEducationLevel = EDUCATION_LEVEL_OPTIONS.includes(profileForm.educationLevel);
+
+  const handleProfileInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = event.target;
+    setProfileForm((previous) => ({ ...previous, [name]: value }));
+  };
+
+  const handleCancelProfileEdit = () => {
+    if (!user) return;
+    setIsEditingProfile(false);
+    setProfileMessage(null);
+    setProfileForm({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      phoneNumber: user.phoneNumber || '',
+      studentId: user.studentId || '',
+      domicileCampus: user.domicileCampus || '',
+      nationality: user.nationality || '',
+      educationLevel: user.educationLevel || '',
+      university: user.university || '',
+      major: user.major || '',
+      intake: user.intake || '',
+      expectedGraduation: user.expectedGraduation || '',
+      birthDate: user.birthDate ? user.birthDate.slice(0, 10) : '',
+    });
+  };
+
+  const handleProfileSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setIsSavingProfile(true);
+    setProfileMessage(null);
+
+    if (isInvalidNameValue(profileForm.firstName) || isInvalidNameValue(profileForm.lastName)) {
+      setProfileMessage({
+        type: 'error',
+        text: language === 'id'
+          ? 'Nama depan dan nama belakang tidak boleh menggunakan N/A'
+          : 'First name and last name cannot use N/A',
+      });
+      setIsSavingProfile(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/me', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profileForm),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        setProfileMessage({
+          type: 'error',
+          text: data.error || (language === 'id' ? 'Gagal menyimpan profil' : 'Failed to save profile'),
+        });
+        return;
+      }
+
+      await refetchUser();
+      setIsEditingProfile(false);
+      setProfileMessage({
+        type: 'success',
+        text: language === 'id' ? 'Profil berhasil diperbarui' : 'Profile updated successfully',
+      });
+    } catch {
+      setProfileMessage({
+        type: 'error',
+        text: language === 'id' ? 'Terjadi kesalahan saat menyimpan' : 'An error occurred while saving',
+      });
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -262,6 +389,218 @@ export default function ProfilePage() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Edit Profile */}
+        <div className="bg-white rounded-2xl border border-[#E4DBCA] p-8 mb-12">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+            <h3 className="font-tan-angleton font-bold text-2xl text-[#B64847]">
+              {language === 'id' ? 'Edit Data Profil' : 'Edit Profile Data'}
+            </h3>
+            {!isEditingProfile ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditingProfile(true);
+                  setProfileMessage(null);
+                }}
+                className="px-4 py-2 bg-[#B64847] text-white rounded-xl hover:bg-[#9a3a3e] font-bold uppercase tracking-wider text-xs transition-all"
+              >
+                {language === 'id' ? 'Edit Data' : 'Edit Profile'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCancelProfileEdit}
+                className="px-4 py-2 border-2 border-[#E4DBCA] text-[#886644] rounded-xl hover:border-[#B64847] hover:text-[#B64847] font-bold uppercase tracking-wider text-xs transition-all"
+              >
+                {language === 'id' ? 'Batal' : 'Cancel'}
+              </button>
+            )}
+          </div>
+
+          {profileMessage && (
+            <div className={`mb-5 p-3 rounded-xl text-sm font-semibold ${
+              profileMessage.type === 'success'
+                ? 'bg-green-50 text-green-700 border border-green-200'
+                : 'bg-red-50 text-red-700 border border-red-200'
+            }`}>
+              {profileMessage.text}
+            </div>
+          )}
+
+          {isEditingProfile ? (
+            <form onSubmit={handleProfileSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Nama Depan' : 'First Name'}
+                  </p>
+                  <input
+                    name="firstName"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.firstName}
+                    onChange={handleProfileInputChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Nama Belakang' : 'Last Name'}
+                  </p>
+                  <input
+                    name="lastName"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.lastName}
+                    onChange={handleProfileInputChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Nomor HP' : 'Phone Number'}
+                  </p>
+                  <input
+                    name="phoneNumber"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.phoneNumber}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Nomor Pelajar' : 'Student ID'}
+                  </p>
+                  <input
+                    name="studentId"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.studentId}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Kewarganegaraan' : 'Nationality'}
+                  </p>
+                  <input
+                    name="nationality"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.nationality}
+                    onChange={handleProfileInputChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Tanggal Lahir' : 'Date of Birth'}
+                  </p>
+                  <input
+                    type="date"
+                    name="birthDate"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.birthDate}
+                    onChange={handleProfileInputChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Universitas' : 'University'}
+                  </p>
+                  <input
+                    name="university"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.university}
+                    onChange={handleProfileInputChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Jenjang Pendidikan' : 'Education Level'}
+                  </p>
+                  <select
+                    name="educationLevel"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847] bg-white"
+                    value={profileForm.educationLevel}
+                    onChange={handleProfileInputChange}
+                    required
+                  >
+                    <option value="" disabled>
+                      {language === 'id' ? 'Pilih jenjang pendidikan' : 'Select education level'}
+                    </option>
+                    {!isKnownEducationLevel && profileForm.educationLevel && (
+                      <option value={profileForm.educationLevel}>{profileForm.educationLevel}</option>
+                    )}
+                    {EDUCATION_LEVEL_OPTIONS.map((level) => (
+                      <option key={level} value={level}>{level}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Jurusan' : 'Major'}
+                  </p>
+                  <input
+                    name="major"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.major}
+                    onChange={handleProfileInputChange}
+                    required
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Domisili / Kampus' : 'Domicile / Campus'}
+                  </p>
+                  <input
+                    name="domicileCampus"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.domicileCampus}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Intake' : 'Intake'}
+                  </p>
+                  <input
+                    name="intake"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.intake}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1">
+                    {language === 'id' ? 'Perkiraan Kelulusan' : 'Expected Graduation'}
+                  </p>
+                  <input
+                    name="expectedGraduation"
+                    className="w-full px-3 py-2 border border-[#E4DBCA] rounded-lg text-sm focus:outline-none focus:border-[#B64847]"
+                    value={profileForm.expectedGraduation}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSavingProfile}
+                className="px-6 py-2 bg-[#B64847] text-white rounded-xl hover:bg-[#9a3a3e] font-bold uppercase tracking-wider text-xs transition-all disabled:opacity-60"
+              >
+                {isSavingProfile
+                  ? (language === 'id' ? 'Menyimpan...' : 'Saving...')
+                  : (language === 'id' ? 'Simpan Perubahan' : 'Save Changes')}
+              </button>
+            </form>
+          ) : (
+            <p className="text-sm text-gray-600">
+              {language === 'id'
+                ? 'Tekan tombol Edit Data jika Anda ingin memperbarui informasi profil.'
+                : 'Click Edit Data if you want to update your profile information.'}
+            </p>
+          )}
         </div>
 
         {/* Membership Status */}

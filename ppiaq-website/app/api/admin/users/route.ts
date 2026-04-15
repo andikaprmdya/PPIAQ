@@ -3,6 +3,7 @@ import { getUsersByStatus, updateUser, getUserById } from '@/lib/database/db';
 import { checkAdmin } from '@/lib/auth/check-admin';
 import { isEligibleForMembershipList } from '@/lib/membership-rules';
 import { getMembershipApplicationTemplate, sendEmail } from '@/lib/email/brevo';
+import { validateFirstLastName } from '@/lib/name-validation';
 
 export async function GET(request: NextRequest) {
   try {
@@ -74,6 +75,15 @@ export async function PUT(request: NextRequest) {
         { error: 'User not found' },
         { status: 404 }
       );
+    }
+
+    const nextFirstName =
+      typeof updates?.firstName === 'string' ? updates.firstName : existingUser.firstName;
+    const nextLastName =
+      typeof updates?.lastName === 'string' ? updates.lastName : existingUser.lastName;
+    const nameValidationError = validateFirstLastName(nextFirstName, nextLastName);
+    if (nameValidationError) {
+      return NextResponse.json({ error: nameValidationError }, { status: 400 });
     }
 
     // Update the user

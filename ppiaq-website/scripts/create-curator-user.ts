@@ -14,7 +14,7 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const email = process.env.CURATOR_EMAIL || 'curator@ppiaq.org';
+  const email = process.env.CURATOR_EMAIL || 'qld@ppi-australia.org';
   const password = process.env.CURATOR_PASSWORD || 'Curator123!';
   const hashedPassword = bcryptjs.hashSync(password, 10);
 
