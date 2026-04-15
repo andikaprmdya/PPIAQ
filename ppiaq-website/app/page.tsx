@@ -30,14 +30,10 @@ interface EventItem {
 type EventOrganizerFilter = 'all' | 'ppiaq' | 'uqisa' | 'qut' | 'griffith' | 'jcu' | 'other';
 
 const HERO_SLIDER_IMAGES = [
-  '/images/pesra 1.jpg',
-  '/images/pesra 2.jpg',
-  '/images/pesra 3.jpg',
-  '/images/pesra 4.jpg',
-  '/images/pesra biggest box.jpg',
-  '/images/pesra rectangle.jpg',
-  '/images/qutmarketday.jpg',
-  '/images/uqmarketday.jpg',
+  '/images/home-shuffle-1.jpg',
+  '/images/home-shuffle-2.jpeg',
+  '/images/home-shuffle-3.jpg',
+  '/images/home-shuffle-4.jpg',
 ];
 
 const EVENT_ORGANIZER_FILTERS: Array<{ key: EventOrganizerFilter; label: { id: string; en: string } }> = [
@@ -83,6 +79,15 @@ const getEventOrganizerKey = (event: EventItem): Exclude<EventOrganizerFilter, '
   return mapOrganizerTextToKey(searchableText);
 };
 
+const shuffleImageOrder = (images: string[]): string[] => {
+  const cloned = [...images];
+  for (let i = cloned.length - 1; i > 0; i -= 1) {
+    const randomIndex = Math.floor(Math.random() * (i + 1));
+    [cloned[i], cloned[randomIndex]] = [cloned[randomIndex], cloned[i]];
+  }
+  return cloned;
+};
+
 export default function HomePage() {
   const { language } = useLanguage();
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -92,6 +97,7 @@ export default function HomePage() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [selectedOrganizer, setSelectedOrganizer] = useState<EventOrganizerFilter>('all');
+  const [heroSliderImages, setHeroSliderImages] = useState<string[]>(HERO_SLIDER_IMAGES);
   const [currentBg, setCurrentBg] = useState(0);
   const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
 
@@ -129,11 +135,16 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
+    setHeroSliderImages(shuffleImageOrder(HERO_SLIDER_IMAGES));
+  }, []);
+
+  useEffect(() => {
+    if (heroSliderImages.length <= 1) return;
     const interval = setInterval(() => {
-      setCurrentBg((prev) => (prev + 1) % HERO_SLIDER_IMAGES.length);
+      setCurrentBg((prev) => (prev + 1) % heroSliderImages.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [heroSliderImages.length]);
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -160,10 +171,12 @@ export default function HomePage() {
     })
     .slice(0, 3);
   const handlePreviousImage = () => {
-    setCurrentBg((prev) => (prev - 1 + HERO_SLIDER_IMAGES.length) % HERO_SLIDER_IMAGES.length);
+    if (heroSliderImages.length === 0) return;
+    setCurrentBg((prev) => (prev - 1 + heroSliderImages.length) % heroSliderImages.length);
   };
   const handleNextImage = () => {
-    setCurrentBg((prev) => (prev + 1) % HERO_SLIDER_IMAGES.length);
+    if (heroSliderImages.length === 0) return;
+    setCurrentBg((prev) => (prev + 1) % heroSliderImages.length);
   };
 
   return (
@@ -231,7 +244,7 @@ export default function HomePage() {
             >
               →
             </button>
-            {HERO_SLIDER_IMAGES.map((image, index) => (
+            {heroSliderImages.map((image, index) => (
               <Image
                 key={image}
                 src={image}
