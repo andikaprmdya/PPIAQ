@@ -140,6 +140,16 @@ export default function GuideToQueenslandPage() {
             {language === 'id' ? 'Panduan Queensland' : 'Guide to Queensland Booklet'}
           </h1>
           <div className="w-12 h-1 bg-[#FEB602] rounded-full"></div>
+          <div className="mt-6 flex justify-center md:justify-end">
+            <a
+              href={GUIDE_BOOKLET_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 bg-[#B64847] text-white rounded-2xl hover:bg-[#9a3a3e] font-bold uppercase tracking-wider text-sm md:text-base transition-all shadow-md"
+            >
+              {language === 'id' ? 'Buka Booklet Resmi' : 'Open Official Booklet'}
+            </a>
+          </div>
         </div>
 
         <div className="bg-white border border-[#E4DBCA] rounded-3xl p-6 md:p-8 mb-8">
@@ -189,14 +199,6 @@ export default function GuideToQueenslandPage() {
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <a
-            href={GUIDE_BOOKLET_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-6 py-3 bg-[#B64847] text-white rounded-xl hover:bg-[#9a3a3e] font-bold uppercase tracking-widest text-xs transition-all"
-          >
-            {language === 'id' ? 'Buka Booklet Resmi' : 'Open Official Booklet'}
-          </a>
           <Link
             href="/"
             className="px-6 py-3 border-2 border-[#E4DBCA] text-[#886644] rounded-xl hover:border-[#B64847] hover:text-[#B64847] font-bold uppercase tracking-widest text-xs transition-all"
