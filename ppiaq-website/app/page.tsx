@@ -236,22 +236,22 @@ export default function HomePage() {
                 ? 'Selamat datang! Kami menghubungkan pelajar Indonesia di seluruh Queensland dengan berbagai peluang, dan satu sama lain.'
                 : 'Welcome! We connect Indonesian students all over Queensland to opportunities, and to each other.'}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center gap-4">
               <Link
                 href="/membership"
-                className="px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
+                className="justify-self-center sm:justify-self-start px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
               >
                 {language === 'id' ? 'Jadilah Anggota' : 'Become a Member'}
               </Link>
               <Link
                 href="/guide-to-queensland"
-                className="px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
+                className="justify-self-center px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
               >
                 {language === 'id' ? 'Panduan Queensland' : 'Guide to Queensland Booklet'}
               </Link>
               <Link
                 href="/about"
-                className="px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
+                className="justify-self-center sm:justify-self-end px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
               >
                 {language === 'id' ? 'Pelajari Tentang Kami' : 'Learn More About Us'}
               </Link>
