@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '@/lib/language-context';
 import { createTranslator, getTranslation, translations } from '@/lib/translations';
 
@@ -161,6 +161,7 @@ export default function AdminCommunityBoardPage() {
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const discountFormRef = useRef<HTMLDivElement | null>(null);
 
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
@@ -233,6 +234,9 @@ export default function AdminCommunityBoardPage() {
   const startEditDiscount = (d: Discount) => {
     setEditingDiscount(d);
     setDiscountForm({ name: d.name, description: d.description, code: d.code, validUntil: d.validUntil, isActive: d.isActive, order: d.order });
+    requestAnimationFrame(() => {
+      discountFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   // ── RESOURCES ──────────────────────────────────────────────────
@@ -359,7 +363,7 @@ export default function AdminCommunityBoardPage() {
       {activeTab === 'discounts' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Form */}
-          <div className="bg-white rounded-2xl border border-[#E4DBCA] p-6">
+          <div ref={discountFormRef} className="bg-white rounded-2xl border border-[#E4DBCA] p-6">
             <h3 className="font-bold text-lg text-[#B64847] mb-4">
               {editingDiscount ? t('admin.communityBoard.discount.edit', 'Edit Partner Entry') : t('admin.communityBoard.discount.add', 'Add Partner Entry')}
             </h3>
