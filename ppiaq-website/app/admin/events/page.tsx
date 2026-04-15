@@ -38,6 +38,18 @@ export default function EventsManagementPage() {
   const fetchEvents = async () => {
     try {
       const res = await fetch('/api/admin/events');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        const errorMessage = errorData?.error || t('admin.events.failedToFetchEvents', 'Failed to fetch events');
+        if (res.status === 401 || res.status === 403) {
+          alert(language === 'id'
+            ? 'Sesi admin Anda sudah tidak valid. Silakan login ulang.'
+            : 'Your admin session is no longer valid. Please sign in again.');
+          router.push('/auth/login');
+          return;
+        }
+        throw new Error(errorMessage);
+      }
       const data = await res.json();
       setEvents(data.data || []);
     } catch (error) {
@@ -57,7 +69,7 @@ export default function EventsManagementPage() {
         setEvents(events.filter((e) => e.id !== id));
         alert(t('admin.events.eventDeletedSuccessfully', 'Event deleted successfully'));
       }
-    } catch (error) {
+    } catch {
       alert(t('admin.events.failedToDeleteEvent', 'Failed to delete event'));
     }
     setDeleteConfirm({ show: false, id: null });

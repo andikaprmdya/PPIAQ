@@ -40,54 +40,6 @@ const HERO_SLIDER_IMAGES = [
   '/images/uqmarketday.jpg',
 ];
 
-const eventDetailRoutes: Record<string, string> = {
-  'Pre-Departure Briefing - Semester 1, 2026': '/events/pre-departure-briefing',
-  'QUT Market Day - Join ISAQ / PPIA QUT': '/events/qut-market-day',
-  'UQ St. Lucia Market Day - Join UQISA / PPIA UQ': '/events/uq-market-day',
-};
-
-const FALLBACK_COMMUNITY_EVENTS: EventItem[] = [
-  {
-    id: 'fallback-predeparture',
-    day: '5',
-    month: 'FEB',
-    title: {
-      id: 'Pre-Departure Briefing - Semester 1, 2026',
-      en: 'Pre-Departure Briefing - Semester 1, 2026',
-    },
-    date: 'Thursday, February 5, 2026',
-    organizer: 'PPIAQ',
-    location: { id: 'Zoom', en: 'Zoom' },
-    image: '/images/predeparture.jpg',
-  },
-  {
-    id: 'fallback-qut',
-    day: '16',
-    month: 'FEB',
-    title: {
-      id: 'QUT Market Day - Join ISAQ / PPIA QUT',
-      en: 'QUT Market Day - Join ISAQ / PPIA QUT',
-    },
-    date: 'Monday, February 16, 2026',
-    organizer: 'QUT',
-    location: { id: 'QUT', en: 'QUT' },
-    image: '/images/qutmarketday.jpg',
-  },
-  {
-    id: 'fallback-uq',
-    day: '18',
-    month: 'FEB',
-    title: {
-      id: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ',
-      en: 'UQ St. Lucia Market Day - Join UQISA / PPIA UQ',
-    },
-    date: 'Wednesday, February 18, 2026',
-    organizer: 'UQISA',
-    location: { id: 'UQ St. Lucia', en: 'UQ St. Lucia' },
-    image: '/images/uqmarketday.jpg',
-  },
-];
-
 const EVENT_ORGANIZER_FILTERS: Array<{ key: EventOrganizerFilter; label: { id: string; en: string } }> = [
   { key: 'all', label: { id: 'Semua', en: 'All' } },
   { key: 'ppiaq', label: { id: 'PPIAQ', en: 'PPIAQ' } },
@@ -149,10 +101,10 @@ export default function HomePage() {
         const res = await fetch('/api/events');
         const data = await res.json();
         const fetchedEvents = Array.isArray(data.data) ? data.data : [];
-        setEvents(fetchedEvents.length > 0 ? fetchedEvents : FALLBACK_COMMUNITY_EVENTS);
+        setEvents(fetchedEvents);
       } catch (error) {
         console.error('Error fetching events:', error);
-        setEvents(FALLBACK_COMMUNITY_EVENTS);
+        setEvents([]);
       } finally {
         setEventsLoading(false);
       }
@@ -216,42 +168,42 @@ export default function HomePage() {
 
   return (
     <main className="font-montserrat text-[#303030] bg-[#FFFAF5] overflow-x-hidden">
-      <section className="text-white py-20 px-6 min-h-[70vh] flex items-center relative overflow-hidden bg-[#B64847]">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 relative z-10">
+      <section className="text-white py-14 md:py-16 lg:py-20 px-6 min-h-[56vh] flex items-center relative overflow-hidden bg-[#B64847]">
+        <div className="max-w-6xl mx-auto w-full flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12 relative z-10">
           <Image
             src="/images/Cendrawasih_Up.png"
-            alt="Cendrawasih Bird Decoration"
-            width={300}
-            height={400}
+            alt={language === 'id' ? 'Dekorasi burung Cendrawasih' : 'Cendrawasih bird decoration'}
+            width={240}
+            height={320}
             priority
-            className="shrink-0"
+            className="hidden lg:block shrink-0 opacity-90"
           />
 
-          <div className="text-center md:text-left">
-            <h1 className="font-tan-angleton font-bold text-5xl md:text-7xl mb-6 text-[#FEB602]">
-              Welcome to PPIA Queensland!
+          <div className="w-full max-w-4xl text-center lg:text-left">
+            <h1 className="font-tan-angleton font-bold text-[clamp(2.5rem,7vw,5.6rem)] leading-[0.95] mb-5 text-[#FEB602]">
+              {language === 'id' ? 'Selamat Datang di PPIA Queensland!' : 'Welcome to PPIA Queensland!'}
             </h1>
-            <p className="text-lg md:text-xl mb-10 opacity-90 leading-relaxed italic">
+            <p className="text-lg md:text-2xl mb-7 opacity-90 leading-relaxed italic max-w-3xl mx-auto lg:mx-0">
               {language === 'id'
                 ? 'Selamat datang! Kami menghubungkan pelajar Indonesia di seluruh Queensland dengan berbagai peluang, dan satu sama lain.'
                 : 'Welcome! We connect Indonesian students all over Queensland to opportunities, and to each other.'}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_1fr] items-center gap-4">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-center lg:justify-start gap-3 sm:gap-4">
               <Link
                 href="/membership"
-                className="justify-self-center sm:justify-self-start px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
+                className="w-full sm:w-auto sm:min-w-[220px] px-6 py-3.5 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-[0.13em] text-sm text-center shadow-md"
               >
                 {language === 'id' ? 'Jadilah Anggota' : 'Become a Member'}
               </Link>
               <Link
                 href="/guide-to-queensland"
-                className="justify-self-center px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
+                className="w-full sm:w-auto sm:min-w-[270px] px-6 py-3.5 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-[0.13em] text-sm text-center shadow-md"
               >
                 {language === 'id' ? 'Panduan Queensland' : 'Guide to Queensland Booklet'}
               </Link>
               <Link
                 href="/about"
-                className="justify-self-center sm:justify-self-end px-6 py-4 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-wider text-xs text-center shadow-md"
+                className="w-full sm:w-auto sm:min-w-[220px] px-6 py-3.5 bg-white text-[#B64847] font-bold rounded-lg hover:bg-[#FEB602] hover:text-[#303030] transition-colors uppercase tracking-[0.13em] text-sm text-center shadow-md"
               >
                 {language === 'id' ? 'Pelajari Tentang Kami' : 'Learn More About Us'}
               </Link>
@@ -283,7 +235,7 @@ export default function HomePage() {
               <Image
                 key={image}
                 src={image}
-                alt={`PPIAQ activities ${index + 1}`}
+                alt={language === 'id' ? `Aktivitas PPIAQ ${index + 1}` : `PPIAQ activities ${index + 1}`}
                 fill
                 className={`object-cover transition-opacity duration-700 ${
                   currentBg === index ? 'opacity-100' : 'opacity-0'
@@ -335,7 +287,7 @@ export default function HomePage() {
                 const title = language === 'id' ? event.title.id : event.title.en;
                 const location = language === 'id' ? event.location.id : event.location.en;
                 const organizer = getEventOrganizerKey(event);
-                const href = eventDetailRoutes[event.title.en] || event.registrationUrl || '#';
+                const href = event.registrationUrl || '';
                 const imageSrc = event.image || '/images/PPIAQ_logo.png';
 
                 const card = (
@@ -367,8 +319,16 @@ export default function HomePage() {
                   </div>
                 );
 
-                if (href === '#') {
+                if (!href) {
                   return <div key={event.id}>{card}</div>;
+                }
+
+                if (href.startsWith('http://') || href.startsWith('https://')) {
+                  return (
+                    <a key={event.id} href={href} target="_blank" rel="noopener noreferrer" className="block">
+                      {card}
+                    </a>
+                  );
                 }
 
                 return (
@@ -424,7 +384,9 @@ export default function HomePage() {
             <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-6 italic">* {language === 'id' ? 'Menunjukkan field yang diperlukan' : 'Indicates required field'}</p>
             <form className="space-y-6" onSubmit={handleNewsletterSubmit}>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-widest mb-2">Email <span className="text-[#B64847]">*</span></label>
+                <label className="block text-xs font-bold uppercase tracking-widest mb-2">
+                  {language === 'id' ? 'Email' : 'Email'} <span className="text-[#B64847]">*</span>
+                </label>
                 <input type="email" value={newsletterEmail} onChange={(e) => setNewsletterEmail(e.target.value)} required className="w-full p-3 border border-gray-300 focus:border-[#B64847] outline-none transition-all rounded-sm" />
               </div>
               <div className="flex items-start gap-3">
@@ -473,7 +435,7 @@ export default function HomePage() {
                   href="https://instagram.com/ppiaqueensland"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Instagram"
+                  aria-label={language === 'id' ? 'Instagram PPIAQ' : 'PPIAQ Instagram'}
                   className="w-12 h-12 flex items-center justify-center border-2 border-black rounded-lg text-2xl hover:bg-[#B64847] hover:border-[#B64847] hover:text-white transition-all"
                 >
                   <FaInstagram />
@@ -482,7 +444,7 @@ export default function HomePage() {
                   href="https://www.linkedin.com/company/ppia-queensland/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="LinkedIn"
+                  aria-label={language === 'id' ? 'LinkedIn PPIAQ' : 'PPIAQ LinkedIn'}
                   className="w-12 h-12 flex items-center justify-center border-2 border-black rounded-lg text-2xl hover:bg-[#B64847] hover:border-[#B64847] hover:text-white transition-all"
                 >
                   <FaLinkedinIn />

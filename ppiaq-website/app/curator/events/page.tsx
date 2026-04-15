@@ -4,6 +4,7 @@ import ConfirmDialog from '@/components/admin/forms/ConfirmDialog';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/language-context';
 import { createTranslator, getTranslation, translations } from '@/lib/translations';
 
@@ -27,6 +28,7 @@ const filterOptions = [
 ] as const;
 
 export default function CuratorEventsPage() {
+  const router = useRouter();
   const { language } = useLanguage();
   const t = createTranslator(language);
   const [events, setEvents] = useState<Event[]>([]);
@@ -45,6 +47,18 @@ export default function CuratorEventsPage() {
   const fetchEvents = async () => {
     try {
       const res = await fetch('/api/curator/events');
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        const errorMessage = errorData?.error || t('curator.events.failedToFetchEvents', 'Failed to fetch events');
+        if (res.status === 401 || res.status === 403) {
+          alert(language === 'id'
+            ? 'Sesi curator Anda sudah tidak valid. Silakan login ulang.'
+            : 'Your curator session is no longer valid. Please sign in again.');
+          router.push('/auth/login');
+          return;
+        }
+        throw new Error(errorMessage);
+      }
       const data = await res.json();
       setEvents(data.data || []);
     } catch (error) {
