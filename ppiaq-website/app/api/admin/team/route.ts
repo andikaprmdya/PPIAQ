@@ -6,6 +6,15 @@ import {
 } from '@/lib/database/db';
 import { checkAdmin } from '@/lib/auth/check-admin';
 
+export const dynamic = 'force-dynamic';
+
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+  'Surrogate-Control': 'no-store',
+};
+
 // GET /api/admin/team - List all team members
 export async function GET(req: NextRequest) {
   try {
@@ -22,7 +31,7 @@ export async function GET(req: NextRequest) {
       data: filtered.sort((a, b) => a.order - b.order),
       message: `Retrieved ${filtered.length} team members`,
       meta: { total: filtered.length },
-    });
+    }, { headers: NO_STORE_HEADERS });
   } catch (error) {
     console.error('Error fetching team members:', error);
     return NextResponse.json({ error: 'Failed to fetch team members' }, { status: 500 });
@@ -58,7 +67,10 @@ export async function POST(req: NextRequest) {
       isActive: body.isActive !== false,
     });
 
-    return NextResponse.json({ data: newMember, message: 'Team member created successfully' }, { status: 201 });
+    return NextResponse.json(
+      { data: newMember, message: 'Team member created successfully' },
+      { status: 201, headers: NO_STORE_HEADERS }
+    );
   } catch (error) {
     console.error('Error creating team member:', error);
     return NextResponse.json({ error: 'Failed to create team member' }, { status: 500 });
@@ -85,7 +97,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to reorder members' }, { status: 500 });
     }
 
-    return NextResponse.json({ message: 'Team members reordered successfully' });
+    return NextResponse.json({ message: 'Team members reordered successfully' }, { headers: NO_STORE_HEADERS });
   } catch (error) {
     console.error('Error reordering team members:', error);
     return NextResponse.json({ error: 'Failed to reorder members' }, { status: 500 });

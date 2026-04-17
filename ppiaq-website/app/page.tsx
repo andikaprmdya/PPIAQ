@@ -102,36 +102,60 @@ export default function HomePage() {
   const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
 
   useEffect(() => {
+    let isActive = true;
+
     const fetchEvents = async () => {
       try {
-        const res = await fetch('/api/events');
+        const res = await fetch('/api/events', { cache: 'no-store' });
         const data = await res.json();
         const fetchedEvents = Array.isArray(data.data) ? data.data : [];
-        setEvents(fetchedEvents);
+        if (isActive) {
+          setEvents(fetchedEvents);
+        }
       } catch (error) {
         console.error('Error fetching events:', error);
-        setEvents([]);
+        if (isActive) {
+          setEvents([]);
+        }
       } finally {
-        setEventsLoading(false);
+        if (isActive) {
+          setEventsLoading(false);
+        }
       }
     };
 
     fetchEvents();
+    const intervalId = setInterval(fetchEvents, 30000);
+    return () => {
+      isActive = false;
+      clearInterval(intervalId);
+    };
   }, []);
 
   useEffect(() => {
+    let isActive = true;
+
     const fetchFAQ = async () => {
       try {
-        const res = await fetch('/api/faq?page=home');
+        const res = await fetch('/api/faq?page=home', { cache: 'no-store' });
         const data = await res.json();
-        setFaqData(data.data || []);
+        if (isActive) {
+          setFaqData(data.data || []);
+        }
       } catch (error) {
         console.error('Error fetching FAQ:', error);
       } finally {
-        setFaqLoading(false);
+        if (isActive) {
+          setFaqLoading(false);
+        }
       }
     };
     fetchFAQ();
+    const intervalId = setInterval(fetchFAQ, 30000);
+    return () => {
+      isActive = false;
+      clearInterval(intervalId);
+    };
   }, []);
 
   useEffect(() => {

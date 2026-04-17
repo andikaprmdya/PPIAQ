@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCMSTeamMemberById, updateCMSTeamMember, deleteCMSTeamMember } from '@/lib/database/db';
 import { checkAdmin } from '@/lib/auth/check-admin';
 
+export const dynamic = 'force-dynamic';
+
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+  'Surrogate-Control': 'no-store',
+};
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await checkAdmin();
@@ -11,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const member = await getCMSTeamMemberById(id);
     if (!member) return NextResponse.json({ error: 'Member not found' }, { status: 404 });
 
-    return NextResponse.json({ data: member });
+    return NextResponse.json({ data: member }, { headers: NO_STORE_HEADERS });
   } catch (error) {
     console.error('Error fetching member:', error);
     return NextResponse.json({ error: 'Failed to fetch member' }, { status: 500 });
@@ -28,7 +37,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const updated = await updateCMSTeamMember(id, body);
 
     if (!updated) return NextResponse.json({ error: 'Member not found' }, { status: 404 });
-    return NextResponse.json({ data: updated, message: 'Member updated successfully' });
+    return NextResponse.json(
+      { data: updated, message: 'Member updated successfully' },
+      { headers: NO_STORE_HEADERS }
+    );
   } catch (error) {
     console.error('Error updating member:', error);
     return NextResponse.json({ error: 'Failed to update member' }, { status: 500 });
@@ -44,7 +56,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const deleted = await deleteCMSTeamMember(id);
     if (!deleted) return NextResponse.json({ error: 'Member not found' }, { status: 404 });
 
-    return NextResponse.json({ message: 'Member deleted successfully' });
+    return NextResponse.json({ message: 'Member deleted successfully' }, { headers: NO_STORE_HEADERS });
   } catch (error) {
     console.error('Error deleting member:', error);
     return NextResponse.json({ error: 'Failed to delete member' }, { status: 500 });

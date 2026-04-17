@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FaInstagram } from 'react-icons/fa';
 import { SiGmail } from 'react-icons/si';
 import { useLanguage } from '@/lib/language-context';
@@ -13,16 +15,53 @@ const UNIVERSITIES = [
   { name: 'PPIA Queensland University of Technology - ISAQ', email: 'isaq.qut@gmail.com', instagram: '@ppiaqut', logo: '/images/ISAQ_Logo.png' },
 ];
 
-const TEAM_MEMBERS = [
-  { name: 'Rafika Kusuma', role: { id: 'Ketua', en: 'President' }, university: 'University of Queensland', instagram: '@rafikakusuma', image: '/images/rafika.png' },
-  { name: 'Andika Pramudya Wardana', role: { id: 'Wakil Ketua Internal', en: 'Vice President Internal' }, university: 'University of Queensland', instagram: '@andikawdna', image: '/images/Andika.png' },
-  { name: 'Vincent Hamdali', role: { id: 'Wakil Ketua Eksternal', en: 'Vice President External' }, university: 'University of Queensland', instagram: '@vincenthamdali', image: '/images/vincent.jpg' },
-  { name: 'Emmanuela Stefany Sugiarto', role: { id: 'Sekretaris Jenderal', en: 'Secretary General' }, university: 'University of Queensland', instagram: '@emmanuelas', image: '/images/emma.png' },
-  { name: 'Fanny Alfianti', role: { id: 'Bendahara Jenderal', en: 'Treasurer General' }, university: 'University of Queensland', instagram: '@fannyalfianti', image: '/images/Fani.png' },
-];
+interface TeamMember {
+  id: string;
+  name: string;
+  role: { id: string; en: string };
+  university: string;
+  instagram: string;
+  image: string;
+  order: number;
+}
 
 export default function AboutPage() {
   const { language } = useLanguage();
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [teamLoading, setTeamLoading] = useState(true);
+  const [viewMoreEnabled, setViewMoreEnabled] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchTeamMembers = async () => {
+      try {
+        const res = await fetch('/api/team', { cache: 'no-store' });
+        const data = await res.json();
+        const members = Array.isArray(data?.data) ? data.data : [];
+        const sortedPreview = [...members]
+          .sort((a: TeamMember, b: TeamMember) => a.order - b.order)
+          .slice(0, 5);
+
+        if (!isMounted) return;
+        setTeamMembers(sortedPreview);
+        setViewMoreEnabled(data?.meta?.viewMoreEnabled !== false);
+      } catch (error) {
+        console.error('Error fetching about team members:', error);
+        if (!isMounted) return;
+        setTeamMembers([]);
+      } finally {
+        if (isMounted) setTeamLoading(false);
+      }
+    };
+
+    fetchTeamMembers();
+    const intervalId = setInterval(fetchTeamMembers, 30000);
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
+  }, []);
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen overflow-x-hidden">
@@ -169,47 +208,61 @@ export default function AboutPage() {
 
           {/* Grid updated to lg:grid-cols-5 for 1 row on desktop */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {TEAM_MEMBERS.map((member, i) => (
-              <div key={i} className="group relative">
-                <div className="bg-white rounded-3xl p-5 text-center border border-[#E4DBCA] shadow-sm group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
-                  <div className="relative w-16 h-16 mx-auto mb-5 rounded-2xl overflow-hidden shadow-md border border-white/20">
-                    <Image
-                      src={member.image}
-                      alt={member.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <h3 className="font-bold text-sm text-[#303030] mb-0.5 group-hover:text-[#B64847] transition-colors leading-tight">{member.name}</h3>
-                  <p className="text-[#886644] font-bold text-[9px] uppercase tracking-widest mb-3">
-                    {getTranslation(member.role, language)}
-                  </p>
-                  <div className="w-8 h-px bg-[#E4DBCA] mx-auto mb-3"></div>
-                  <p className="text-[9px] text-gray-400 font-bold mb-4 grow flex items-center justify-center italic">
-                    {member.university}
-                  </p>
-                  <a 
-                    href={`https://instagram.com/${member.instagram.replace('@', '')}`}
-                    className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-[9px] font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-all shadow-sm"
-                  >
-                    {member.instagram}
-                  </a>
-                </div>
+            {teamLoading ? (
+              <div className="col-span-full text-center py-8 text-[#886644] font-bold">
+                {language === 'id' ? 'Memuat anggota tim...' : 'Loading team members...'}
               </div>
-            ))}
+            ) : teamMembers.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-[#886644] font-bold">
+                {language === 'id' ? 'Belum ada anggota tim tersedia' : 'No team members available'}
+              </div>
+            ) : (
+              teamMembers.map((member) => (
+                <div key={member.id} className="group relative">
+                  <div className="bg-white rounded-3xl p-5 text-center border border-[#E4DBCA] shadow-sm group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500 flex flex-col h-full">
+                    <div className="relative w-16 h-16 mx-auto mb-5 rounded-2xl overflow-hidden shadow-md border border-white/20">
+                      <Image
+                        src={member.image || '/images/PPIAQ_logo.png'}
+                        alt={member.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <h3 className="font-bold text-sm text-[#303030] mb-0.5 group-hover:text-[#B64847] transition-colors leading-tight">{member.name}</h3>
+                    <p className="text-[#886644] font-bold text-[9px] uppercase tracking-widest mb-3">
+                      {getTranslation(member.role, language)}
+                    </p>
+                    <div className="w-8 h-px bg-[#E4DBCA] mx-auto mb-3"></div>
+                    <p className="text-[9px] text-gray-400 font-bold mb-4 grow flex items-center justify-center italic">
+                      {member.university}
+                    </p>
+                    <a
+                      href={`https://instagram.com/${(member.instagram || '').replace('@', '')}`}
+                      className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-[9px] font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-all shadow-sm"
+                    >
+                      {member.instagram || '@ppiaqueensland'}
+                    </a>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
-          {/* View More Button (temporarily disabled until full team data is ready) */}
           <div className="mt-12 flex justify-center">
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              title={language === 'id' ? 'Belum tersedia' : 'Not available yet'}
-              className="px-8 py-3 bg-[#B64847]/60 text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl shadow-lg inline-block cursor-not-allowed opacity-80"
-            >
-              {language === 'id' ? 'Lebih Banyak Anggota (Segera)' : 'View More Members (Soon)'}
-            </button>
+            {viewMoreEnabled ? (
+              <Link
+                href="/meet-the-team"
+                className="px-8 py-3 bg-[#B64847] text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#303030] transition-all shadow-lg inline-block"
+              >
+                {language === 'id' ? 'Lihat Semua Anggota' : 'View More Members'}
+              </Link>
+            ) : (
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#886644] text-center">
+                {language === 'id'
+                  ? 'Tombol lihat semua anggota dinonaktifkan oleh admin'
+                  : 'View more button is currently disabled by admin'}
+              </p>
+            )}
           </div>
         </div>
       </section>

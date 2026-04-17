@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ConfirmDialog from '@/components/admin/forms/ConfirmDialog';
@@ -31,16 +31,12 @@ export default function EventsManagementPage() {
     id: null,
   });
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/events');
+      const res = await fetch('/api/admin/events', { cache: 'no-store' });
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        const errorMessage = errorData?.error || t('admin.events.failedToFetchEvents', 'Failed to fetch events');
+        const errorMessage = errorData?.error || (language === 'id' ? 'Gagal mengambil acara' : 'Failed to fetch events');
         if (res.status === 401 || res.status === 403) {
           alert(language === 'id'
             ? 'Sesi admin Anda sudah tidak valid. Silakan login ulang.'
@@ -54,11 +50,17 @@ export default function EventsManagementPage() {
       setEvents(data.data || []);
     } catch (error) {
       console.error('Error fetching events:', error);
-      alert(t('admin.events.failedToFetchEvents', 'Failed to fetch events'));
+      alert(language === 'id' ? 'Gagal mengambil acara' : 'Failed to fetch events');
     } finally {
       setLoading(false);
     }
-  };
+  }, [language, router]);
+
+  useEffect(() => {
+    fetchEvents();
+    const intervalId = setInterval(fetchEvents, 30000);
+    return () => clearInterval(intervalId);
+  }, [fetchEvents]);
 
   const filteredEvents = filter === 'all' ? events : events.filter((e) => e.status === filter);
 

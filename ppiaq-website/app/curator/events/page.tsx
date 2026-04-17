@@ -3,7 +3,7 @@
 import ConfirmDialog from '@/components/admin/forms/ConfirmDialog';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/lib/language-context';
 import { createTranslator, getTranslation, translations } from '@/lib/translations';
@@ -40,16 +40,12 @@ export default function CuratorEventsPage() {
     id: null,
   });
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     try {
-      const res = await fetch('/api/curator/events');
+      const res = await fetch('/api/curator/events', { cache: 'no-store' });
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        const errorMessage = errorData?.error || t('curator.events.failedToFetchEvents', 'Failed to fetch events');
+        const errorMessage = errorData?.error || (language === 'id' ? 'Gagal mengambil acara' : 'Failed to fetch events');
         if (res.status === 401 || res.status === 403) {
           alert(language === 'id'
             ? 'Sesi curator Anda sudah tidak valid. Silakan login ulang.'
@@ -63,11 +59,17 @@ export default function CuratorEventsPage() {
       setEvents(data.data || []);
     } catch (error) {
       console.error('Error fetching events:', error);
-      alert(t('curator.events.failedToFetchEvents', 'Failed to fetch events'));
+      alert(language === 'id' ? 'Gagal mengambil acara' : 'Failed to fetch events');
     } finally {
       setLoading(false);
     }
-  };
+  }, [language, router]);
+
+  useEffect(() => {
+    fetchEvents();
+    const intervalId = setInterval(fetchEvents, 30000);
+    return () => clearInterval(intervalId);
+  }, [fetchEvents]);
 
   const organizerOptions = Array.from(
     new Set(events.map((event) => (event.organizer || '').trim()).filter(Boolean))

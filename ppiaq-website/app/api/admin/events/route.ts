@@ -8,6 +8,15 @@ import {
 } from '@/lib/database/db';
 import { checkAdmin } from '@/lib/auth/check-admin';
 
+export const dynamic = 'force-dynamic';
+
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+  'Surrogate-Control': 'no-store',
+};
+
 // GET /api/admin/events - List all events with optional filters
 export async function GET(req: NextRequest) {
   try {
@@ -29,7 +38,7 @@ export async function GET(req: NextRequest) {
       data: filteredEvents,
       message: `Retrieved ${filteredEvents.length} events`,
       meta: { total: filteredEvents.length },
-    });
+    }, { headers: NO_STORE_HEADERS });
   } catch (error) {
     console.error('Error fetching events:', error);
     return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 });
@@ -69,7 +78,10 @@ export async function POST(req: NextRequest) {
       createdBy: user.id,
     });
 
-    return NextResponse.json({ data: newEvent, message: 'Event created successfully' }, { status: 201 });
+    return NextResponse.json(
+      { data: newEvent, message: 'Event created successfully' },
+      { status: 201, headers: NO_STORE_HEADERS }
+    );
   } catch (error) {
     console.error('Error creating event:', error);
     return NextResponse.json({ error: 'Failed to create event' }, { status: 500 });
@@ -103,7 +115,10 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ data: updatedEvent, message: 'Event updated successfully' });
+    return NextResponse.json(
+      { data: updatedEvent, message: 'Event updated successfully' },
+      { headers: NO_STORE_HEADERS }
+    );
   } catch (error) {
     console.error('Error updating event:', error);
     return NextResponse.json({ error: 'Failed to update event' }, { status: 500 });
@@ -133,7 +148,7 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ message: 'Event deleted successfully' });
+    return NextResponse.json({ message: 'Event deleted successfully' }, { headers: NO_STORE_HEADERS });
   } catch (error) {
     console.error('Error deleting event:', error);
     return NextResponse.json({ error: 'Failed to delete event' }, { status: 500 });

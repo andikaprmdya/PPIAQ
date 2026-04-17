@@ -33,13 +33,17 @@ export default function MeetTheTeamPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchTeamMembers = async () => {
       try {
-        const res = await fetch('/api/team');
+        const res = await fetch('/api/team', { cache: 'no-store' });
         const data = await res.json();
         const all: TeamMember[] = (data.data || []).sort(
           (a: TeamMember, b: TeamMember) => a.order - b.order
         );
+
+        if (!isMounted) return;
 
         // Core team: division === 'CORE' (uppercase from DB)
         setCoreMembers(all.filter((m) => m.division === 'CORE'));
@@ -56,10 +60,17 @@ export default function MeetTheTeamPage() {
       } catch (error) {
         console.error('Error fetching team members:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
+
     fetchTeamMembers();
+    const intervalId = setInterval(fetchTeamMembers, 30000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(intervalId);
+    };
   }, []);
 
   const getTranslation = (obj: { id: string; en: string } | string) => {
@@ -108,16 +119,20 @@ export default function MeetTheTeamPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {loading ? (
-              <div className="col-span-full text-center py-8 text-[#886644]">Loading team members...</div>
+              <div className="col-span-full text-center py-8 text-[#886644]">
+                {language === 'id' ? 'Memuat anggota tim...' : 'Loading team members...'}
+              </div>
             ) : coreMembers.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-[#886644]">No team members available</div>
+              <div className="col-span-full text-center py-8 text-[#886644]">
+                {language === 'id' ? 'Belum ada anggota tim tersedia' : 'No team members available'}
+              </div>
             ) : (
               coreMembers.map((member) => (
                 <div key={member.id} className="group relative">
                   <div className="bg-white rounded-3xl p-5 text-center border border-[#E4DBCA] shadow-sm group-hover:shadow-2xl group-hover:-translate-y-1 transition-all duration-500 flex flex-col h-full cursor-pointer" onClick={() => setSelectedMember(member)}>
                     <div className="relative w-16 h-16 mx-auto mb-5 rounded-2xl overflow-hidden shadow-md border border-white/20">
                       <Image
-                        src={member.image}
+                        src={member.image || '/images/PPIAQ_logo.png'}
                         alt={member.name}
                         fill
                         className="object-cover"
@@ -134,11 +149,11 @@ export default function MeetTheTeamPage() {
                       {member.university}
                     </p>
                     <a
-                      href={`https://instagram.com/${member.instagram.replace('@', '')}`}
+                      href={`https://instagram.com/${(member.instagram || '').replace('@', '')}`}
                       onClick={(e) => e.stopPropagation()}
                       className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-[9px] font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-all shadow-sm"
                     >
-                      {member.instagram}
+                      {member.instagram || '@ppiaqueensland'}
                     </a>
                   </div>
                 </div>
@@ -172,7 +187,9 @@ export default function MeetTheTeamPage() {
                 {/* Members Grid for Division */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                   {loading ? (
-                    <div className="col-span-full text-center py-8 text-[#886644]">Loading...</div>
+                    <div className="col-span-full text-center py-8 text-[#886644]">
+                      {language === 'id' ? 'Memuat...' : 'Loading...'}
+                    </div>
                   ) : (
                     members.map((member) => (
                       <div
@@ -219,11 +236,11 @@ export default function MeetTheTeamPage() {
 
                           {/* Instagram */}
                           <a
-                            href={`https://instagram.com/${member.instagram.replace('@', '')}`}
+                            href={`https://instagram.com/${(member.instagram || '').replace('@', '')}`}
                             onClick={(e) => e.stopPropagation()}
                             className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-[9px] font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-all shadow-sm"
                           >
-                            {member.instagram}
+                            {member.instagram || '@ppiaqueensland'}
                           </a>
                         </div>
                       </div>
@@ -337,7 +354,7 @@ export default function MeetTheTeamPage() {
             {/* Member Image */}
             <div className="relative w-full h-64 bg-gray-200">
               <Image
-                src={selectedMember.image}
+                src={selectedMember.image || '/images/PPIAQ_logo.png'}
                 alt={selectedMember.name}
                 fill
                 className="object-cover"
@@ -367,11 +384,11 @@ export default function MeetTheTeamPage() {
 
               {/* Instagram Link */}
               <a
-                href={`https://instagram.com/${selectedMember.instagram.replace('@', '')}`}
+                href={`https://instagram.com/${(selectedMember.instagram || '').replace('@', '')}`}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[#B64847] text-white font-bold text-sm rounded-xl hover:bg-[#303030] transition-all shadow-lg active:scale-95"
               >
                 <span>📱</span>
-                {selectedMember.instagram}
+                {selectedMember.instagram || '@ppiaqueensland'}
               </a>
             </div>
           </div>

@@ -336,6 +336,12 @@ export async function createCMSEvent(data: Record<string, unknown>) {
 
 export async function updateCMSEvent(id: string, updates: Record<string, unknown>) {
   const cleanedUpdates: Record<string, unknown> = { ...updates };
+  delete cleanedUpdates.id;
+  delete cleanedUpdates.createdAt;
+  delete cleanedUpdates.updatedAt;
+  delete cleanedUpdates.createdBy;
+  delete cleanedUpdates.createdByUser;
+
   if (typeof cleanedUpdates.status === 'string' && cleanedUpdates.status) {
     cleanedUpdates.status = mapEnum('eventStatus', cleanedUpdates.status) as EventStatus;
   }
@@ -394,6 +400,10 @@ export async function createCMSTeamMember(data: Record<string, unknown>) {
 
 export async function updateCMSTeamMember(id: string, updates: Record<string, unknown>) {
   const cleanedUpdates: Record<string, unknown> = { ...updates };
+  delete cleanedUpdates.id;
+  delete cleanedUpdates.createdAt;
+  delete cleanedUpdates.updatedAt;
+
   if (typeof cleanedUpdates.division === 'string' && cleanedUpdates.division) {
     cleanedUpdates.division = mapEnum('division', cleanedUpdates.division) as Division;
   }
@@ -427,6 +437,62 @@ export async function reorderCMSTeamMembers(ids: string[]) {
     console.error('Error reordering team members:', error);
     return false;
   }
+}
+
+const ABOUT_VIEW_MORE_TEAM_KEY = 'about_team_view_more_enabled';
+const TRUE_STRING_VALUES = new Set(['true', '1', 'yes', 'on', 'enabled']);
+
+function parseBooleanLike(value: unknown, fallback: boolean): boolean {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'number') return value !== 0;
+  if (typeof value === 'string') return TRUE_STRING_VALUES.has(value.toLowerCase().trim());
+  return fallback;
+}
+
+export async function getAboutTeamViewMoreEnabled(): Promise<boolean> {
+  const existing = await prisma.staticContent.findUnique({
+    where: { key: ABOUT_VIEW_MORE_TEAM_KEY },
+    select: { content: true },
+  });
+
+  if (!existing?.content) return true;
+
+  if (typeof existing.content === 'string') {
+    return parseBooleanLike(existing.content, true);
+  }
+
+  if (typeof existing.content === 'object') {
+    const content = existing.content as { id?: unknown; en?: unknown; value?: unknown };
+    return parseBooleanLike(content.en ?? content.id ?? content.value, true);
+  }
+
+  return true;
+}
+
+export async function setAboutTeamViewMoreEnabled(enabled: boolean) {
+  const content = {
+    id: String(enabled),
+    en: String(enabled),
+  } as Prisma.InputJsonValue;
+
+  return await prisma.staticContent.upsert({
+    where: { key: ABOUT_VIEW_MORE_TEAM_KEY },
+    update: {
+      type: 'TEXT',
+      content,
+      page: 'about',
+      section: 'team',
+      order: 999,
+    },
+    create: {
+      key: ABOUT_VIEW_MORE_TEAM_KEY,
+      type: 'TEXT',
+      content,
+      page: 'about',
+      section: 'team',
+      order: 999,
+    },
+  });
 }
 
 // ==========================================

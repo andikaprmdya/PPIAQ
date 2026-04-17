@@ -23,7 +23,14 @@ interface TeamMemberData {
   isActive: boolean;
 }
 
-const divisions = ['CORE', 'ADMIN', 'EDUCATION', 'SPORTS', 'MEDIA', 'PARTNERSHIP'];
+const divisions = [
+  { value: 'CORE', label: { id: 'Inti', en: 'Core' } },
+  { value: 'ADMIN', label: { id: 'Administrasi', en: 'Administration' } },
+  { value: 'EDUCATION', label: { id: 'Pendidikan', en: 'Education' } },
+  { value: 'SPORTS', label: { id: 'Olahraga', en: 'Sports' } },
+  { value: 'MEDIA', label: { id: 'Media', en: 'Media' } },
+  { value: 'PARTNERSHIP', label: { id: 'Kemitraan', en: 'Partnership' } },
+];
 
 export default function EditTeamMemberPage() {
   const router = useRouter();
@@ -38,13 +45,15 @@ export default function EditTeamMemberPage() {
   useEffect(() => {
     const fetchMember = async () => {
       try {
-        const res = await fetch(`/api/admin/team/${memberId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setFormData(data.data);
+        const res = await fetch(`/api/admin/team/${memberId}`, { cache: 'no-store' });
+        if (!res.ok) {
+          throw new Error('Failed to fetch member');
         }
-      } catch (error) {
-        alert(t('admin.team.failedToLoadMember', 'Failed to load member'));
+
+        const data = await res.json();
+        setFormData(data.data);
+      } catch {
+        alert(language === 'id' ? 'Gagal memuat anggota tim' : 'Failed to load member');
         router.back();
       } finally {
         setLoading(false);
@@ -52,7 +61,7 @@ export default function EditTeamMemberPage() {
     };
 
     fetchMember();
-  }, [memberId, router]);
+  }, [memberId, router, language]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +82,7 @@ export default function EditTeamMemberPage() {
       } else {
         alert(t('admin.team.failedToUpdateMember', 'Failed to update member'));
       }
-    } catch (error) {
+    } catch {
       alert(t('admin.team.errorUpdatingMember', 'Error updating member'));
     } finally {
       setSubmitting(false);
@@ -151,7 +160,7 @@ export default function EditTeamMemberPage() {
       </FormSection>
 
       <FormSection title={t('admin.team.organization', 'Organization')}>
-        <FormField label={t('admin.team.division', 'Division')} required>
+        <FormField label={t('admin.team.department', 'Department')} required>
           <select
             value={formData.division}
             onChange={(e) => setFormData({ ...formData, division: e.target.value })}
@@ -159,8 +168,8 @@ export default function EditTeamMemberPage() {
             className="w-full px-4 py-3 border border-[#E4DBCA] rounded-xl focus:outline-none focus:border-[#B64847]"
           >
             {divisions.map((div) => (
-              <option key={div} value={div}>
-                {div.charAt(0) + div.slice(1).toLowerCase()}
+              <option key={div.value} value={div.value}>
+                {language === 'id' ? div.label.id : div.label.en}
               </option>
             ))}
           </select>

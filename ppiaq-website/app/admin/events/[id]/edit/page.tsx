@@ -38,13 +38,15 @@ export default function EditEventPage() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await fetch(`/api/admin/events/${eventId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setFormData(data.data);
+        const res = await fetch(`/api/admin/events/${eventId}`, { cache: 'no-store' });
+        if (!res.ok) {
+          throw new Error('Failed to fetch event');
         }
-      } catch (error) {
-        alert(t('admin.events.failedToLoadEvent', 'Failed to load event'));
+
+        const data = await res.json();
+        setFormData(data.data);
+      } catch {
+        alert(language === 'id' ? 'Gagal memuat acara' : 'Failed to load event');
         router.back();
       } finally {
         setLoading(false);
@@ -52,7 +54,7 @@ export default function EditEventPage() {
     };
 
     fetchEvent();
-  }, [eventId, router]);
+  }, [eventId, router, language]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +75,7 @@ export default function EditEventPage() {
       } else {
         alert(t('admin.events.failedToUpdateEvent', 'Failed to update event'));
       }
-    } catch (error) {
+    } catch {
       alert(t('admin.events.errorUpdatingEvent', 'Error updating event'));
     } finally {
       setSubmitting(false);

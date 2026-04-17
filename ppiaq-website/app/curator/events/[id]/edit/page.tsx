@@ -38,13 +38,15 @@ export default function CuratorEditEventPage() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await fetch(`/api/curator/events/${eventId}`);
-        if (res.ok) {
-          const data = await res.json();
-          setFormData(data.data);
+        const res = await fetch(`/api/curator/events/${eventId}`, { cache: 'no-store' });
+        if (!res.ok) {
+          throw new Error('Failed to fetch event');
         }
+
+        const data = await res.json();
+        setFormData(data.data);
       } catch {
-        alert(t('curator.events.failedToLoadEvent', 'Failed to load event'));
+        alert(language === 'id' ? 'Gagal memuat acara' : 'Failed to load event');
         router.back();
       } finally {
         setLoading(false);
@@ -52,7 +54,7 @@ export default function CuratorEditEventPage() {
     };
 
     fetchEvent();
-  }, [eventId, router]);
+  }, [eventId, router, language]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

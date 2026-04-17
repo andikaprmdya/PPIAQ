@@ -22,7 +22,14 @@ interface CreateTeamMemberData {
   isActive: boolean;
 }
 
-const divisions = ['CORE', 'ADMIN', 'EDUCATION', 'SPORTS', 'MEDIA', 'PARTNERSHIP'];
+const divisions = [
+  { value: 'CORE', label: { id: 'Inti', en: 'Core' } },
+  { value: 'ADMIN', label: { id: 'Administrasi', en: 'Administration' } },
+  { value: 'EDUCATION', label: { id: 'Pendidikan', en: 'Education' } },
+  { value: 'SPORTS', label: { id: 'Olahraga', en: 'Sports' } },
+  { value: 'MEDIA', label: { id: 'Media', en: 'Media' } },
+  { value: 'PARTNERSHIP', label: { id: 'Kemitraan', en: 'Partnership' } },
+];
 
 export default function CreateTeamMemberPage() {
   const router = useRouter();
@@ -58,7 +65,7 @@ export default function CreateTeamMemberPage() {
       } else {
         alert(t('admin.team.failedToAddMember', 'Failed to add team member'));
       }
-    } catch (error) {
+    } catch {
       alert(t('admin.team.errorAddingMember', 'Error adding team member'));
     } finally {
       setLoading(false);
@@ -140,7 +147,7 @@ export default function CreateTeamMemberPage() {
       </FormSection>
 
       <FormSection title={t('admin.team.organization', 'Organization')}>
-        <FormField label={t('admin.team.division', 'Division')} required>
+        <FormField label={t('admin.team.department', 'Department')} required>
           <select
             value={formData.division}
             onChange={(e) => setFormData({ ...formData, division: e.target.value })}
@@ -148,8 +155,8 @@ export default function CreateTeamMemberPage() {
             className="w-full px-4 py-3 border border-[#E4DBCA] rounded-xl focus:outline-none focus:border-[#B64847]"
           >
             {divisions.map((div) => (
-              <option key={div} value={div}>
-                {div.charAt(0) + div.slice(1).toLowerCase()}
+              <option key={div.value} value={div.value}>
+                {language === 'id' ? div.label.id : div.label.en}
               </option>
             ))}
           </select>
