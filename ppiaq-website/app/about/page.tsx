@@ -120,39 +120,43 @@ export default function AboutPage() {
       </section>
 
       {/* --- CENDRAWASIH DECORATION --- */}
-      <div className="max-w-7xl mx-auto px-6 mb-16 flex flex-col items-center gap-12">
-        <div className="relative h-[420px] w-[320px] md:h-[500px] md:w-[380px]" aria-hidden="true">
-          <Image
-            src="/images/Cendrawasih_Up.png"
-            alt=""
-            width={250}
-            height={356}
-            className="absolute left-1/2 top-0 h-auto w-[230px] -translate-x-[34%] opacity-95 md:w-[280px]"
-          />
-          <Image
-            src="/images/Cendrawasih_Down.png"
-            alt=""
-            width={250}
-            height={356}
-            className="absolute bottom-0 left-1/2 h-auto w-[230px] -translate-x-[66%] opacity-95 md:w-[280px]"
-          />
-        </div>
+      <div className="max-w-7xl mx-auto px-6 mb-16">
+        <div className="grid w-full grid-cols-1 items-end justify-center gap-10 lg:grid-cols-2 lg:gap-8">
+          <div className="flex flex-col items-center gap-7">
+            <Image
+              src="/images/Cendrawasih_Up.png"
+              alt=""
+              width={250}
+              height={356}
+              className="h-auto w-[220px] opacity-95 md:w-[260px]"
+              aria-hidden="true"
+            />
+            <Link
+              href="/visi-misi"
+              className="flex min-h-16 w-full max-w-xl items-center justify-center rounded-2xl bg-[#B64847] px-7 py-4 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-lg transition-all hover:bg-[#303030] active:scale-95 sm:text-sm sm:tracking-[0.24em] lg:min-h-20 lg:w-[560px] lg:max-w-none"
+            >
+              {language === 'id' ? 'Visi Misi' : 'Vision & Mission'}
+            </Link>
+          </div>
 
-        <div className="flex w-full max-w-[73rem] flex-col items-center justify-center gap-6 lg:flex-row">
-          <Link
-            href="/visi-misi"
-            className="flex min-h-16 w-full max-w-xl items-center justify-center rounded-2xl bg-[#B64847] px-7 py-4 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-lg transition-all hover:bg-[#303030] active:scale-95 sm:text-sm sm:tracking-[0.24em] lg:min-h-20 lg:w-[560px] lg:max-w-none"
-          >
-            {language === 'id' ? 'Visi Misi' : 'Vision & Mission'}
-          </Link>
-          <a
-            href={ARTICLES_OF_ASSOCIATION_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex min-h-16 w-full max-w-xl items-center justify-center rounded-2xl bg-[#B64847] px-7 py-4 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-lg transition-all hover:bg-[#303030] active:scale-95 sm:text-sm sm:tracking-[0.24em] lg:min-h-20 lg:w-[560px] lg:max-w-none"
-          >
-            Articles of Association
-          </a>
+          <div className="flex flex-col items-center gap-7">
+            <Image
+              src="/images/Cendrawasih_Down.png"
+              alt=""
+              width={250}
+              height={356}
+              className="h-auto w-[220px] opacity-95 md:w-[260px]"
+              aria-hidden="true"
+            />
+            <a
+              href={ARTICLES_OF_ASSOCIATION_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex min-h-16 w-full max-w-xl items-center justify-center rounded-2xl bg-[#B64847] px-7 py-4 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-lg transition-all hover:bg-[#303030] active:scale-95 sm:text-sm sm:tracking-[0.24em] lg:min-h-20 lg:w-[560px] lg:max-w-none"
+            >
+              Articles of Association
+            </a>
+          </div>
         </div>
       </div>
 
