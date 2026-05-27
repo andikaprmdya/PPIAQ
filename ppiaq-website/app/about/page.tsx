@@ -15,6 +15,8 @@ const UNIVERSITIES = [
   { name: 'PPIA Queensland University of Technology - ISAQ', email: 'isaq.qut@gmail.com', instagram: '@ppiaqut', logo: '/images/ISAQ_Logo.png' },
 ];
 
+const ARTICLES_OF_ASSOCIATION_URL = 'https://drive.google.com/file/d/1qxagEFtZyr-TnRwpZY3noBtI7pSlhOD-/view?usp=sharing';
+
 interface TeamMember {
   id: string;
   name: string;
@@ -118,18 +120,40 @@ export default function AboutPage() {
       </section>
 
       {/* --- CENDRAWASIH DECORATION --- */}
-      <div className="max-w-5xl mx-auto px-6 mb-12 flex flex-col items-center gap-6">
-        <Image
-          src="/images/Cendrawasih_Down.png"
-          alt="Cendrawasih Bird Decoration"
-          width={250}
-          height={150}
-        />
+      <div className="max-w-7xl mx-auto px-6 mb-16 flex flex-col items-center gap-12">
+        <div className="relative h-[420px] w-[320px] md:h-[500px] md:w-[380px]" aria-hidden="true">
+          <Image
+            src="/images/Cendrawasih_Up.png"
+            alt=""
+            width={250}
+            height={356}
+            className="absolute left-1/2 top-0 h-auto w-[230px] -translate-x-[34%] opacity-95 md:w-[280px]"
+          />
+          <Image
+            src="/images/Cendrawasih_Down.png"
+            alt=""
+            width={250}
+            height={356}
+            className="absolute bottom-0 left-1/2 h-auto w-[230px] -translate-x-[66%] opacity-95 md:w-[280px]"
+          />
+        </div>
 
-        {/* VISI MISI Button */}
-        <a href="/visi-misi" className="px-8 py-3 bg-[#B64847] text-white font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-[#303030] transition-all shadow-lg active:scale-95">
-          {language === 'id' ? 'Visi Misi' : 'Vision & Mission'}
-        </a>
+        <div className="flex w-full max-w-[73rem] flex-col items-center justify-center gap-6 lg:flex-row">
+          <Link
+            href="/visi-misi"
+            className="flex min-h-16 w-full max-w-xl items-center justify-center rounded-2xl bg-[#B64847] px-7 py-4 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-lg transition-all hover:bg-[#303030] active:scale-95 sm:text-sm sm:tracking-[0.24em] lg:min-h-20 lg:w-[560px] lg:max-w-none"
+          >
+            {language === 'id' ? 'Visi Misi' : 'Vision & Mission'}
+          </Link>
+          <a
+            href={ARTICLES_OF_ASSOCIATION_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex min-h-16 w-full max-w-xl items-center justify-center rounded-2xl bg-[#B64847] px-7 py-4 text-center text-[11px] font-bold uppercase tracking-[0.18em] text-white shadow-lg transition-all hover:bg-[#303030] active:scale-95 sm:text-sm sm:tracking-[0.24em] lg:min-h-20 lg:w-[560px] lg:max-w-none"
+          >
+            Articles of Association
+          </a>
+        </div>
       </div>
 
       {/* --- BRANCHES SECTION --- */}
