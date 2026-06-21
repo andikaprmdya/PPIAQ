@@ -37,11 +37,8 @@ export default function ContentEditModal({ section, isOpen, onClose, onSave }: C
           id: contentId,
           en: contentEn,
         },
+        image,
       };
-
-      if (image) {
-        updateData.image = image;
-      }
 
       await onSave(updateData);
     } finally {

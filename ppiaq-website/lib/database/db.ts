@@ -1,7 +1,7 @@
 // Database functions using Prisma ORM
 import bcryptjs from 'bcryptjs';
 import { prisma } from './prisma';
-import { MembershipType, UserStatus, EventStatus, Division, ImageCategory, Prisma } from '@prisma/client';
+import { MembershipType, UserStatus, EventStatus, Division, ImageCategory, ContentType, Prisma } from '@prisma/client';
 import { validateFirstLastName } from '../name-validation';
 
 // ==========================================
@@ -511,14 +511,24 @@ export async function getStaticContentByKey(key: string) {
 }
 
 export async function createStaticContent(data: Record<string, unknown>) {
-  return await prisma.staticContent.create({ data: data as Prisma.StaticContentCreateInput });
+  const contentData: Record<string, unknown> = { ...data };
+  if (typeof contentData.type === 'string' && contentData.type) {
+    contentData.type = mapEnum('contentType', contentData.type) as ContentType;
+  }
+
+  return await prisma.staticContent.create({ data: contentData as Prisma.StaticContentCreateInput });
 }
 
 export async function updateStaticContent(id: string, updates: Record<string, unknown>) {
+  const cleanedUpdates: Record<string, unknown> = { ...updates };
+  if (typeof cleanedUpdates.type === 'string' && cleanedUpdates.type) {
+    cleanedUpdates.type = mapEnum('contentType', cleanedUpdates.type) as ContentType;
+  }
+
   return await prisma.staticContent.update({
     where: { id },
     data: {
-      ...(updates as Prisma.StaticContentUpdateInput),
+      ...(cleanedUpdates as Prisma.StaticContentUpdateInput),
       updatedAt: new Date(),
     },
   });

@@ -1,10 +1,55 @@
 'use client';
 
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { useLanguage } from '@/lib/language-context';
+
+interface StaticContentItem {
+  id: string;
+  key: string;
+  section: string;
+  content: { id: string; en: string };
+  image?: string | null;
+  order?: number;
+}
 
 export default function PestaRakyatPage() {
   const { language } = useLanguage();
+  const [sponsorLogos, setSponsorLogos] = useState<StaticContentItem[]>([]);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const fetchSponsorLogos = async () => {
+      try {
+        const res = await fetch('/api/content?page=pesta-rakyat', { cache: 'no-store' });
+        const data = await res.json();
+        const logos = Array.isArray(data.data)
+          ? data.data
+              .filter((item: StaticContentItem) => item.section === 'sponsors' && item.image)
+              .sort((a: StaticContentItem, b: StaticContentItem) => (a.order || 999) - (b.order || 999))
+          : [];
+
+        if (isActive) {
+          setSponsorLogos(logos);
+        }
+      } catch (error) {
+        console.error('Error fetching Pesra sponsor logos:', error);
+        if (isActive) {
+          setSponsorLogos([]);
+        }
+      }
+    };
+
+    fetchSponsorLogos();
+    return () => {
+      isActive = false;
+    };
+  }, []);
+
+  const getSponsorLabel = (sponsor: StaticContentItem) => (
+    sponsor.content[language] || sponsor.content.en || sponsor.content.id || 'Pesta Rakyat sponsor'
+  );
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen overflow-x-hidden">
@@ -208,6 +253,34 @@ export default function PestaRakyatPage() {
           </div>
         </div>
       </section>
+
+      {sponsorLogos.length > 0 && (
+        <section className="py-12 px-6 bg-white border-y border-[#E4DBCA]">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-8">
+              <h2 className="font-tan-angleton text-2xl md:text-3xl text-[#B64847] uppercase tracking-widest mb-2">
+                {language === 'id' ? 'Didukung Oleh' : 'Supported By'}
+              </h2>
+              <div className="h-1 w-16 bg-[#FEB602] mx-auto rounded-full"></div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {sponsorLogos.map((sponsor) => (
+                <div
+                  key={sponsor.id}
+                  className="h-28 rounded-2xl border border-[#E4DBCA] bg-[#FFFAF5] p-4 flex items-center justify-center"
+                >
+                  <img
+                    src={sponsor.image || ''}
+                    alt={getSponsorLabel(sponsor)}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* --- CENDRAWASIH FOOTER --- */}
       <div className="py-12 px-6 flex justify-center">

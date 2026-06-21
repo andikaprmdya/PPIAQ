@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import ContentEditModal from '@/components/admin/content/ContentEditModal';
+import ImageUploader from '@/components/admin/ImageUploader';
 import { useLanguage } from '@/lib/language-context';
 import { createTranslator } from '@/lib/translations';
+import { ImagePlus, Pencil, Plus, Trash2, X } from 'lucide-react';
 
 interface ContentSection {
   id: string;
@@ -13,6 +15,7 @@ interface ContentSection {
   image?: string;
   type: string;
   page: string;
+  order?: number;
 }
 
 export default function PestaRakyatContentPage() {
@@ -22,6 +25,10 @@ export default function PestaRakyatContentPage() {
   const [loading, setLoading] = useState(true);
   const [editingSection, setEditingSection] = useState<ContentSection | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddingSponsor, setIsAddingSponsor] = useState(false);
+  const [isSavingSponsor, setIsSavingSponsor] = useState(false);
+  const [sponsorName, setSponsorName] = useState('');
+  const [sponsorImage, setSponsorImage] = useState('');
 
   useEffect(() => {
     fetchContent();
@@ -46,11 +53,24 @@ export default function PestaRakyatContentPage() {
   };
 
   const handleSaveSection = async (updatedData: Record<string, unknown>) => {
+    if (!editingSection) return;
+
+    const isExistingContent = Boolean(editingSection.id);
+    const endpoint = isExistingContent ? `/api/admin/content/${editingSection.id}` : '/api/admin/content';
+    const method = isExistingContent ? 'PUT' : 'POST';
+
     try {
-      const res = await fetch(`/api/admin/content/${editingSection?.id}`, {
-        method: 'PUT',
+      const res = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify({
+          ...updatedData,
+          key: editingSection.key,
+          type: editingSection.type || 'TEXT',
+          page: editingSection.page,
+          section: editingSection.section,
+          order: editingSection.order || 999,
+        }),
       });
 
       if (res.ok) {
@@ -64,6 +84,92 @@ export default function PestaRakyatContentPage() {
     } catch (error) {
       console.error('Error saving content:', error);
       alert(t('admin.content.failedToSaveContent', 'Failed to save content'));
+    }
+  };
+
+  const resetSponsorForm = () => {
+    setSponsorName('');
+    setSponsorImage('');
+    setIsAddingSponsor(false);
+  };
+
+  const sponsorLogos = sections
+    .filter((section) => section.section === 'sponsors')
+    .sort((a, b) => (a.order || 999) - (b.order || 999));
+
+  const getNextSponsorOrder = () => {
+    if (sponsorLogos.length === 0) return 1;
+    return Math.max(...sponsorLogos.map((sponsor) => sponsor.order || 0)) + 1;
+  };
+
+  const createSponsorKey = () => {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return `pesta_sponsor_${crypto.randomUUID()}`;
+    }
+
+    return `pesta_sponsor_${Date.now()}`;
+  };
+
+  const handleAddSponsor = async () => {
+    const trimmedName = sponsorName.trim();
+    if (!trimmedName || !sponsorImage) {
+      alert(language === 'id' ? 'Nama sponsor dan logo wajib diisi' : 'Sponsor name and logo are required');
+      return;
+    }
+
+    setIsSavingSponsor(true);
+    try {
+      const res = await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: createSponsorKey(),
+          type: 'IMAGE',
+          content: { id: trimmedName, en: trimmedName },
+          image: sponsorImage,
+          page: 'pesta-rakyat',
+          section: 'sponsors',
+          order: getNextSponsorOrder(),
+        }),
+      });
+
+      if (res.ok) {
+        await fetchContent();
+        resetSponsorForm();
+        alert(language === 'id' ? 'Logo sponsor berhasil ditambahkan' : 'Sponsor logo added successfully');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData?.error || (language === 'id' ? 'Gagal menambahkan logo sponsor' : 'Failed to add sponsor logo'));
+      }
+    } catch (error) {
+      console.error('Error adding sponsor logo:', error);
+      alert(language === 'id' ? 'Gagal menambahkan logo sponsor' : 'Failed to add sponsor logo');
+    } finally {
+      setIsSavingSponsor(false);
+    }
+  };
+
+  const handleDeleteSponsor = async (sponsor: ContentSection) => {
+    const sponsorLabel = sponsor.content[language] || sponsor.content.en || sponsor.content.id || 'Sponsor';
+    const confirmed = confirm(
+      language === 'id'
+        ? `Hapus logo sponsor "${sponsorLabel}"?`
+        : `Delete sponsor logo "${sponsorLabel}"?`
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/admin/content/${sponsor.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        await fetchContent();
+        alert(language === 'id' ? 'Logo sponsor berhasil dihapus' : 'Sponsor logo deleted successfully');
+      } else {
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData?.error || (language === 'id' ? 'Gagal menghapus logo sponsor' : 'Failed to delete sponsor logo'));
+      }
+    } catch (error) {
+      console.error('Error deleting sponsor logo:', error);
+      alert(language === 'id' ? 'Gagal menghapus logo sponsor' : 'Failed to delete sponsor logo');
     }
   };
 
@@ -130,6 +236,153 @@ export default function PestaRakyatContentPage() {
               </div>
             );
           })}
+
+          <section className="pt-6">
+            <div className="bg-white border border-[#E4DBCA] rounded-2xl p-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <ImagePlus className="w-5 h-5 text-[#B64847]" aria-hidden="true" />
+                    <h2 className="font-bold text-xl text-[#B64847]">
+                      {language === 'id' ? 'Logo Sponsor Pesra' : 'Pesra Sponsor Logos'}
+                    </h2>
+                  </div>
+                  <p className="text-sm text-[#886644]">
+                    {language === 'id'
+                      ? 'Logo yang ditambahkan di sini akan tampil di halaman Pesta Rakyat publik.'
+                      : 'Logos added here will appear on the public Pesta Rakyat page.'}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsAddingSponsor(true)}
+                  disabled={isAddingSponsor}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#B64847] text-white font-bold rounded-xl hover:bg-[#303030] transition-all text-sm uppercase disabled:opacity-50"
+                >
+                  <Plus className="w-4 h-4" aria-hidden="true" />
+                  {language === 'id' ? 'Tambah Logo Sponsor' : 'Add Sponsor Logo'}
+                </button>
+              </div>
+
+              {isAddingSponsor && (
+                <div className="mb-6 rounded-2xl border border-[#E4DBCA] bg-[#FFFAF5] p-5">
+                  <div className="flex items-start justify-between gap-4 mb-5">
+                    <div>
+                      <h3 className="font-bold text-[#303030]">
+                        {language === 'id' ? 'Logo sponsor baru' : 'New sponsor logo'}
+                      </h3>
+                      <p className="text-xs text-[#886644] mt-1">
+                        {language === 'id'
+                          ? 'Masukkan nama sponsor untuk teks alternatif dan unggah logo.'
+                          : 'Enter the sponsor name for alt text and upload the logo.'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={resetSponsorForm}
+                      disabled={isSavingSponsor}
+                      className="p-2 text-[#886644] hover:text-[#B64847] disabled:opacity-50"
+                      aria-label={language === 'id' ? 'Tutup formulir sponsor' : 'Close sponsor form'}
+                    >
+                      <X className="w-5 h-5" aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  <label className="block text-sm font-bold uppercase tracking-widest text-[#886644] mb-3">
+                    {language === 'id' ? 'Nama Sponsor' : 'Sponsor Name'}
+                  </label>
+                  <input
+                    type="text"
+                    value={sponsorName}
+                    onChange={(event) => setSponsorName(event.target.value)}
+                    placeholder={language === 'id' ? 'mis. Tuya Taste' : 'e.g., Tuya Taste'}
+                    className="w-full px-4 py-3 border border-[#E4DBCA] rounded-xl focus:outline-none focus:border-[#B64847] mb-5"
+                  />
+
+                  <ImageUploader
+                    value={sponsorImage}
+                    onChange={setSponsorImage}
+                    category="general"
+                    maxSizeMB={5}
+                  />
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      onClick={handleAddSponsor}
+                      disabled={isSavingSponsor}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#B64847] text-white font-bold rounded-xl hover:bg-[#303030] transition-all text-sm uppercase disabled:opacity-50"
+                    >
+                      <Plus className="w-4 h-4" aria-hidden="true" />
+                      {isSavingSponsor
+                        ? (language === 'id' ? 'Menyimpan...' : 'Saving...')
+                        : (language === 'id' ? 'Simpan Logo' : 'Save Logo')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={resetSponsorForm}
+                      disabled={isSavingSponsor}
+                      className="px-5 py-3 border-2 border-[#B64847] text-[#B64847] font-bold rounded-xl hover:bg-[#B64847] hover:text-white transition-all text-sm uppercase disabled:opacity-50"
+                    >
+                      {language === 'id' ? 'Batal' : 'Cancel'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {sponsorLogos.length === 0 ? (
+                <div className="rounded-xl border border-dashed border-[#E4DBCA] p-8 text-center text-sm text-[#886644]">
+                  {language === 'id'
+                    ? 'Belum ada logo sponsor. Klik tombol tambah untuk menampilkan sponsor di website.'
+                    : 'No sponsor logos yet. Click add to show sponsors on the website.'}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {sponsorLogos.map((sponsor) => {
+                    const sponsorLabel = sponsor.content[language] || sponsor.content.en || sponsor.content.id || 'Sponsor';
+
+                    return (
+                      <div key={sponsor.id} className="rounded-xl border border-[#E4DBCA] bg-[#FFFAF5] p-4">
+                        <div className="h-28 rounded-lg border border-[#E4DBCA] bg-white p-4 flex items-center justify-center mb-4">
+                          {sponsor.image ? (
+                            <img
+                              src={sponsor.image}
+                              alt={sponsorLabel}
+                              className="max-h-full max-w-full object-contain"
+                            />
+                          ) : (
+                            <span className="text-xs font-bold uppercase tracking-widest text-[#886644]">
+                              {language === 'id' ? 'Tanpa Logo' : 'No Logo'}
+                            </span>
+                          )}
+                        </div>
+                        <p className="font-bold text-[#303030] mb-3">{sponsorLabel}</p>
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleEditSection(sponsor)}
+                            className="inline-flex flex-1 items-center justify-center gap-2 px-3 py-2 bg-[#B64847] text-white rounded-lg hover:bg-[#303030] transition-all text-xs font-bold uppercase"
+                          >
+                            <Pencil className="w-3.5 h-3.5" aria-hidden="true" />
+                            {language === 'id' ? 'Edit' : 'Edit'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSponsor(sponsor)}
+                            className="inline-flex flex-1 items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-xs font-bold uppercase"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                            {language === 'id' ? 'Hapus' : 'Delete'}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </section>
         </div>
       )}
 

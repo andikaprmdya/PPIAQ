@@ -5,6 +5,13 @@ import {
 } from '@/lib/database/db';
 import { checkAdmin } from '@/lib/auth/check-admin';
 
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+  'Surrogate-Control': 'no-store',
+};
+
 export async function GET(req: NextRequest) {
   try {
     const user = await checkAdmin();
@@ -18,7 +25,7 @@ export async function GET(req: NextRequest) {
       data: content,
       message: `Retrieved ${content.length} content items for ${page}`,
       meta: { total: content.length, page },
-    });
+    }, { headers: NO_STORE_HEADERS });
   } catch (error) {
     console.error('Error fetching content:', error);
     return NextResponse.json({ error: 'Failed to fetch content' }, { status: 500 });
@@ -42,12 +49,16 @@ export async function POST(req: NextRequest) {
       key: body.key,
       type: body.type,
       content: body.content,
+      image: typeof body.image === 'string' ? body.image : undefined,
       page: body.page,
       section: body.section || '',
       order: body.order || 999,
     });
 
-    return NextResponse.json({ data: newContent, message: 'Content created successfully' }, { status: 201 });
+    return NextResponse.json(
+      { data: newContent, message: 'Content created successfully' },
+      { status: 201, headers: NO_STORE_HEADERS }
+    );
   } catch (error) {
     console.error('Error creating content:', error);
     return NextResponse.json({ error: 'Failed to create content' }, { status: 500 });

@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getStaticContentByPage, getStaticContentByKey } from '@/lib/database/db';
 
+const NO_STORE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+  Pragma: 'no-cache',
+  Expires: '0',
+  'Surrogate-Control': 'no-store',
+};
+
 export async function GET(req: NextRequest) {
   try {
     const url = new URL(req.url);
@@ -21,7 +28,7 @@ export async function GET(req: NextRequest) {
       data,
       message: `Retrieved ${data.length} content items`,
       meta: { total: data.length },
-    });
+    }, { headers: NO_STORE_HEADERS });
   } catch (error) {
     console.error('Error fetching content:', error);
     return NextResponse.json({ error: 'Failed to fetch content' }, { status: 500 });
