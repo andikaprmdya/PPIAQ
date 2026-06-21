@@ -14,7 +14,6 @@ interface FormActionsProps {
 
 export default function FormActions({
   onCancel,
-  onSubmit,
   submitText,
   cancelText,
   isLoading = false,
@@ -35,20 +34,17 @@ export default function FormActions({
         {cancelLabel}
       </button>
 
-      {onSubmit && (
-        <button
-          type="button"
-          onClick={onSubmit}
-          disabled={isLoading}
-          className={`
-            px-8 py-3 font-bold rounded-xl transition-all text-sm uppercase
-            ${isDanger ? 'bg-red-600 hover:bg-red-700' : 'bg-[#B64847] hover:bg-[#303030]'}
-            text-white disabled:opacity-50
-          `}
-        >
-          {isLoading ? `⏳ ${getTranslation(translations.common.processing, language)}` : submitLabel}
-        </button>
-      )}
+      <button
+        type="submit"
+        disabled={isLoading}
+        className={`
+          px-8 py-3 font-bold rounded-xl transition-all text-sm uppercase
+          ${isDanger ? 'bg-red-600 hover:bg-red-700' : 'bg-[#B64847] hover:bg-[#303030]'}
+          text-white disabled:opacity-50
+        `}
+      >
+        {isLoading ? `⏳ ${getTranslation(translations.common.processing, language)}` : submitLabel}
+      </button>
     </div>
   );
 }

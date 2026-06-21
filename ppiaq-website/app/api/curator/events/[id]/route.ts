@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCMSEventById, updateCMSEvent, deleteCMSEvent } from '@/lib/database/db';
 import { checkRoles } from '@/lib/auth/check-roles';
+import { EventPayloadError, normalizeEventUpdatePayload } from '@/lib/events/event-payload';
 
 export const dynamic = 'force-dynamic';
 
@@ -42,7 +43,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const body = await req.json();
-    const updated = await updateCMSEvent(id, body);
+    const eventPayload = normalizeEventUpdatePayload(body);
+    const updated = await updateCMSEvent(id, eventPayload);
 
     if (!updated) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
@@ -53,6 +55,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       { headers: NO_STORE_HEADERS }
     );
   } catch (error) {
+    if (error instanceof EventPayloadError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     console.error('Error updating curator event:', error);
     return NextResponse.json({ error: 'Failed to update event' }, { status: 500 });
   }

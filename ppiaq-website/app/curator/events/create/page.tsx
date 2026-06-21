@@ -55,7 +55,8 @@ export default function CuratorCreateEventPage() {
         alert(t('curator.events.eventCreatedSuccessfully', 'Event created successfully!'));
         router.push('/curator/events');
       } else {
-        alert(t('curator.events.failedToCreateEvent', 'Failed to create event'));
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData?.error || t('curator.events.failedToCreateEvent', 'Failed to create event'));
       }
     } catch {
       alert(t('curator.events.errorCreatingEvent', 'Error creating event'));

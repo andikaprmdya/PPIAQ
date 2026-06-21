@@ -55,9 +55,10 @@ export default function CreateEventPage() {
         alert(t('admin.events.eventCreatedSuccessfully', 'Event created successfully!'));
         router.push('/admin/events');
       } else {
-        alert(t('admin.events.failedToCreateEvent', 'Failed to create event'));
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData?.error || t('admin.events.failedToCreateEvent', 'Failed to create event'));
       }
-    } catch (error) {
+    } catch {
       alert(t('admin.events.errorCreatingEvent', 'Error creating event'));
     } finally {
       setLoading(false);

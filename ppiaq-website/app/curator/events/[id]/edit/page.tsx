@@ -73,7 +73,8 @@ export default function CuratorEditEventPage() {
         alert(t('curator.events.eventUpdatedSuccessfully', 'Event updated successfully!'));
         router.push('/curator/events');
       } else {
-        alert(t('curator.events.failedToUpdateEvent', 'Failed to update event'));
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData?.error || t('curator.events.failedToUpdateEvent', 'Failed to update event'));
       }
     } catch {
       alert(t('curator.events.errorUpdatingEvent', 'Error updating event'));

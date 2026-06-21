@@ -73,7 +73,8 @@ export default function EditEventPage() {
         alert(t('admin.events.eventUpdatedSuccessfully', 'Event updated successfully!'));
         router.push('/admin/events');
       } else {
-        alert(t('admin.events.failedToUpdateEvent', 'Failed to update event'));
+        const errorData = await res.json().catch(() => ({}));
+        alert(errorData?.error || t('admin.events.failedToUpdateEvent', 'Failed to update event'));
       }
     } catch {
       alert(t('admin.events.errorUpdatingEvent', 'Error updating event'));

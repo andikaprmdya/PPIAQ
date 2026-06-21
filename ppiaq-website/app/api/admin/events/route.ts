@@ -7,6 +7,11 @@ import {
   deleteCMSEvent,
 } from '@/lib/database/db';
 import { checkAdmin } from '@/lib/auth/check-admin';
+import {
+  EventPayloadError,
+  normalizeEventCreatePayload,
+  normalizeEventUpdatePayload,
+} from '@/lib/events/event-payload';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,34 +60,18 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
 
-    // Validation
-    if (!body.day || !body.month || !body.title || !body.date || !body.location || !body.organizer) {
-      return NextResponse.json(
-        { error: 'Missing required fields: day, month, title, date, location, organizer' },
-        { status: 400 }
-      );
-    }
-
-    // Create event
-    const newEvent = await createCMSEvent({
-      day: body.day,
-      month: body.month,
-      title: body.title,
-      date: body.date,
-      organizer: body.organizer,
-      location: body.location,
-      description: body.description || { id: '', en: '' },
-      image: body.image || '',
-      registrationUrl: body.registrationUrl,
-      status: body.status || 'draft',
-      createdBy: user.id,
-    });
+    const eventPayload = normalizeEventCreatePayload(body, user.id);
+    const newEvent = await createCMSEvent(eventPayload);
 
     return NextResponse.json(
       { data: newEvent, message: 'Event created successfully' },
       { status: 201, headers: NO_STORE_HEADERS }
     );
   } catch (error) {
+    if (error instanceof EventPayloadError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     console.error('Error creating event:', error);
     return NextResponse.json({ error: 'Failed to create event' }, { status: 500 });
   }
@@ -105,11 +94,8 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-
-    // Update event
-    const updatedEvent = await updateCMSEvent(eventId, {
-      ...body,
-    });
+    const eventPayload = normalizeEventUpdatePayload(body);
+    const updatedEvent = await updateCMSEvent(eventId, eventPayload);
 
     if (!updatedEvent) {
       return NextResponse.json({ error: 'Event not found' }, { status: 404 });
@@ -120,6 +106,10 @@ export async function PUT(req: NextRequest) {
       { headers: NO_STORE_HEADERS }
     );
   } catch (error) {
+    if (error instanceof EventPayloadError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
     console.error('Error updating event:', error);
     return NextResponse.json({ error: 'Failed to update event' }, { status: 500 });
   }
