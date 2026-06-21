@@ -23,11 +23,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return null;
   }
 
-  const sidebarItems = [
+  const sidebarItems: Array<{ label: string; href: string; highlight?: boolean }> = [
     { label: getTranslation(translations.admin.layout.dashboard, language), href: '/admin/dashboard' },
     { label: getTranslation(translations.admin.layout.events, language), href: '/admin/events' },
     { label: getTranslation(translations.admin.layout.team, language), href: '/admin/team' },
     { label: getTranslation(translations.admin.layout.communityBoard, language), href: '/admin/community-board' },
+    {
+      label: language === 'id' ? 'Sponsor Pesra' : 'Pesra Sponsors',
+      href: '/admin/content/pesta-rakyat',
+      highlight: true,
+    },
   ];
 
   return (
@@ -47,10 +52,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               key={item.href}
               href={item.href}
               className={`
-                block px-4 py-3 rounded-xl font-bold text-sm uppercase tracking-widest transition-all
+                block px-4 py-3 rounded-xl font-bold text-sm uppercase tracking-widest transition-all border
                 ${pathname === item.href || pathname.startsWith(item.href + '/')
-                  ? 'bg-[#B64847] text-white shadow-lg'
-                  : 'text-[#886644] hover:bg-[#FFFAF5] hover:text-[#B64847]'
+                  ? 'bg-[#B64847] text-white shadow-lg border-[#B64847]'
+                  : item.highlight
+                    ? 'bg-[#FEB602]/20 border-[#FEB602] text-[#B64847] hover:bg-[#FEB602] hover:text-[#303030]'
+                    : 'border-transparent text-[#886644] hover:bg-[#FFFAF5] hover:text-[#B64847]'
                 }
               `}
             >
@@ -82,6 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               {pathname.startsWith('/admin/events') && getTranslation(translations.admin.layout.eventsManagement, language)}
               {pathname.startsWith('/admin/team') && getTranslation(translations.admin.layout.teamManagement, language)}
               {pathname.startsWith('/admin/community-board') && getTranslation(translations.admin.layout.communityBoardManagement, language)}
+              {pathname.startsWith('/admin/content/pesta-rakyat') && (language === 'id' ? 'Sponsor Pesra' : 'Pesra Sponsors')}
             </h2>
           </div>
         </div>

@@ -27,6 +27,7 @@ export default function PestaRakyatContentPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddingSponsor, setIsAddingSponsor] = useState(false);
   const [isSavingSponsor, setIsSavingSponsor] = useState(false);
+  const [editingSponsor, setEditingSponsor] = useState<ContentSection | null>(null);
   const [sponsorName, setSponsorName] = useState('');
   const [sponsorImage, setSponsorImage] = useState('');
 
@@ -90,7 +91,15 @@ export default function PestaRakyatContentPage() {
   const resetSponsorForm = () => {
     setSponsorName('');
     setSponsorImage('');
+    setEditingSponsor(null);
     setIsAddingSponsor(false);
+  };
+
+  const openAddSponsorForm = () => {
+    setSponsorName('');
+    setSponsorImage('');
+    setEditingSponsor(null);
+    setIsAddingSponsor(true);
   };
 
   const sponsorLogos = sections
@@ -110,7 +119,14 @@ export default function PestaRakyatContentPage() {
     return `pesta_sponsor_${Date.now()}`;
   };
 
-  const handleAddSponsor = async () => {
+  const handleEditSponsor = (sponsor: ContentSection) => {
+    setSponsorName(sponsor.content[language] || sponsor.content.en || sponsor.content.id || '');
+    setSponsorImage(sponsor.image || '');
+    setEditingSponsor(sponsor);
+    setIsAddingSponsor(true);
+  };
+
+  const handleSaveSponsor = async () => {
     const trimmedName = sponsorName.trim();
     if (!trimmedName || !sponsorImage) {
       alert(language === 'id' ? 'Nama sponsor dan logo wajib diisi' : 'Sponsor name and logo are required');
@@ -119,31 +135,36 @@ export default function PestaRakyatContentPage() {
 
     setIsSavingSponsor(true);
     try {
-      const res = await fetch('/api/admin/content', {
-        method: 'POST',
+      const isEditingSponsor = Boolean(editingSponsor?.id);
+      const res = await fetch(isEditingSponsor ? `/api/admin/content/${editingSponsor?.id}` : '/api/admin/content', {
+        method: isEditingSponsor ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          key: createSponsorKey(),
+          key: editingSponsor?.key || createSponsorKey(),
           type: 'IMAGE',
           content: { id: trimmedName, en: trimmedName },
           image: sponsorImage,
           page: 'pesta-rakyat',
           section: 'sponsors',
-          order: getNextSponsorOrder(),
+          order: editingSponsor?.order || getNextSponsorOrder(),
         }),
       });
 
       if (res.ok) {
         await fetchContent();
         resetSponsorForm();
-        alert(language === 'id' ? 'Logo sponsor berhasil ditambahkan' : 'Sponsor logo added successfully');
+        alert(
+          isEditingSponsor
+            ? (language === 'id' ? 'Logo sponsor berhasil diperbarui' : 'Sponsor logo updated successfully')
+            : (language === 'id' ? 'Logo sponsor berhasil ditambahkan' : 'Sponsor logo added successfully')
+        );
       } else {
         const errorData = await res.json().catch(() => ({}));
-        alert(errorData?.error || (language === 'id' ? 'Gagal menambahkan logo sponsor' : 'Failed to add sponsor logo'));
+        alert(errorData?.error || (language === 'id' ? 'Gagal menyimpan logo sponsor' : 'Failed to save sponsor logo'));
       }
     } catch (error) {
-      console.error('Error adding sponsor logo:', error);
-      alert(language === 'id' ? 'Gagal menambahkan logo sponsor' : 'Failed to add sponsor logo');
+      console.error('Error saving sponsor logo:', error);
+      alert(language === 'id' ? 'Gagal menyimpan logo sponsor' : 'Failed to save sponsor logo');
     } finally {
       setIsSavingSponsor(false);
     }
@@ -247,16 +268,11 @@ export default function PestaRakyatContentPage() {
                       {language === 'id' ? 'Logo Sponsor Pesra' : 'Pesra Sponsor Logos'}
                     </h2>
                   </div>
-                  <p className="text-sm text-[#886644]">
-                    {language === 'id'
-                      ? 'Logo yang ditambahkan di sini akan tampil di halaman Pesta Rakyat publik.'
-                      : 'Logos added here will appear on the public Pesta Rakyat page.'}
-                  </p>
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => setIsAddingSponsor(true)}
+                  onClick={openAddSponsorForm}
                   disabled={isAddingSponsor}
                   className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#B64847] text-white font-bold rounded-xl hover:bg-[#303030] transition-all text-sm uppercase disabled:opacity-50"
                 >
@@ -268,16 +284,11 @@ export default function PestaRakyatContentPage() {
               {isAddingSponsor && (
                 <div className="mb-6 rounded-2xl border border-[#E4DBCA] bg-[#FFFAF5] p-5">
                   <div className="flex items-start justify-between gap-4 mb-5">
-                    <div>
-                      <h3 className="font-bold text-[#303030]">
-                        {language === 'id' ? 'Logo sponsor baru' : 'New sponsor logo'}
-                      </h3>
-                      <p className="text-xs text-[#886644] mt-1">
-                        {language === 'id'
-                          ? 'Masukkan nama sponsor untuk teks alternatif dan unggah logo.'
-                          : 'Enter the sponsor name for alt text and upload the logo.'}
-                      </p>
-                    </div>
+                    <h3 className="font-bold text-[#303030]">
+                      {editingSponsor
+                        ? (language === 'id' ? 'Edit logo sponsor' : 'Edit sponsor logo')
+                        : (language === 'id' ? 'Logo sponsor baru' : 'New sponsor logo')}
+                    </h3>
                     <button
                       type="button"
                       onClick={resetSponsorForm}
@@ -297,7 +308,7 @@ export default function PestaRakyatContentPage() {
                     value={sponsorName}
                     onChange={(event) => setSponsorName(event.target.value)}
                     placeholder={language === 'id' ? 'mis. Tuya Taste' : 'e.g., Tuya Taste'}
-                    className="w-full px-4 py-3 border border-[#E4DBCA] rounded-xl focus:outline-none focus:border-[#B64847] mb-5"
+                    className="w-full px-4 py-3 border border-[#E4DBCA] rounded-xl focus:outline-none focus:border-[#B64847] mb-5 text-[#303030] placeholder:text-[#886644]"
                   />
 
                   <ImageUploader
@@ -310,14 +321,16 @@ export default function PestaRakyatContentPage() {
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       type="button"
-                      onClick={handleAddSponsor}
+                      onClick={handleSaveSponsor}
                       disabled={isSavingSponsor}
                       className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#B64847] text-white font-bold rounded-xl hover:bg-[#303030] transition-all text-sm uppercase disabled:opacity-50"
                     >
                       <Plus className="w-4 h-4" aria-hidden="true" />
                       {isSavingSponsor
                         ? (language === 'id' ? 'Menyimpan...' : 'Saving...')
-                        : (language === 'id' ? 'Simpan Logo' : 'Save Logo')}
+                        : editingSponsor
+                          ? (language === 'id' ? 'Perbarui Logo' : 'Update Logo')
+                          : (language === 'id' ? 'Simpan Logo' : 'Save Logo')}
                     </button>
                     <button
                       type="button"
@@ -361,7 +374,7 @@ export default function PestaRakyatContentPage() {
                         <div className="flex gap-2">
                           <button
                             type="button"
-                            onClick={() => handleEditSection(sponsor)}
+                            onClick={() => handleEditSponsor(sponsor)}
                             className="inline-flex flex-1 items-center justify-center gap-2 px-3 py-2 bg-[#B64847] text-white rounded-lg hover:bg-[#303030] transition-all text-xs font-bold uppercase"
                           >
                             <Pencil className="w-3.5 h-3.5" aria-hidden="true" />

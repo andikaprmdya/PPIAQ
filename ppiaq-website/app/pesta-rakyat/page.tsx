@@ -264,11 +264,11 @@ export default function PestaRakyatPage() {
               <div className="h-1 w-16 bg-[#FEB602] mx-auto rounded-full"></div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
               {sponsorLogos.map((sponsor) => (
                 <div
                   key={sponsor.id}
-                  className="h-28 rounded-2xl border border-[#E4DBCA] bg-[#FFFAF5] p-4 flex items-center justify-center"
+                  className="h-24 w-40 flex items-center justify-center"
                 >
                   <img
                     src={sponsor.image || ''}
