@@ -7,16 +7,31 @@ import { useLanguage } from '@/lib/language-context';
 import { createTranslator } from '@/lib/translations';
 import { ImagePlus, Pencil, Plus, Trash2, X } from 'lucide-react';
 
+type SponsorSize = 'L' | 'M' | 'S';
+
 interface ContentSection {
   id: string;
   key: string;
   section: string;
-  content: { id: string; en: string };
+  content: { id: string; en: string; size?: string };
   image?: string;
   type: string;
   page: string;
   order?: number;
 }
+
+const SPONSOR_SIZE_OPTIONS: Array<{ value: SponsorSize; label: string; hint: { id: string; en: string } }> = [
+  { value: 'L', label: 'L', hint: { id: 'Besar', en: 'Large' } },
+  { value: 'M', label: 'M', hint: { id: 'Sedang', en: 'Medium' } },
+  { value: 'S', label: 'S', hint: { id: 'Kecil', en: 'Small' } },
+];
+
+const normalizeSponsorName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+const isKjriSydneySponsor = (name: string) => {
+  const normalized = normalizeSponsorName(name);
+  return normalized.includes('kjri sydney') || normalized.includes('konsulat jenderal sydney');
+};
 
 export default function PestaRakyatContentPage() {
   const { language } = useLanguage();
@@ -30,6 +45,7 @@ export default function PestaRakyatContentPage() {
   const [editingSponsor, setEditingSponsor] = useState<ContentSection | null>(null);
   const [sponsorName, setSponsorName] = useState('');
   const [sponsorImage, setSponsorImage] = useState('');
+  const [sponsorSize, setSponsorSize] = useState<SponsorSize>('S');
 
   useEffect(() => {
     fetchContent();
@@ -91,6 +107,7 @@ export default function PestaRakyatContentPage() {
   const resetSponsorForm = () => {
     setSponsorName('');
     setSponsorImage('');
+    setSponsorSize('S');
     setEditingSponsor(null);
     setIsAddingSponsor(false);
   };
@@ -98,6 +115,7 @@ export default function PestaRakyatContentPage() {
   const openAddSponsorForm = () => {
     setSponsorName('');
     setSponsorImage('');
+    setSponsorSize('S');
     setEditingSponsor(null);
     setIsAddingSponsor(true);
   };
@@ -119,9 +137,20 @@ export default function PestaRakyatContentPage() {
     return `pesta_sponsor_${Date.now()}`;
   };
 
+  const getSponsorLabel = (sponsor: ContentSection) => (
+    sponsor.content[language] || sponsor.content.en || sponsor.content.id || 'Sponsor'
+  );
+
+  const getSponsorSize = (sponsor: ContentSection): SponsorSize => {
+    const rawSize = sponsor.content.size?.toUpperCase();
+    if (rawSize === 'L' || rawSize === 'M' || rawSize === 'S') return rawSize;
+    return isKjriSydneySponsor(getSponsorLabel(sponsor)) ? 'L' : 'S';
+  };
+
   const handleEditSponsor = (sponsor: ContentSection) => {
-    setSponsorName(sponsor.content[language] || sponsor.content.en || sponsor.content.id || '');
+    setSponsorName(getSponsorLabel(sponsor));
     setSponsorImage(sponsor.image || '');
+    setSponsorSize(getSponsorSize(sponsor));
     setEditingSponsor(sponsor);
     setIsAddingSponsor(true);
   };
@@ -142,7 +171,7 @@ export default function PestaRakyatContentPage() {
         body: JSON.stringify({
           key: editingSponsor?.key || createSponsorKey(),
           type: 'IMAGE',
-          content: { id: trimmedName, en: trimmedName },
+          content: { id: trimmedName, en: trimmedName, size: sponsorSize },
           image: sponsorImage,
           page: 'pesta-rakyat',
           section: 'sponsors',
@@ -318,6 +347,33 @@ export default function PestaRakyatContentPage() {
                     maxSizeMB={5}
                   />
 
+                  <div className="mb-6">
+                    <label className="block text-sm font-bold uppercase tracking-widest text-[#886644] mb-3">
+                      {language === 'id' ? 'Ukuran Logo' : 'Logo Size'}
+                    </label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {SPONSOR_SIZE_OPTIONS.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setSponsorSize(option.value)}
+                          className={`
+                            px-4 py-3 rounded-xl border-2 text-center transition-all
+                            ${sponsorSize === option.value
+                              ? 'bg-[#B64847] border-[#B64847] text-white'
+                              : 'bg-white border-[#E4DBCA] text-[#303030] hover:border-[#B64847]'
+                            }
+                          `}
+                        >
+                          <span className="block text-lg font-black">{option.label}</span>
+                          <span className="block text-[10px] font-bold uppercase tracking-widest opacity-80">
+                            {option.hint[language]}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="flex flex-col sm:flex-row gap-3">
                     <button
                       type="button"
@@ -353,7 +409,8 @@ export default function PestaRakyatContentPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {sponsorLogos.map((sponsor) => {
-                    const sponsorLabel = sponsor.content[language] || sponsor.content.en || sponsor.content.id || 'Sponsor';
+                    const sponsorLabel = getSponsorLabel(sponsor);
+                    const sponsorSizeValue = getSponsorSize(sponsor);
 
                     return (
                       <div key={sponsor.id} className="rounded-xl border border-[#E4DBCA] bg-[#FFFAF5] p-4">
@@ -370,7 +427,12 @@ export default function PestaRakyatContentPage() {
                             </span>
                           )}
                         </div>
-                        <p className="font-bold text-[#303030] mb-3">{sponsorLabel}</p>
+                        <div className="flex items-center justify-between gap-3 mb-3">
+                          <p className="font-bold text-[#303030]">{sponsorLabel}</p>
+                          <span className="shrink-0 rounded-full bg-[#FEB602]/25 px-3 py-1 text-xs font-black text-[#B64847]">
+                            {sponsorSizeValue}
+                          </span>
+                        </div>
                         <div className="flex gap-2">
                           <button
                             type="button"

@@ -4,13 +4,47 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useLanguage } from '@/lib/language-context';
 
+type SponsorSize = 'L' | 'M' | 'S';
+
 interface StaticContentItem {
   id: string;
   key: string;
   section: string;
-  content: { id: string; en: string };
+  content: { id: string; en: string; size?: string };
   image?: string | null;
   order?: number;
+}
+
+const SPONSOR_SIZE_ORDER: SponsorSize[] = ['L', 'M', 'S'];
+const SPONSOR_COLUMNS_BY_SIZE: Record<SponsorSize, number> = {
+  L: 1,
+  M: 2,
+  S: 3,
+};
+const SPONSOR_LOGO_SIZE_CLASSES: Record<SponsorSize, string> = {
+  L: 'h-32 w-64 sm:h-36 sm:w-80 md:h-40 md:w-96',
+  M: 'h-24 w-36 sm:h-28 sm:w-48 md:h-32 md:w-56',
+  S: 'h-16 w-24 sm:h-20 sm:w-32 md:h-24 md:w-40',
+};
+const SPONSOR_ROW_GAP_CLASSES: Record<SponsorSize, string> = {
+  L: 'gap-x-14 gap-y-8',
+  M: 'gap-x-8 gap-y-7',
+  S: 'gap-x-4 gap-y-6 sm:gap-x-8',
+};
+
+const normalizeSponsorName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+const isKjriSydneySponsor = (name: string) => {
+  const normalized = normalizeSponsorName(name);
+  return normalized.includes('kjri sydney') || normalized.includes('konsulat jenderal sydney');
+};
+
+function chunkSponsors(sponsors: StaticContentItem[], chunkSize: number) {
+  const rows: StaticContentItem[][] = [];
+  for (let index = 0; index < sponsors.length; index += chunkSize) {
+    rows.push(sponsors.slice(index, index + chunkSize));
+  }
+  return rows;
 }
 
 export default function PestaRakyatPage() {
@@ -50,6 +84,20 @@ export default function PestaRakyatPage() {
   const getSponsorLabel = (sponsor: StaticContentItem) => (
     sponsor.content[language] || sponsor.content.en || sponsor.content.id || 'Pesta Rakyat sponsor'
   );
+
+  const getSponsorSize = (sponsor: StaticContentItem): SponsorSize => {
+    const rawSize = sponsor.content.size?.toUpperCase();
+    if (rawSize === 'L' || rawSize === 'M' || rawSize === 'S') return rawSize;
+    return isKjriSydneySponsor(getSponsorLabel(sponsor)) ? 'L' : 'S';
+  };
+
+  const sponsorRows = SPONSOR_SIZE_ORDER.flatMap((size) => {
+    const sponsorsForSize = sponsorLogos.filter((sponsor) => getSponsorSize(sponsor) === size);
+    return chunkSponsors(sponsorsForSize, SPONSOR_COLUMNS_BY_SIZE[size]).map((sponsors) => ({
+      size,
+      sponsors,
+    }));
+  });
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen overflow-x-hidden">
@@ -264,17 +312,24 @@ export default function PestaRakyatPage() {
               <div className="h-1 w-16 bg-[#FEB602] mx-auto rounded-full"></div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
-              {sponsorLogos.map((sponsor) => (
+            <div className="space-y-9">
+              {sponsorRows.map((row, rowIndex) => (
                 <div
-                  key={sponsor.id}
-                  className="h-24 w-40 flex items-center justify-center"
+                  key={`${row.size}-${rowIndex}`}
+                  className={`flex flex-wrap items-center justify-center ${SPONSOR_ROW_GAP_CLASSES[row.size]}`}
                 >
-                  <img
-                    src={sponsor.image || ''}
-                    alt={getSponsorLabel(sponsor)}
-                    className="max-h-full max-w-full object-contain"
-                  />
+                  {row.sponsors.map((sponsor) => (
+                    <div
+                      key={sponsor.id}
+                      className={`${SPONSOR_LOGO_SIZE_CLASSES[row.size]} flex items-center justify-center`}
+                    >
+                      <img
+                        src={sponsor.image || ''}
+                        alt={getSponsorLabel(sponsor)}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
