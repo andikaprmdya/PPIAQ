@@ -10,9 +10,9 @@ interface ContentSection {
   key: string;
   section: string;
   content: { id: string; en: string };
-  image?: string;
-  type: string;
-  page: string;
+  image?: string | null;
+  type?: string;
+  page?: string;
 }
 
 interface ContentEditModalProps {

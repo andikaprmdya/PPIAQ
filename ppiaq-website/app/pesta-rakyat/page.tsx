@@ -3,53 +3,46 @@
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { useLanguage } from '@/lib/language-context';
+import {
+  DEFAULT_PESRA_COMMUNITY_SUPPORTERS,
+  DEFAULT_PESRA_SPONSORS,
+  getPesraText,
+  mergePesraDefaults,
+  type PesraContentItem,
+} from '@/lib/pesra-content';
 
-type SponsorSize = 'L' | 'M' | 'S';
+function PesraCopy({ text, className }: { text: string; className: string }) {
+  const registrationUrl = 'bit.ly/CompetitionRegistrationPesra2026';
 
-interface StaticContentItem {
-  id: string;
-  key: string;
-  section: string;
-  content: { id: string; en: string; size?: string };
-  image?: string | null;
-  order?: number;
-}
+  return (
+    <div className={className}>
+      {text.split(/\n\s*\n/).map((paragraph, index) => {
+        const parts = paragraph.split(registrationUrl);
 
-const SPONSOR_SIZE_ORDER: SponsorSize[] = ['L', 'M', 'S'];
-const SPONSOR_COLUMNS_BY_SIZE: Record<SponsorSize, number> = {
-  L: 1,
-  M: 2,
-  S: 3,
-};
-const SPONSOR_LOGO_SIZE_CLASSES: Record<SponsorSize, string> = {
-  L: 'h-32 w-64 sm:h-36 sm:w-80 md:h-40 md:w-96',
-  M: 'h-24 w-36 sm:h-28 sm:w-48 md:h-32 md:w-56',
-  S: 'h-16 w-24 sm:h-20 sm:w-32 md:h-24 md:w-40',
-};
-const SPONSOR_ROW_GAP_CLASSES: Record<SponsorSize, string> = {
-  L: 'gap-x-14 gap-y-8',
-  M: 'gap-x-8 gap-y-7',
-  S: 'gap-x-4 gap-y-6 sm:gap-x-8',
-};
-
-const normalizeSponsorName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-
-const isKjriSydneySponsor = (name: string) => {
-  const normalized = normalizeSponsorName(name);
-  return normalized.includes('kjri sydney') || normalized.includes('konsulat jenderal sydney');
-};
-
-function chunkSponsors(sponsors: StaticContentItem[], chunkSize: number) {
-  const rows: StaticContentItem[][] = [];
-  for (let index = 0; index < sponsors.length; index += chunkSize) {
-    rows.push(sponsors.slice(index, index + chunkSize));
-  }
-  return rows;
+        return (
+          <p key={`${index}-${paragraph.slice(0, 12)}`}>
+            {parts[0]}
+            {parts.length > 1 && (
+              <a
+                href={`https://${registrationUrl}`}
+                target="_blank"
+                rel="noreferrer"
+                className="font-bold text-[#B64847] underline underline-offset-2 hover:text-[#303030]"
+              >
+                {registrationUrl}
+              </a>
+            )}
+            {parts[1]}
+          </p>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function PestaRakyatPage() {
   const { language } = useLanguage();
-  const [sponsorLogos, setSponsorLogos] = useState<StaticContentItem[]>([]);
+  const [contentItems, setContentItems] = useState<PesraContentItem[]>([]);
 
   useEffect(() => {
     let isActive = true;
@@ -58,19 +51,15 @@ export default function PestaRakyatPage() {
       try {
         const res = await fetch('/api/content?page=pesta-rakyat', { cache: 'no-store' });
         const data = await res.json();
-        const logos = Array.isArray(data.data)
-          ? data.data
-              .filter((item: StaticContentItem) => item.section === 'sponsors' && item.image)
-              .sort((a: StaticContentItem, b: StaticContentItem) => (a.order || 999) - (b.order || 999))
-          : [];
+        const items = Array.isArray(data.data) ? data.data : [];
 
         if (isActive) {
-          setSponsorLogos(logos);
+          setContentItems(items);
         }
       } catch (error) {
-        console.error('Error fetching Pesra sponsor logos:', error);
+        console.error('Error fetching Pesra content:', error);
         if (isActive) {
-          setSponsorLogos([]);
+          setContentItems([]);
         }
       }
     };
@@ -81,23 +70,24 @@ export default function PestaRakyatPage() {
     };
   }, []);
 
-  const getSponsorLabel = (sponsor: StaticContentItem) => (
+  const getSponsorLabel = (sponsor: PesraContentItem) => (
     sponsor.content[language] || sponsor.content.en || sponsor.content.id || 'Pesta Rakyat sponsor'
   );
 
-  const getSponsorSize = (sponsor: StaticContentItem): SponsorSize => {
-    const rawSize = sponsor.content.size?.toUpperCase();
-    if (rawSize === 'L' || rawSize === 'M' || rawSize === 'S') return rawSize;
-    return isKjriSydneySponsor(getSponsorLabel(sponsor)) ? 'L' : 'S';
-  };
-
-  const sponsorRows = SPONSOR_SIZE_ORDER.flatMap((size) => {
-    const sponsorsForSize = sponsorLogos.filter((sponsor) => getSponsorSize(sponsor) === size);
-    return chunkSponsors(sponsorsForSize, SPONSOR_COLUMNS_BY_SIZE[size]).map((sponsors) => ({
-      size,
-      sponsors,
-    }));
-  });
+  const defaultSponsorKeys = new Set(DEFAULT_PESRA_SPONSORS.map((sponsor) => sponsor.key));
+  const storedSponsors = contentItems.filter(
+    (item) => item.section === 'sponsors' && (defaultSponsorKeys.has(item.key) || item.content.placement)
+  );
+  const storedSupporters = contentItems.filter((item) => item.section === 'community-supporters');
+  const sponsorItems = mergePesraDefaults(DEFAULT_PESRA_SPONSORS, storedSponsors);
+  const supporterItems = mergePesraDefaults(DEFAULT_PESRA_COMMUNITY_SUPPORTERS, storedSupporters);
+  const featuredSponsors = sponsorItems.filter((sponsor) => sponsor.content.placement === 'featured');
+  const standardSponsors = sponsorItems.filter((sponsor) => sponsor.content.placement !== 'featured');
+  const sponsorHeading = getPesraText(contentItems, 'pesta_sponsors_heading', language);
+  const communityHeading = getPesraText(contentItems, 'pesta_community_heading', language);
+  const eventDate = getPesraText(contentItems, 'pesta_event_date', language);
+  const eventIntro = getPesraText(contentItems, 'pesta_event_intro', language);
+  const eventDescription = getPesraText(contentItems, 'pesta_event_description', language);
 
   return (
     <main className="bg-[#FFFAF5] text-[#303030] font-montserrat min-h-screen overflow-x-hidden">
@@ -124,7 +114,7 @@ export default function PestaRakyatPage() {
             </h1>
             <div className="flex items-center gap-4 w-full max-w-lg">
               <div className="h-px bg-[#B64847]/40 grow"></div>
-              <span className="font-tan-angleton text-xl md:text-2xl text-[#B64847] whitespace-nowrap">Brisbane 2026</span>
+              <span className="max-w-[15rem] text-center font-tan-angleton text-sm md:text-2xl text-[#B64847] leading-tight">{eventDate}</span>
               <div className="h-px bg-[#B64847]/40 grow"></div>
             </div>
           </div>
@@ -146,21 +136,11 @@ export default function PestaRakyatPage() {
               {language === 'id' ? "Perayaan Budaya Terbesar di Queensland" : "Queensland's Premier Indonesian Cultural Showcase"}
             </h2>
             <div className="w-16 h-1 bg-[#FEB602]"></div>
-            <div className="space-y-4 text-gray-600 leading-relaxed text-base md:text-lg italic border-l-4 border-[#E4DBCA] pl-6">
-              <p>
-                {language === 'id'
-                  ? 'Pesta Rakyat (PesRa) adalah perayaan terbesar tahunan Hari Kemerdekaan Indonesia di Queensland, menyatukan ribuan mahasiswa Indonesia, keluarga diaspora, dan komunitas Australia yang lebih luas dalam pameran budaya, musik, makanan, dan kebanggaan nasional yang spektakuler.'
-                  : 'Pesta Rakyat (PesRa) is Queensland\'s largest annual celebration of Indonesian Independence Day, uniting thousands of Indonesian students, diaspora families and the wider Australian community in a spectacular showcase of culture, music, food and national pride.'}
-              </p>
-            </div>
+            <PesraCopy text={eventIntro} className="space-y-4 text-gray-600 leading-relaxed text-base md:text-lg italic border-l-4 border-[#E4DBCA] pl-6" />
           </div>
 
           <div className="lg:col-span-5 bg-white p-6 rounded-4xl border border-[#E4DBCA] shadow-2xl shadow-[#B64847]/5 relative">
-            <p className="text-gray-700 leading-relaxed text-sm md:text-base font-medium">
-               {language === 'id'
-                 ? 'Pesta Rakyat berfungsi sebagai platform bagi diaspora Indonesia di Queensland untuk memperkuat ikatan komunitas sambil memperkenalkan budaya, seni, dan warisan kuliner Indonesia kepada komunitas internasional.'
-                 : 'Pesta Rakyat serves as a platform for the Indonesian diaspora in Queensland to strengthen community ties while introducing Indonesia\'s culture, arts, and culinary heritage to the international community.'}
-            </p>
+            <PesraCopy text={eventDescription} className="space-y-5 text-gray-700 leading-relaxed text-sm md:text-base font-medium" />
             <div className="mt-6 flex justify-end opacity-20">
                <div className="w-12 h-12 border-2 border-dashed border-[#886644] rounded-full flex items-center justify-center text-[6px] font-bold">[LOGO]</div>
             </div>
@@ -271,71 +251,68 @@ export default function PestaRakyatPage() {
         </div>
       </section>
 
-      {/* --- COLLABORATION & RECRUITMENT (ALREADY COMPACTED) --- */}
-      <section className="py-12 px-6 relative">
+      <section className="py-14 px-6 bg-white border-y border-[#E4DBCA]">
         <div className="max-w-6xl mx-auto">
-          <div className="bg-white border-2 border-[#B64847] rounded-3xl overflow-hidden flex flex-col md:flex-row shadow-xl">
-            <div className="bg-[#B64847] p-8 md:w-1/2 text-white flex flex-col justify-center">
-              <span className="font-nickainley text-2xl text-[#FEB602] mb-2">{language === 'id' ? 'Kami kembali!' : 'We are back!'}</span>
-              <h2 className="font-tan-angleton text-3xl text-white mb-6">{language === 'id' ? 'Pesra Kembali di 2026' : 'Pesra is returning in 2026'}</h2>
-              <p className="text-xs md:text-sm opacity-80 leading-relaxed italic">
-                {language === 'id'
-                  ? 'Pesra menyediakan ruang untuk kolaborasi antara siswa, komunitas Indonesia, dan mitra lokal, berkontribusi pada promosi citra Indonesia yang positif di luar negeri.'
-                  : 'Pesra provides a space for collaboration among students, the Indonesian community, and local partners, contributing to the promotion of a positive image of Indonesia abroad.'}
-              </p>
-            </div>
-            <div className="p-8 md:w-1/2 flex flex-col justify-center bg-white border-l border-[#B64847]/10">
-              <h3 className="font-tan-angleton text-2xl text-[#B64847] mb-4">{language === 'id' ? 'Bergabung dengan Komite' : 'Join the Committee'}</h3>
-              <p className="text-gray-600 text-xs md:text-sm mb-8 leading-relaxed font-medium">
-                {language === 'id'
-                  ? 'PPIA Queensland mencari tim acara untuk menjalankan Pesra di 2026. Ekspresikan minat Anda untuk menjadi bagian dari komite acara Pesta Rakyat di berbagai fungsi.'
-                  : 'PPIA Queensland is looking for an events team to run Pesra in 2026. Express your interest to be part of Pesta Rakyat events committee across many different functions.'}
-              </p>
-              <a 
-                href="mailto:qld@ppi-australia.org" 
-                className="inline-block text-center bg-[#FEB602] text-[#B64847] px-6 py-3 rounded-xl font-bold uppercase tracking-widest text-[9px] hover:bg-[#B64847] hover:text-white transition-all shadow-md active:scale-95"
-              >
-                Send Expression of Interest
-              </a>
-            </div>
+          <div className="text-center mb-8">
+            <h2 className="mx-auto max-w-3xl font-tan-angleton text-2xl md:text-3xl text-[#B64847] uppercase tracking-widest mb-3">
+              {sponsorHeading}
+            </h2>
+            <div className="h-1 w-16 bg-[#FEB602] mx-auto rounded-full"></div>
           </div>
-        </div>
-      </section>
 
-      {sponsorLogos.length > 0 && (
-        <section className="py-12 px-6 bg-white border-y border-[#E4DBCA]">
-          <div className="max-w-6xl mx-auto">
+          {featuredSponsors.length > 0 && (
+            <div className="flex justify-center mb-8">
+              {featuredSponsors.map((sponsor) => sponsor.image && (
+                <div key={sponsor.key} className="h-44 w-40 sm:h-52 sm:w-48 flex items-center justify-center">
+                  <img
+                    src={sponsor.image}
+                    alt={getSponsorLabel(sponsor)}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
+            {standardSponsors.map((sponsor) => sponsor.image && (
+              <div key={sponsor.key} className="h-28 w-44 sm:h-32 sm:w-56 flex items-center justify-center">
+                <img
+                  src={sponsor.image}
+                  alt={getSponsorLabel(sponsor)}
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-14 border-t border-[#E4DBCA] pt-10">
             <div className="text-center mb-8">
-              <h2 className="font-tan-angleton text-2xl md:text-3xl text-[#B64847] uppercase tracking-widest mb-2">
-                {language === 'id' ? 'Didukung Oleh' : 'Supported By'}
-              </h2>
+              <h3 className="mx-auto max-w-4xl font-tan-angleton text-xl md:text-2xl text-[#B64847] uppercase tracking-widest mb-3">
+                {communityHeading}
+              </h3>
               <div className="h-1 w-16 bg-[#FEB602] mx-auto rounded-full"></div>
             </div>
 
-            <div className="space-y-9">
-              {sponsorRows.map((row, rowIndex) => (
-                <div
-                  key={`${row.size}-${rowIndex}`}
-                  className={`flex flex-wrap items-center justify-center ${SPONSOR_ROW_GAP_CLASSES[row.size]}`}
-                >
-                  {row.sponsors.map((sponsor) => (
-                    <div
-                      key={sponsor.id}
-                      className={`${SPONSOR_LOGO_SIZE_CLASSES[row.size]} flex items-center justify-center`}
-                    >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-stretch">
+              {supporterItems.map((supporter) => (
+                <div key={supporter.key} className="min-h-28 rounded-2xl border border-[#E4DBCA] bg-[#FFFAF5] p-4 flex flex-col items-center justify-center text-center">
+                  {supporter.image && (
+                    <div className="h-24 w-full flex items-center justify-center mb-3">
                       <img
-                        src={sponsor.image || ''}
-                        alt={getSponsorLabel(sponsor)}
+                        src={supporter.image}
+                        alt={getSponsorLabel(supporter)}
                         className="max-h-full max-w-full object-contain"
                       />
                     </div>
-                  ))}
+                  )}
+                  <p className="text-xs font-bold leading-relaxed text-[#303030]">{getSponsorLabel(supporter)}</p>
                 </div>
               ))}
             </div>
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* --- CENDRAWASIH FOOTER --- */}
       <div className="py-12 px-6 flex justify-center">
