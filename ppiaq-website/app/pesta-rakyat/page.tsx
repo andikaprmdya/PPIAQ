@@ -11,6 +11,14 @@ import {
   type PesraContentItem,
 } from '@/lib/pesra-content';
 
+type SponsorSize = 'L' | 'M' | 'S';
+
+const SPONSOR_LOGO_SIZE_CLASSES: Record<SponsorSize, string> = {
+  L: 'h-56 w-56 sm:h-64 sm:w-64 md:h-72 md:w-72',
+  M: 'h-28 w-44 sm:h-32 sm:w-56',
+  S: 'h-20 w-32 sm:h-24 sm:w-40',
+};
+
 function PesraCopy({ text, className }: { text: string; className: string }) {
   const registrationUrl = 'bit.ly/CompetitionRegistrationPesra2026';
 
@@ -73,6 +81,12 @@ export default function PestaRakyatPage() {
   const getSponsorLabel = (sponsor: PesraContentItem) => (
     sponsor.content[language] || sponsor.content.en || sponsor.content.id || 'Pesta Rakyat sponsor'
   );
+
+  const getSponsorSize = (sponsor: PesraContentItem): SponsorSize => {
+    const rawSize = sponsor.content.size?.toUpperCase();
+    if (rawSize === 'L' || rawSize === 'M' || rawSize === 'S') return rawSize;
+    return sponsor.key === 'pesta_sponsor_brisbane_city_council' ? 'L' : 'S';
+  };
 
   const defaultSponsorKeys = new Set(DEFAULT_PESRA_SPONSORS.map((sponsor) => sponsor.key));
   const storedSponsors = contentItems.filter(
@@ -263,7 +277,7 @@ export default function PestaRakyatPage() {
           {featuredSponsors.length > 0 && (
             <div className="flex justify-center mb-8">
               {featuredSponsors.map((sponsor) => sponsor.image && (
-                <div key={sponsor.key} className="h-44 w-40 sm:h-52 sm:w-48 flex items-center justify-center">
+                <div key={sponsor.key} className={`${SPONSOR_LOGO_SIZE_CLASSES[getSponsorSize(sponsor)]} flex items-center justify-center`}>
                   <img
                     src={sponsor.image}
                     alt={getSponsorLabel(sponsor)}
@@ -276,7 +290,7 @@ export default function PestaRakyatPage() {
 
           <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
             {standardSponsors.map((sponsor) => sponsor.image && (
-              <div key={sponsor.key} className="h-28 w-44 sm:h-32 sm:w-56 flex items-center justify-center">
+              <div key={sponsor.key} className={`${SPONSOR_LOGO_SIZE_CLASSES[getSponsorSize(sponsor)]} flex items-center justify-center`}>
                 <img
                   src={sponsor.image}
                   alt={getSponsorLabel(sponsor)}

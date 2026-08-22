@@ -2,6 +2,7 @@
 
 import { useLanguage } from '@/lib/language-context';
 import { getTranslation, translations } from '@/lib/translations';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -36,6 +37,15 @@ export default function Footer() {
               <p className="text-white/70 text-sm leading-relaxed font-medium">
                 PPIA Queensland acknowledges the Traditional Owners and their custodianship. We pay our respects to Elders past, present, and emerging.
               </p>
+              <div className="mt-5 h-28 w-28">
+                <Image
+                  src="/images/registered-charity-logo.jpeg"
+                  alt="Registered Charity logo"
+                  width={160}
+                  height={160}
+                  className="h-full w-full object-contain"
+                />
+              </div>
             </div>
           </div>
 
