@@ -7,6 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "check:bandwidth": "node scripts/check-public-bandwidth.mjs",
     "create:curator": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/create-curator-user.ts",
     "sync:partner-obligations": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/sync-partner-obligations.ts"
   },
@@ -33,6 +34,7 @@
     "react-dom": "19.2.3",
     "react-hook-form": "^7.71.1",
     "react-icons": "^5.5.0",
+    "sharp": "^0.34.5",
     "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },

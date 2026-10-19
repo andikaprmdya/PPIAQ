@@ -3,6 +3,7 @@ import bcryptjs from 'bcryptjs';
 import { prisma } from './prisma';
 import { MembershipType, UserStatus, EventStatus, Division, ImageCategory, ContentType, Prisma } from '@prisma/client';
 import { validateFirstLastName } from '../name-validation';
+import { invalidatePublicContent } from '../public-cache';
 
 // ==========================================
 // ENUM MAPPING UTILITIES
@@ -317,7 +318,7 @@ export async function getCMSEventById(id: string) {
 }
 
 export async function createCMSEvent(data: Record<string, unknown>) {
-  return await prisma.event.create({
+  const result = await prisma.event.create({
     data: {
       day: data.day as string,
       month: data.month as string,
@@ -332,6 +333,8 @@ export async function createCMSEvent(data: Record<string, unknown>) {
       createdBy: data.createdBy as string,
     },
   });
+  invalidatePublicContent('events');
+  return result;
 }
 
 export async function updateCMSEvent(id: string, updates: Record<string, unknown>) {
@@ -345,17 +348,20 @@ export async function updateCMSEvent(id: string, updates: Record<string, unknown
   if (typeof cleanedUpdates.status === 'string' && cleanedUpdates.status) {
     cleanedUpdates.status = mapEnum('eventStatus', cleanedUpdates.status) as EventStatus;
   }
-  return await prisma.event.update({
+  const result = await prisma.event.update({
     where: { id },
     data: {
       ...(cleanedUpdates as Prisma.EventUpdateInput),
       updatedAt: new Date(),
     },
   });
+  invalidatePublicContent('events');
+  return result;
 }
 
 export async function deleteCMSEvent(id: string) {
   await prisma.event.delete({ where: { id } });
+  invalidatePublicContent('events');
   return true;
 }
 
@@ -383,7 +389,7 @@ export async function getCMSTeamMemberById(id: string) {
 }
 
 export async function createCMSTeamMember(data: Record<string, unknown>) {
-  return await prisma.teamMember.create({
+  const result = await prisma.teamMember.create({
     data: {
       name: data.name as string,
       role: data.role as Prisma.InputJsonValue,
@@ -396,6 +402,8 @@ export async function createCMSTeamMember(data: Record<string, unknown>) {
       isActive: data.isActive !== false,
     },
   });
+  invalidatePublicContent('team');
+  return result;
 }
 
 export async function updateCMSTeamMember(id: string, updates: Record<string, unknown>) {
@@ -408,17 +416,20 @@ export async function updateCMSTeamMember(id: string, updates: Record<string, un
     cleanedUpdates.division = mapEnum('division', cleanedUpdates.division) as Division;
   }
 
-  return await prisma.teamMember.update({
+  const result = await prisma.teamMember.update({
     where: { id },
     data: {
       ...(cleanedUpdates as Prisma.TeamMemberUpdateInput),
       updatedAt: new Date(),
     },
   });
+  invalidatePublicContent('team');
+  return result;
 }
 
 export async function deleteCMSTeamMember(id: string) {
   await prisma.teamMember.delete({ where: { id } });
+  invalidatePublicContent('team');
   return true;
 }
 
@@ -432,6 +443,7 @@ export async function reorderCMSTeamMembers(ids: string[]) {
         })
       )
     );
+    invalidatePublicContent('team');
     return true;
   } catch (error) {
     console.error('Error reordering team members:', error);
@@ -475,7 +487,7 @@ export async function setAboutTeamViewMoreEnabled(enabled: boolean) {
     en: String(enabled),
   } as Prisma.InputJsonValue;
 
-  return await prisma.staticContent.upsert({
+  const result = await prisma.staticContent.upsert({
     where: { key: ABOUT_VIEW_MORE_TEAM_KEY },
     update: {
       type: 'TEXT',
@@ -493,6 +505,8 @@ export async function setAboutTeamViewMoreEnabled(enabled: boolean) {
       order: 999,
     },
   });
+  invalidatePublicContent('content');
+  return result;
 }
 
 // ==========================================
@@ -516,7 +530,9 @@ export async function createStaticContent(data: Record<string, unknown>) {
     contentData.type = mapEnum('contentType', contentData.type) as ContentType;
   }
 
-  return await prisma.staticContent.create({ data: contentData as Prisma.StaticContentCreateInput });
+  const result = await prisma.staticContent.create({ data: contentData as Prisma.StaticContentCreateInput });
+  invalidatePublicContent('content');
+  return result;
 }
 
 export async function updateStaticContent(id: string, updates: Record<string, unknown>) {
@@ -525,17 +541,20 @@ export async function updateStaticContent(id: string, updates: Record<string, un
     cleanedUpdates.type = mapEnum('contentType', cleanedUpdates.type) as ContentType;
   }
 
-  return await prisma.staticContent.update({
+  const result = await prisma.staticContent.update({
     where: { id },
     data: {
       ...(cleanedUpdates as Prisma.StaticContentUpdateInput),
       updatedAt: new Date(),
     },
   });
+  invalidatePublicContent('content');
+  return result;
 }
 
 export async function deleteStaticContent(id: string) {
   await prisma.staticContent.delete({ where: { id } });
+  invalidatePublicContent('content');
   return true;
 }
 
@@ -558,21 +577,26 @@ export async function getFAQById(id: string) {
 }
 
 export async function createFAQ(data: Record<string, unknown>) {
-  return await prisma.fAQ.create({ data: data as Prisma.FAQCreateInput });
+  const result = await prisma.fAQ.create({ data: data as Prisma.FAQCreateInput });
+  invalidatePublicContent('faq');
+  return result;
 }
 
 export async function updateFAQ(id: string, updates: Record<string, unknown>) {
-  return await prisma.fAQ.update({
+  const result = await prisma.fAQ.update({
     where: { id },
     data: {
       ...(updates as Prisma.FAQUpdateInput),
       updatedAt: new Date(),
     },
   });
+  invalidatePublicContent('faq');
+  return result;
 }
 
 export async function deleteFAQ(id: string) {
   await prisma.fAQ.delete({ where: { id } });
+  invalidatePublicContent('faq');
   return true;
 }
 
@@ -586,6 +610,7 @@ export async function reorderFAQs(ids: string[]) {
         })
       )
     );
+    invalidatePublicContent('faq');
     return true;
   } catch (error) {
     console.error('Error reordering FAQs:', error);

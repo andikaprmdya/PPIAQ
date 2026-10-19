@@ -38,7 +38,7 @@ export default function AboutPage() {
 
     const fetchTeamMembers = async () => {
       try {
-        const res = await fetch('/api/team', { cache: 'no-store' });
+        const res = await fetch('/api/team');
         const data = await res.json();
         const members = Array.isArray(data?.data) ? data.data : [];
         const sortedPreview = [...members]
@@ -58,10 +58,8 @@ export default function AboutPage() {
     };
 
     fetchTeamMembers();
-    const intervalId = setInterval(fetchTeamMembers, 30000);
     return () => {
       isMounted = false;
-      clearInterval(intervalId);
     };
   }, []);
 

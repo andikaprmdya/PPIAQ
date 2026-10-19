@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/database/prisma';
+import { invalidatePublicContent } from '@/lib/public-cache';
 import { checkAdmin } from '@/lib/auth/check-admin';
 
 export async function GET() {
@@ -20,6 +21,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const discount = await prisma.communityDiscount.create({ data: body });
+    invalidatePublicContent('community');
     return NextResponse.json(discount, { status: 201 });
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -37,6 +39,7 @@ export async function PUT(request: NextRequest) {
 
     const body = await request.json();
     const discount = await prisma.communityDiscount.update({ where: { id }, data: body });
+    invalidatePublicContent('community');
     return NextResponse.json(discount);
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -53,6 +56,7 @@ export async function DELETE(request: NextRequest) {
     if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
     await prisma.communityDiscount.delete({ where: { id } });
+    invalidatePublicContent('community');
     return NextResponse.json({ message: 'Deleted successfully' });
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

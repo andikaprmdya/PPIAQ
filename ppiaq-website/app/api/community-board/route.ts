@@ -1,27 +1,11 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/database/prisma';
-
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+import { getPublicCommunityBoard } from '@/lib/database/public-content';
+import { PUBLIC_CACHE_HEADERS } from '@/lib/public-cache';
 
 export async function GET() {
   try {
-    const [discounts, resources, announcements] = await Promise.all([
-      prisma.communityDiscount.findMany({
-        where: { isActive: true },
-        orderBy: { order: 'asc' },
-      }),
-      prisma.communityResource.findMany({
-        where: { isActive: true },
-        orderBy: [{ category: 'asc' }, { order: 'asc' }],
-      }),
-      prisma.communityAnnouncement.findMany({
-        where: { isActive: true },
-        orderBy: { order: 'asc' },
-      }),
-    ]);
-
-    return NextResponse.json({ discounts, resources, announcements });
+    const data = await getPublicCommunityBoard();
+    return NextResponse.json(data, { headers: PUBLIC_CACHE_HEADERS });
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

@@ -106,7 +106,7 @@ export default function HomePage() {
 
     const fetchEvents = async () => {
       try {
-        const res = await fetch('/api/events', { cache: 'no-store' });
+        const res = await fetch('/api/events');
         const data = await res.json();
         const fetchedEvents = Array.isArray(data.data) ? data.data : [];
         if (isActive) {
@@ -125,10 +125,8 @@ export default function HomePage() {
     };
 
     fetchEvents();
-    const intervalId = setInterval(fetchEvents, 30000);
     return () => {
       isActive = false;
-      clearInterval(intervalId);
     };
   }, []);
 
@@ -137,7 +135,7 @@ export default function HomePage() {
 
     const fetchFAQ = async () => {
       try {
-        const res = await fetch('/api/faq?page=home', { cache: 'no-store' });
+        const res = await fetch('/api/faq?page=home');
         const data = await res.json();
         if (isActive) {
           setFaqData(data.data || []);
@@ -151,10 +149,8 @@ export default function HomePage() {
       }
     };
     fetchFAQ();
-    const intervalId = setInterval(fetchFAQ, 30000);
     return () => {
       isActive = false;
-      clearInterval(intervalId);
     };
   }, []);
 

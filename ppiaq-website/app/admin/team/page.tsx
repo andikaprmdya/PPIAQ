@@ -115,10 +115,8 @@ export default function TeamManagementPage() {
     };
 
     refreshAll();
-    const intervalId = setInterval(refreshAll, 30000);
     return () => {
       isMounted = false;
-      clearInterval(intervalId);
     };
   }, [language, router]);
 

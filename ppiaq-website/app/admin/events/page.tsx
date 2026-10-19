@@ -58,8 +58,6 @@ export default function EventsManagementPage() {
 
   useEffect(() => {
     fetchEvents();
-    const intervalId = setInterval(fetchEvents, 30000);
-    return () => clearInterval(intervalId);
   }, [fetchEvents]);
 
   const filteredEvents = filter === 'all' ? events : events.filter((e) => e.status === filter);

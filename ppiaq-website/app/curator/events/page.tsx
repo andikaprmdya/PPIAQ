@@ -67,8 +67,6 @@ export default function CuratorEventsPage() {
 
   useEffect(() => {
     fetchEvents();
-    const intervalId = setInterval(fetchEvents, 30000);
-    return () => clearInterval(intervalId);
   }, [fetchEvents]);
 
   const organizerOptions = Array.from(

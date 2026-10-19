@@ -51,7 +51,7 @@ export default function CommunityBoardPage() {
   }, [isAuthenticated, router]);
 
   useEffect(() => {
-    fetch('/api/community-board', { cache: 'no-store' })
+    fetch('/api/community-board')
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data) {

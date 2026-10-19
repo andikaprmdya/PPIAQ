@@ -37,7 +37,7 @@ export default function MeetTheTeamPage() {
 
     const fetchTeamMembers = async () => {
       try {
-        const res = await fetch('/api/team', { cache: 'no-store' });
+        const res = await fetch('/api/team');
         const data = await res.json();
         const all: TeamMember[] = (data.data || []).sort(
           (a: TeamMember, b: TeamMember) => a.order - b.order
@@ -65,11 +65,9 @@ export default function MeetTheTeamPage() {
     };
 
     fetchTeamMembers();
-    const intervalId = setInterval(fetchTeamMembers, 30000);
 
     return () => {
       isMounted = false;
-      clearInterval(intervalId);
     };
   }, []);
 

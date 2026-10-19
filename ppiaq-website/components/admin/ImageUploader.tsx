@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { useLanguage } from '@/lib/language-context';
 import { getTranslation, translations } from '@/lib/translations';
 
@@ -45,16 +44,23 @@ export default function ImageUploader({
         return;
       }
 
-      // Convert to base64
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64 = e.target?.result as string;
-        onChange(base64);
-        setIsLoading(false);
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
+      // Store a display-sized image instead of a full-resolution camera upload.
+      const bitmap = await createImageBitmap(file);
+      try {
+        const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+        canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Image processing unavailable');
+        context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+        onChange(canvas.toDataURL('image/webp', 0.8));
+      } finally {
+        bitmap.close();
+      }
+    } catch {
       setError(getTranslation(translations.imageUploader.processError, language));
+    } finally {
       setIsLoading(false);
     }
   };

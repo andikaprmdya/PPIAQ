@@ -57,7 +57,7 @@ export default function PestaRakyatPage() {
 
     const fetchSponsorLogos = async () => {
       try {
-        const res = await fetch('/api/content?page=pesta-rakyat', { cache: 'no-store' });
+        const res = await fetch('/api/content?page=pesta-rakyat');
         const data = await res.json();
         const items = Array.isArray(data.data) ? data.data : [];
 
