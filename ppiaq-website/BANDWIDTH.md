@@ -90,6 +90,13 @@ images, cache headers, image dimensions, repeat responses, Next/Image integratio
 and rejection of private or unsupported media requests. It reads at most one
 event poster and one static-content image on a cold cache.
 
+Vercel consumes the `s-maxage` and `stale-while-revalidate` directives before
+sending the response to browsers. The check verifies those directives directly
+on localhost; on Vercel it additionally requires real CDN `HIT` / `STALE`
+responses on repeated public requests. A browser-visible `public, max-age=60`
+header alone is therefore expected in production. See
+[Vercel's cache header behavior](https://vercel.com/docs/caching/cache-control-headers).
+
 The check first calls `/api/version`, which returns the public Git commit SHA
 without querying Supabase. It stops before downloading application data if
 Vercel has disabled the deployment or the site still runs an older release.

@@ -51,10 +51,44 @@ function collectMedia(value) {
   else if (value && typeof value === 'object') Object.values(value).forEach(collectMedia);
 }
 
+function checkCacheHeaders(response, browserTTL, sharedTTL, path) {
+  const cache = response.headers.get('cache-control') || '';
+  assert.match(cache, /(?:^|,)\s*public(?:,|$)/, path);
+  assert.match(cache, new RegExp(`(?:^|,)\\s*max-age=${browserTTL}(?:,|$)`), path);
+  const shared = cache.match(/(?:^|,)\s*s-maxage=(\d+)(?:,|$)/);
+  if (shared) assert.equal(Number(shared[1]), sharedTTL, `${path} shared cache lifetime`);
+  else {
+    // Vercel consumes s-maxage and stale-while-revalidate at its proxy. They
+    // remain visible on localhost; on Vercel we verify real CDN hits instead.
+    assert.ok(response.headers.has('x-vercel-cache'), `${path} lacks a shared cache directive`);
+  }
+}
+
+async function cachedRepeat(path, first) {
+  const onVercel = first.headers.has('x-vercel-cache');
+  for (let attempt = 0; attempt < (onVercel ? 3 : 1); attempt += 1) {
+    const repeated = await fetch(new URL(path, origin), { signal: AbortSignal.timeout(15000) });
+    assert.equal(repeated.status, 200, path);
+    if (!onVercel || ['HIT', 'STALE'].includes(repeated.headers.get('x-vercel-cache'))) return repeated;
+    // A freshly generated response can take a moment to populate the CDN.
+    await repeated.arrayBuffer();
+  }
+  assert.fail(`${path} never produced a Vercel CDN cache hit on repeated requests`);
+}
+
+function checkUncached(response, path) {
+  const cache = response.headers.get('cache-control') || '';
+  assert.ok(!/(?:^|,)\s*(?:s-maxage|max-age)=[1-9]\d*(?:,|$)/.test(cache), `${path} has a positive cache lifetime`);
+  // Vercel adds public,max-age=0,must-revalidate to responses that have no
+  // explicit policy. Its zero-lifetime default does not enable CDN caching.
+  if (cache.includes('public')) assert.match(cache, /(?:no-store|max-age=0(?:,|$))/, `${path} is publicly cacheable`);
+  assert.ok(!['HIT', 'STALE'].includes(response.headers.get('x-vercel-cache')), `${path} was served from the CDN cache`);
+}
+
 for (const path of paths) {
   const response = await fetch(new URL(path, origin));
   assert.equal(response.status, 200, path);
-  assert.match(response.headers.get('cache-control'), /public.*s-maxage=300/, path);
+  checkCacheHeaders(response, 60, 300, path);
   const text = await response.text();
   assert.ok(!text.includes('data:image/'), `${path} embeds image bytes`);
   assert.ok(Buffer.byteLength(text) < 2 * 1024 * 1024, `${path} exceeds data cache limit`);
@@ -62,9 +96,9 @@ for (const path of paths) {
   if (path === '/api/events') assert.ok(data.data.every(event => event.status === 'PUBLISHED'));
   if (path === '/api/team') assert.ok(data.data.every(member => member.isActive));
   collectMedia(data);
-  const repeated = await fetch(new URL(path, origin));
+  const repeated = await cachedRepeat(path, response);
   assert.equal(await repeated.text(), text, `${path} changed between immediate reads`);
-  console.log(`${path}: ${Buffer.byteLength(text)} bytes; repeat matches`);
+  console.log(`${path}: ${Buffer.byteLength(text)} bytes; repeat matches; CDN ${repeated.headers.get('x-vercel-cache') || 'not present (local)'}`);
 }
 
 // Check one event poster and one CMS image, keeping the check's own egress small.
@@ -74,12 +108,12 @@ for (const path of samples) {
   const response = await fetch(new URL(path, origin));
   assert.equal(response.status, 200, path);
   assert.equal(response.headers.get('content-type'), 'image/webp');
-  assert.match(response.headers.get('cache-control'), /s-maxage=86400/);
+  checkCacheHeaders(response, 300, 86400, path);
   const buffer = Buffer.from(await response.arrayBuffer());
   const metadata = await sharp(buffer).metadata();
   assert.ok(metadata.width <= 1600 && metadata.height <= 1600);
   assert.ok(buffer.length * 4 / 3 < 2 * 1024 * 1024, 'Optimized image exceeds data cache limit');
-  const repeated = await fetch(new URL(path, origin));
+  const repeated = await cachedRepeat(path, response);
   assert.deepEqual(Buffer.from(await repeated.arrayBuffer()), buffer);
   console.log(`Public ${path.split('/')[3]} image: ${buffer.length} bytes, ${metadata.width}×${metadata.height}; repeat matches`);
 
@@ -97,9 +131,9 @@ for (const path of ['/api/media/users/test', '/api/media/events/test?field=en', 
 for (const path of ['/api/auth/me', '/api/admin/events']) {
   const response = await fetch(new URL(path, origin));
   assert.ok([401, 403].includes(response.status), `Unexpected unauthenticated access: ${path}`);
-  assert.ok(!response.headers.get('cache-control')?.includes('public'), `${path} is publicly cached`);
+  checkUncached(response, path);
 }
 const missing = await fetch(new URL('/api/content', origin));
 assert.equal(missing.status, 400);
-assert.ok(!missing.headers.get('cache-control')?.includes('public'));
+checkUncached(missing, '/api/content');
 console.log('Public bandwidth checks passed; invalid media and private APIs rejected.');
