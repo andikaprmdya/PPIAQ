@@ -125,7 +125,7 @@ export default function BallotPage() {
             <p className="text-center text-xs text-[#6b5a47]">{id ? 'Suara yang sudah dikirim tidak dapat diubah atau dihapus.' : 'A submitted vote cannot be changed or deleted.'}</p>
           </section>}
         </>}
-      <a href="/guides/PPIAQ_Election_Voter_Guide.pdf" target="_blank" rel="noreferrer" className="inline-block text-sm font-bold text-[#B64847] underline">{id ? 'Unduh panduan pemilih (PDF)' : 'Download voter guide (PDF)'}</a>
+      <a href="/guides/PPIAQ_Election_Quick_Guide.pdf" target="_blank" rel="noreferrer" className="inline-block text-sm font-bold text-[#B64847] underline">{id ? 'Unduh panduan 1 halaman (PDF)' : 'Download 1-page guide (PDF)'}</a>
     </div>
     {confirming && <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="vote-confirm-title">
       <div className={`${cardClass} max-w-lg space-y-5 shadow-xl`}>

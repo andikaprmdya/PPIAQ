@@ -49,8 +49,7 @@ export default function ElectionsPage() {
     </div>
     <div className={`${cardClass} flex flex-wrap gap-3 items-center text-sm`}>
       <span className="font-bold">{id ? 'Panduan PDF' : 'PDF guides'}</span>
-      <a className={secondaryClass} href="/guides/PPIAQ_Election_Admin_Guide.pdf" target="_blank" rel="noreferrer">Admin ↗</a>
-      <a className={secondaryClass} href="/guides/PPIAQ_Election_Voter_Guide.pdf" target="_blank" rel="noreferrer">{id ? 'Pemilih' : 'Voters'} ↗</a>
+      <a className={secondaryClass} href="/guides/PPIAQ_Election_Quick_Guide.pdf" target="_blank" rel="noreferrer">{id ? 'Admin & Pemilih · 1 halaman' : 'Admin & Voters · 1 page'} ↗</a>
       <button className="ml-auto text-[#B64847] underline" onClick={load}>{id ? 'Muat ulang' : 'Refresh'}</button>
     </div>
     {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-800">{error}</p>}

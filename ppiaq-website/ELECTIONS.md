@@ -104,9 +104,11 @@ It starts the build at `http://127.0.0.1:3141` using a separate throwaway local 
 and explicitly disables real email. Demo credentials and links are written to
 the OS temporary directory and deleted at shutdown.
 
-PDFs are in `public/guides/` and linked from the admin and voter pages. Their
-editable sources are in `docs/election-*-guide.md`. Rebuild with
-`npm run guides:elections` (Python `reportlab` required).
+The one-page, text-only English PDF is in `public/guides/PPIAQ_Election_Quick_Guide.pdf`
+and linked from the admin and voter pages. Edit `docs/election-quick-guide.md`
+and rebuild with `npm run guides:elections` (Python `reportlab` required).
+The old admin/voter PDF URLs also serve this combined guide. The longer Indonesian
+Markdown guides remain in `docs/` for reference.
 
 References:
 [Next.js after](https://nextjs.org/docs/app/api-reference/functions/after),

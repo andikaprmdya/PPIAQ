@@ -25,6 +25,19 @@ const DIVISION_META = [
   { id: 'PARTNERSHIP', name: { id: 'Kemitraan',                   en: 'Partnership' } },
 ];
 
+const TECH_LEAD: TeamMember = {
+  id: 'andhika-nayaka-tech-lead',
+  name: 'Andhika Nayaka Arya Wibowo',
+  role: { id: 'Head Tech Dev, Web Developer', en: 'Head Tech Dev, Web Developer' },
+  university: 'University of Queensland',
+  instagram: '@andhikanayaka',
+  image: '/images/andhika-nayaka.webp',
+  bio: { id: '', en: '' },
+  division: 'CORE',
+  order: -1,
+  isActive: true,
+};
+
 export default function MeetTheTeamPage() {
   const { language } = useLanguage();
   const [coreMembers, setCoreMembers] = useState<TeamMember[]>([]);
@@ -113,6 +126,20 @@ export default function MeetTheTeamPage() {
               {language === 'id' ? 'Tim Inti' : 'Core Team'}
             </h2>
             <div className="h-1.5 w-20 bg-[#FEB602] mx-auto rounded-full"></div>
+          </div>
+
+          <div className="max-w-sm mx-auto mb-10 rounded-3xl border border-[#E4DBCA] bg-white p-6 text-center shadow-sm">
+            <button type="button" onClick={() => setSelectedMember(TECH_LEAD)} className="w-full cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-[#B64847]">
+              <div className="relative w-28 h-28 mx-auto mb-4 rounded-2xl overflow-hidden shadow-md">
+                <Image src={TECH_LEAD.image} alt={TECH_LEAD.name} fill sizes="112px" className="object-cover object-[center_35%]" />
+              </div>
+              <h3 className="font-bold text-base text-[#303030]">{TECH_LEAD.name}</h3>
+              <p className="text-[#886644] font-bold text-xs mt-1">{getTranslation(TECH_LEAD.role)}</p>
+              <p className="text-xs text-gray-500 italic mt-3 mb-4">{TECH_LEAD.university}</p>
+            </button>
+            <a href="https://instagram.com/andhikanayaka" className="inline-flex px-4 py-2 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-xs font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-colors">
+              {TECH_LEAD.instagram}
+            </a>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
