@@ -58,6 +58,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image).*)',
+    // These public files need no session checks or function invocation. Keep
+    // application routes (including /admin and /curator) in the matcher.
+    '/((?!api(?:/|$)|_next/static|_next/image|images(?:/|$)|guides(?:/|$)|downloads(?:/|$)|favicon(?:[^/]*$)|web-app-manifest-[^/]*$|site\\.webmanifest$|EOI%20guide\\.pdf$|EOI guide\\.pdf$|(?:file|globe|next|vercel|window)\\.svg$).*)',
   ],
 };

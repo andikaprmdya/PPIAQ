@@ -2,6 +2,7 @@
 // npm run build && npm start -- --port 3100
 // npm run check:bandwidth -- http://localhost:3100
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import sharp from 'sharp';
 
 const origin = process.argv[2] || 'http://localhost:3100';
@@ -27,6 +28,23 @@ const version = await versionResponse.json();
 assert.equal(version.bandwidthFixVersion, 1, 'This deployment does not contain the expected bandwidth fixes');
 if (expectedCommit) assert.equal(version.commit, expectedCommit, 'Deployment commit is missing or does not match EXPECTED_GIT_SHA');
 console.log(`Deployment revision: ${version.commit || 'not provided by host'}`);
+
+const home = await fetch(new URL('/', origin));
+assert.equal(home.status, 200);
+const html = await home.text();
+const galleryImages = html.match(/<img\b[^>]*\/images\/optimized\/[^>]*>/g) || [];
+assert.equal(galleryImages.length, 1, 'Home should initially request only the first slideshow photo');
+const firstPhoto = galleryImages[0].match(/\/images\/optimized\/home-shuffle-\d-480-([a-f0-9]+)\.webp/);
+assert.ok(firstPhoto, 'Missing responsive homepage image');
+const photo = await fetch(new URL(firstPhoto[0], origin));
+assert.equal(photo.status, 200);
+assert.equal(photo.headers.get('content-type'), 'image/webp');
+assert.match(photo.headers.get('cache-control'), /max-age=31536000.*immutable/);
+const photoBytes = Buffer.from(await photo.arrayBuffer());
+assert.equal(createHash('sha256').update(photoBytes).digest('hex').slice(0, 12), firstPhoto[1], 'Immutable photo URL must contain the hash of its content');
+assert.equal((await sharp(photoBytes).metadata()).width, 480);
+assert.ok(photoBytes.length < 50 * 1024, 'Small homepage photo exceeds its bandwidth budget');
+console.log(`Home: one initial slideshow image; smallest variant ${photoBytes.length} bytes, immutable cache`);
 
 function collectMedia(value) {
   if (typeof value === 'string' && value.startsWith('/api/media/')) media.add(value);

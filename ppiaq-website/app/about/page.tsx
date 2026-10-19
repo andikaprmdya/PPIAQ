@@ -251,6 +251,7 @@ export default function AboutPage() {
                         src={member.image || '/images/PPIAQ_logo.png'}
                         alt={member.name}
                         fill
+                        sizes="64px"
                         className="object-cover"
                       />
                     </div>

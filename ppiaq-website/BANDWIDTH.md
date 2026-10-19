@@ -28,6 +28,25 @@ transfer approximately 420 MB per hour from the database.
   30 seconds. Administration screens still fetch on entry and update their state
   after their own changes.
 - The CMS uploader resizes and compresses new images before saving them.
+- Homepage slideshow photos have responsive WebP variants prepared locally.
+  The four original photos total 12,042,440 bytes; all sixteen generated variants
+  combined total 861,624 bytes. A browser downloads just its chosen size for each
+  photo it actually views, without invoking Vercel's image transformation service.
+  Generated filenames contain a content hash and allow immutable one-year caching.
+  Originals are retained as sources; regenerate variants with `npm run images:optimize`
+  after replacing a source photo, and commit the manifest and generated images.
+- Only the first slideshow photo is initially rendered. Subsequent photos load
+  when selected. Automatic rotation runs only while the gallery is visible and
+  the tab is active, and respects reduced motion, Save-Data and 2G connections.
+  Arrow buttons continue to work. The first slide is stable between server and
+  browser rendering, avoiding an unnecessary image download during reshuffling.
+- Team portraits specify their actual 64 px display size, including on About.
+  Larger member detail photos still load on demand. The decorative homepage bird
+  no longer preloads on mobile, where it is hidden.
+- Public static image, guide, download and favicon requests bypass middleware.
+  Application pages retain their existing session redirects; API authentication
+  continues to be checked in the API handlers. Run `npm run test:bandwidth` to
+  check that static-file exclusions do not bypass protected page paths.
 
 Existing database records are preserved. No schema migration or bucket is needed.
 Authentication and administration responses do not receive public cache headers.
@@ -36,6 +55,22 @@ their public data changes appear after the one-hour cache revalidation window
 (image contents after the daily media revalidation window).
 
 ## Validation
+
+Additional image changes were measured against the preceding fixed release
+(`520b142`) using a local production server, Chrome at 390×844 with device pixel
+ratio 3, a fresh browser context per page and a 5.5-second wait after network idle.
+Transferred bytes include loaded scripts, images, HTML and API responses:
+
+| Page | Before | After | Reduction |
+| --- | ---: | ---: | ---: |
+| Homepage | 848,606 B | 516,131 B | 39% |
+| Meet the Team | 635,694 B | 318,115 B | 50% |
+
+Portrait image transfers alone fell from 371,090 B to 52,503 B (86%). These are
+local browser measurements, not production billing totals. Savings vary with
+device, cache state and time spent viewing the slideshow. Browser checks also
+verified next/previous controls, offscreen pause, reduced motion, data saving,
+desktop/mobile rendering, small portraits and larger member detail images.
 
 From `ppiaq-website`, run:
 
@@ -77,9 +112,28 @@ A successful Git push does not prove that Vercel deployed it. Inspect the commit
 Vercel check and compare `/api/version` with that commit after deployment.
 An `Account is blocked` GitHub status or `402 DEPLOYMENT_DISABLED` HTTP response
 is a hosting-account restriction. Repository changes and repeated pushes cannot
-clear that restriction. The project owner must resolve it in their Vercel account
-before the fixed application can be served. Keep the election in DRAFT while
-restoring hosting.
+clear that restriction. Keep the election in DRAFT while restoring hosting.
+
+### Recovery without a paid upgrade
+
+No paid plan, trial, billing change or new Vercel account is needed for these
+optimizations. They reduce future use once the account can serve the release.
+They do not remove bytes already counted against the account's allowance.
+
+Vercel's [Hobby documentation](https://vercel.com/docs/plans/hobby#hobby-billing-cycle)
+says that, in most cases, exceeding a usage limit means waiting until 30 days
+have passed before the feature can be used again. Check the actual reset date
+in the owning team's Usage dashboard and pause notification. If the owner's
+dashboard says November 15, that is the date to check; it has not been confirmed
+through the connected CLI account.
+
+The owner can request a review through Vercel's available account/support channels
+and supply the fixed commit and measurements. An early reset is at Vercel's
+discretion; it cannot be promised. Once the restriction expires or Vercel lifts
+it, redeploy the latest `master`, check the GitHub deployment status and run the
+read-only release check above. Repeated pushes while blocked cannot restore the
+site and are unnecessary. See also
+[Vercel's deployment-disabled troubleshooting](https://vercel.com/docs/errors/deployment_disabled).
 
 ## Account usage
 

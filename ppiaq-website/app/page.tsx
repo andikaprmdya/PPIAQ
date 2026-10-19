@@ -8,6 +8,7 @@ import { FaInstagram, FaLinkedinIn } from 'react-icons/fa';
 import { useLanguage } from '@/lib/language-context';
 import { useFormSubmit } from '@/lib/hooks/useFormSubmit';
 import { API_ENDPOINTS } from '@/lib/constants';
+import HomePhotoCarousel from '@/components/HomePhotoCarousel';
 
 interface FAQItem {
   id: string;
@@ -28,13 +29,6 @@ interface EventItem {
 }
 
 type EventOrganizerFilter = 'all' | 'ppiaq' | 'uqisa' | 'qut' | 'griffith' | 'jcu' | 'other';
-
-const HERO_SLIDER_IMAGES = [
-  '/images/home-shuffle-1.jpg',
-  '/images/home-shuffle-2.jpeg',
-  '/images/home-shuffle-3.jpg',
-  '/images/home-shuffle-4.jpg',
-];
 
 const EVENT_ORGANIZER_FILTERS: Array<{ key: EventOrganizerFilter; label: { id: string; en: string } }> = [
   { key: 'all', label: { id: 'Semua', en: 'All' } },
@@ -79,15 +73,6 @@ const getEventOrganizerKey = (event: EventItem): Exclude<EventOrganizerFilter, '
   return mapOrganizerTextToKey(searchableText);
 };
 
-const shuffleImageOrder = (images: string[]): string[] => {
-  const cloned = [...images];
-  for (let i = cloned.length - 1; i > 0; i -= 1) {
-    const randomIndex = Math.floor(Math.random() * (i + 1));
-    [cloned[i], cloned[randomIndex]] = [cloned[randomIndex], cloned[i]];
-  }
-  return cloned;
-};
-
 export default function HomePage() {
   const { language } = useLanguage();
   const [newsletterEmail, setNewsletterEmail] = useState('');
@@ -97,8 +82,6 @@ export default function HomePage() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [eventsLoading, setEventsLoading] = useState(true);
   const [selectedOrganizer, setSelectedOrganizer] = useState<EventOrganizerFilter>('all');
-  const [heroSliderImages, setHeroSliderImages] = useState<string[]>(HERO_SLIDER_IMAGES);
-  const [currentBg, setCurrentBg] = useState(0);
   const { submit: submitNewsletter, loading: newsletterLoading, success: newsletterSuccess, error: newsletterError } = useFormSubmit();
 
   useEffect(() => {
@@ -154,18 +137,6 @@ export default function HomePage() {
     };
   }, []);
 
-  useEffect(() => {
-    setHeroSliderImages(shuffleImageOrder(HERO_SLIDER_IMAGES));
-  }, []);
-
-  useEffect(() => {
-    if (heroSliderImages.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentBg((prev) => (prev + 1) % heroSliderImages.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [heroSliderImages.length]);
-
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await submitNewsletter({
@@ -190,15 +161,6 @@ export default function HomePage() {
       return getEventOrganizerKey(event) === selectedOrganizer;
     })
     .slice(0, 3);
-  const handlePreviousImage = () => {
-    if (heroSliderImages.length === 0) return;
-    setCurrentBg((prev) => (prev - 1 + heroSliderImages.length) % heroSliderImages.length);
-  };
-  const handleNextImage = () => {
-    if (heroSliderImages.length === 0) return;
-    setCurrentBg((prev) => (prev + 1) % heroSliderImages.length);
-  };
-
   return (
     <main className="font-montserrat text-[#303030] bg-[#FFFAF5] overflow-x-hidden">
       <section className="text-white py-14 md:py-16 lg:py-20 px-6 min-h-[56vh] flex items-center relative overflow-hidden bg-[#B64847]">
@@ -208,7 +170,7 @@ export default function HomePage() {
             alt={language === 'id' ? 'Dekorasi burung Cendrawasih' : 'Cendrawasih bird decoration'}
             width={240}
             height={320}
-            priority
+            sizes="240px"
             className="hidden lg:block shrink-0 opacity-90"
           />
 
@@ -247,36 +209,7 @@ export default function HomePage() {
 
       <section className="py-14 px-6 bg-[#FFFAF5]">
         <div className="max-w-6xl mx-auto">
-          <div className="relative w-full aspect-[16/7] rounded-2xl overflow-hidden border border-[#E4DBCA] shadow-md bg-white">
-            <button
-              type="button"
-              onClick={handlePreviousImage}
-              aria-label={language === 'id' ? 'Gambar sebelumnya' : 'Previous image'}
-              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 w-10 h-10 rounded-full bg-black/45 text-white font-bold text-lg hover:bg-black/65 transition-all"
-            >
-              ←
-            </button>
-            <button
-              type="button"
-              onClick={handleNextImage}
-              aria-label={language === 'id' ? 'Gambar selanjutnya' : 'Next image'}
-              className="absolute right-3 top-1/2 z-20 -translate-y-1/2 w-10 h-10 rounded-full bg-black/45 text-white font-bold text-lg hover:bg-black/65 transition-all"
-            >
-              →
-            </button>
-            {heroSliderImages.map((image, index) => (
-              <Image
-                key={image}
-                src={image}
-                alt={language === 'id' ? `Aktivitas PPIAQ ${index + 1}` : `PPIAQ activities ${index + 1}`}
-                fill
-                className={`object-cover transition-opacity duration-700 ${
-                  currentBg === index ? 'opacity-100' : 'opacity-0'
-                }`}
-                priority={index === 0}
-              />
-            ))}
-          </div>
+          <HomePhotoCarousel language={language} />
         </div>
       </section>
 

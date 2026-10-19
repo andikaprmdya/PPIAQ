@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "check:bandwidth": "node scripts/check-public-bandwidth.mjs",
+    "test:bandwidth": "tsx --test tests/bandwidth.test.ts",
+    "images:optimize": "node scripts/optimize-home-gallery.mjs",
     "test:elections": "tsx --test tests/elections.test.ts",
     "elections:create-draft": "tsx scripts/create-election-draft.ts",
     "guides:elections": "python3 scripts/build-election-guides.py",

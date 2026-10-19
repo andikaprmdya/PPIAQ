@@ -43,6 +43,7 @@ export default function Footer() {
                   alt="Registered Charity logo"
                   width={160}
                   height={160}
+                  sizes="112px"
                   className="h-full w-full object-contain"
                 />
               </div>

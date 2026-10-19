@@ -133,6 +133,7 @@ export default function MeetTheTeamPage() {
                         src={member.image || '/images/PPIAQ_logo.png'}
                         alt={member.name}
                         fill
+                        sizes="64px"
                         className="object-cover"
                       />
                     </div>
@@ -203,6 +204,7 @@ export default function MeetTheTeamPage() {
                                 src={member.image}
                                 alt={member.name}
                                 fill
+                                sizes="64px"
                                 className="object-cover"
                               />
                             ) : (
@@ -355,6 +357,7 @@ export default function MeetTheTeamPage() {
                 src={selectedMember.image || '/images/PPIAQ_logo.png'}
                 alt={selectedMember.name}
                 fill
+                sizes="(min-width: 496px) 448px, calc(100vw - 48px)"
                 className="object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/20"></div>
