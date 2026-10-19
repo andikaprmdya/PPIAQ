@@ -128,21 +128,21 @@ export default function MeetTheTeamPage() {
             <div className="h-1.5 w-20 bg-[#FEB602] mx-auto rounded-full"></div>
           </div>
 
-          <div className="max-w-sm mx-auto mb-10 rounded-3xl border border-[#E4DBCA] bg-white p-6 text-center shadow-sm">
-            <button type="button" onClick={() => setSelectedMember(TECH_LEAD)} className="w-full cursor-pointer rounded-2xl focus-visible:outline-2 focus-visible:outline-[#B64847]">
-              <div className="relative w-28 h-28 mx-auto mb-4 rounded-2xl overflow-hidden shadow-md">
-                <Image src={TECH_LEAD.image} alt={TECH_LEAD.name} fill sizes="112px" className="object-cover object-[center_35%]" />
+          <div className="grid auto-rows-fr grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="col-span-full flex justify-center">
+              <div className="w-[calc((100%_-_1rem)/2)] md:w-[calc((100%_-_2rem)/3)] lg:w-[calc((100%_-_4rem)/5)] rounded-3xl border border-[#E4DBCA] bg-white p-5 text-center shadow-sm flex flex-col h-full">
+                <div className="relative w-16 h-16 mx-auto mb-5 rounded-2xl overflow-hidden shadow-md border border-white/20">
+                  <Image src={TECH_LEAD.image} alt={TECH_LEAD.name} fill sizes="64px" className="object-cover object-[center_35%]" />
+                </div>
+                <h3 className="font-bold text-sm text-[#303030] mb-0.5 leading-tight">{TECH_LEAD.name}</h3>
+                <p className="text-[#886644] font-bold text-[9px] uppercase tracking-widest mb-3">{getTranslation(TECH_LEAD.role)}</p>
+                <div className="w-8 h-px bg-[#E4DBCA] mx-auto mb-3"></div>
+                <p className="text-[9px] text-gray-400 font-bold mb-4 grow flex items-center justify-center italic">{TECH_LEAD.university}</p>
+                <a href="https://instagram.com/andhikanayaka" className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-[9px] font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-all shadow-sm">
+                  {TECH_LEAD.instagram}
+                </a>
               </div>
-              <h3 className="font-bold text-base text-[#303030]">{TECH_LEAD.name}</h3>
-              <p className="text-[#886644] font-bold text-xs mt-1">{getTranslation(TECH_LEAD.role)}</p>
-              <p className="text-xs text-gray-500 italic mt-3 mb-4">{TECH_LEAD.university}</p>
-            </button>
-            <a href="https://instagram.com/andhikanayaka" className="inline-flex px-4 py-2 rounded-full bg-[#FFFAF5] border border-[#E4DBCA] text-xs font-bold text-[#B64847] hover:bg-[#B64847] hover:text-white transition-colors">
-              {TECH_LEAD.instagram}
-            </a>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            </div>
             {loading ? (
               <div className="col-span-full text-center py-8 text-[#886644]">
                 {language === 'id' ? 'Memuat anggota tim...' : 'Loading team members...'}
