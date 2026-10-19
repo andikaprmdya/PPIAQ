@@ -1,8 +1,0 @@
-{
-  "monorepo": true,
-  "projectSettings": {
-    "ppiaq-website": {
-      "rootDirectory": "ppiaq-website"
-    }
-  }
-}

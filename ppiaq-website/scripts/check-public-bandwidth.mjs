@@ -5,11 +5,28 @@ import assert from 'node:assert/strict';
 import sharp from 'sharp';
 
 const origin = process.argv[2] || 'http://localhost:3100';
+const expectedCommit = process.env.EXPECTED_GIT_SHA;
 const paths = [
   '/api/events', '/api/team', '/api/faq?page=home',
   '/api/content?page=pesta-rakyat', '/api/community-board',
 ];
 const media = new Set();
+
+// Check the deployed revision before touching a data endpoint. An old release
+// could otherwise serve multi-MB originals during this check itself.
+const versionResponse = await fetch(new URL('/api/version', origin), {
+  cache: 'no-store', signal: AbortSignal.timeout(15000),
+});
+assert.ok(
+  !(versionResponse.status === 402 && versionResponse.headers.get('x-vercel-error') === 'DEPLOYMENT_DISABLED'),
+  'Vercel has disabled the deployment. Restore the hosting account before checking application traffic.',
+);
+assert.equal(versionResponse.status, 200, 'The deployed release lacks /api/version. Deploy the latest master before continuing.');
+assert.equal(versionResponse.headers.get('cache-control'), 'no-store');
+const version = await versionResponse.json();
+assert.equal(version.bandwidthFixVersion, 1, 'This deployment does not contain the expected bandwidth fixes');
+if (expectedCommit) assert.equal(version.commit, expectedCommit, 'Deployment commit is missing or does not match EXPECTED_GIT_SHA');
+console.log(`Deployment revision: ${version.commit || 'not provided by host'}`);
 
 function collectMedia(value) {
   if (typeof value === 'string' && value.startsWith('/api/media/')) media.add(value);

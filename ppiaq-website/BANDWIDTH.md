@@ -55,6 +55,32 @@ images, cache headers, image dimensions, repeat responses, Next/Image integratio
 and rejection of private or unsupported media requests. It reads at most one
 event poster and one static-content image on a cold cache.
 
+The check first calls `/api/version`, which returns the public Git commit SHA
+without querying Supabase. It stops before downloading application data if
+Vercel has disabled the deployment or the site still runs an older release.
+To verify a particular production commit, run:
+
+```sh
+EXPECTED_GIT_SHA=YOUR_FULL_COMMIT_SHA npm run check:bandwidth -- https://ppiaqueensland.org
+```
+
+## Vercel deployment
+
+The Vercel project's **Root Directory** must be `ppiaq-website`, with production
+branch `master`. The supported build/install configuration is in
+`ppiaq-website/vercel.json`. Root Directory belongs in the Vercel project settings;
+the old repository-root `monorepo` / `projectSettings` JSON was not a supported
+way to configure it. Next.js uses the single `next.config.ts` file, including
+the public-media image allowlist.
+
+A successful Git push does not prove that Vercel deployed it. Inspect the commit's
+Vercel check and compare `/api/version` with that commit after deployment.
+An `Account is blocked` GitHub status or `402 DEPLOYMENT_DISABLED` HTTP response
+is a hosting-account restriction. Repository changes and repeated pushes cannot
+clear that restriction. The project owner must resolve it in their Vercel account
+before the fixed application can be served. Keep the election in DRAFT while
+restoring hosting.
+
 ## Account usage
 
 After deployment, inspect Supabase's Usage dashboard to confirm that daily
