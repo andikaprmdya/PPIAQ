@@ -4,6 +4,7 @@ import bcryptjs from 'bcryptjs';
 import { loginUser } from '@/lib/database/db';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 import { TEMP_IMPORTED_MEMBER_PASSWORD } from '@/lib/auth/password-reset';
+import { createSession, SESSION_COOKIE, SESSION_SECONDS } from '@/lib/auth/session';
 
 export async function POST(request: NextRequest) {
   try {
@@ -91,6 +92,11 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
+
+    response.cookies.set(SESSION_COOKIE, createSession(user), {
+      httpOnly: true, secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax', path: '/', maxAge: SESSION_SECONDS,
+    });
 
     response.cookies.set('userEmail', email, {
       httpOnly: true,

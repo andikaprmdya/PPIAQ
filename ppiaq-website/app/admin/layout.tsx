@@ -26,6 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const sidebarItems: Array<{ label: string; href: string; highlight?: boolean }> = [
     { label: getTranslation(translations.admin.layout.dashboard, language), href: '/admin/dashboard' },
     { label: getTranslation(translations.admin.layout.events, language), href: '/admin/events' },
+    { label: language === 'id' ? 'Pemilihan' : 'Elections', href: '/admin/elections' },
     { label: getTranslation(translations.admin.layout.team, language), href: '/admin/team' },
     { label: getTranslation(translations.admin.layout.communityBoard, language), href: '/admin/community-board' },
     {
@@ -87,6 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <h2 className="font-tan-angleton font-bold text-2xl text-[#B64847]">
               {pathname === '/admin/dashboard' && getTranslation(translations.admin.layout.dashboard, language)}
               {pathname.startsWith('/admin/events') && getTranslation(translations.admin.layout.eventsManagement, language)}
+              {pathname.startsWith('/admin/elections') && (language === 'id' ? 'Pemilihan Presiden' : 'Presidential Elections')}
               {pathname.startsWith('/admin/team') && getTranslation(translations.admin.layout.teamManagement, language)}
               {pathname.startsWith('/admin/community-board') && getTranslation(translations.admin.layout.communityBoardManagement, language)}
               {pathname.startsWith('/admin/content/pesta-rakyat') && (language === 'id' ? 'Sponsor Pesra' : 'Pesra Sponsors')}

@@ -55,6 +55,8 @@ model User {
   // Relations
   createdEvents   Event[]   @relation("CreatedBy")
   uploadedImages  ImageAsset[]
+  createdElections Election[]
+  electionVoters ElectionVoter[]
 
   @@index([email])
   @@index([status])
@@ -312,4 +314,108 @@ enum ImageCategory {
   TEAM
   HERO
   GENERAL
+}
+
+// Election eligibility and anonymous choices are deliberately separate.
+model Election {
+  id          String @id @default(cuid())
+  title       String
+  description String @db.Text
+  status      ElectionStatus @default(DRAFT)
+  opensAt     DateTime?
+  closesAt    DateTime?
+  allowAbstain Boolean @default(true)
+  emailSubject String
+  emailBody   String @db.Text
+  revision    Int @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  publishedAt DateTime?
+  closedAt    DateTime?
+  financialConfirmedAt DateTime?
+  createdBy   String
+  creator     User @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+  candidates  ElectionCandidate[]
+  voters      ElectionVoter[]
+  ballots     ElectionBallot[]
+  mailBatches ElectionMailBatch[]
+
+  @@index([status])
+  @@map("elections")
+}
+
+enum ElectionStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  CANCELLED
+}
+
+model ElectionCandidate {
+  id         String @id @default(cuid())
+  electionId String
+  name       String
+  manifesto  String @db.Text
+  order      Int
+  election   Election @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  ballots    ElectionBallot[]
+
+  @@unique([electionId, id])
+  @@map("election_candidates")
+}
+
+model ElectionVoter {
+  id          String @id @default(cuid())
+  electionId  String
+  userId      String
+  voterId     String
+  email       String
+  name        String
+  tokenNonce  String
+  tokenHash   String? @unique
+  hasVoted    Boolean @default(false)
+  mailBatchId String? @db.Uuid
+  election    Election @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  member      User @relation(fields: [userId], references: [id], onDelete: Restrict)
+  mailBatch   ElectionMailBatch? @relation(fields: [mailBatchId], references: [id], onDelete: SetNull)
+
+  // No votedAt: individual participation timestamps could identify ballots.
+  @@unique([electionId, userId])
+  @@unique([electionId, email])
+  @@unique([electionId, voterId])
+  @@map("election_voters")
+}
+
+model ElectionBallot {
+  id          String @id @default(uuid()) @db.Uuid
+  electionId  String
+  candidateId String?
+  election    Election @relation(fields: [electionId], references: [id], onDelete: Restrict)
+  candidate   ElectionCandidate? @relation(fields: [electionId, candidateId], references: [electionId, id], onDelete: Restrict)
+
+  // No voter ID, member ID, email, token, IP, session or submission timestamp.
+  @@index([electionId, candidateId])
+  @@map("election_ballots")
+}
+
+model ElectionMailBatch {
+  id           String @id @default(uuid()) @db.Uuid
+  electionId   String
+  status       ElectionMailStatus @default(QUEUED)
+  attempts     Int @default(0)
+  lockedUntil  DateTime?
+  errorCode    String?
+  acceptedAt   DateTime?
+  election     Election @relation(fields: [electionId], references: [id], onDelete: Cascade)
+  voters       ElectionVoter[]
+
+  @@index([electionId, status])
+  @@map("election_mail_batches")
+}
+
+enum ElectionMailStatus {
+  QUEUED
+  SENDING
+  SENT
+  FAILED
 }

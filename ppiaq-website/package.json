@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "check:bandwidth": "node scripts/check-public-bandwidth.mjs",
+    "test:elections": "tsx --test tests/elections.test.ts",
+    "elections:create-draft": "tsx scripts/create-election-draft.ts",
+    "guides:elections": "python3 scripts/build-election-guides.py",
     "create:curator": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/create-curator-user.ts",
     "sync:partner-obligations": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/sync-partner-obligations.ts"
   },
@@ -46,11 +49,13 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv-cli": "^11.0.0",
+    "embedded-postgres": "^18.4.0-beta.17",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "prisma": "^7.3.0",
     "tailwindcss": "^4",
     "ts-node": "^10.9.2",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

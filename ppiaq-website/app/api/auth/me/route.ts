@@ -1,21 +1,11 @@
-import { cookies } from 'next/headers';
-import { getUserByEmail, updateUser } from '@/lib/database/db';
+import { getAuthenticatedUser } from '@/lib/auth/session';
+import { updateUser } from '@/lib/database/db';
 import { validateFirstLastName } from '@/lib/name-validation';
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return Response.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const user = await getUserByEmail(userEmail);
-
-    if (!user) {
-      return Response.json({ error: 'User not found' }, { status: 404 });
-    }
+    const user = await getAuthenticatedUser();
+    if (!user) return Response.json({ error: 'Not authenticated' }, { status: 401 });
 
     // Return user data (without password)
     const userWithoutPassword = { ...user };
@@ -52,17 +42,8 @@ const normalizeString = (value: unknown): string => {
 
 export async function PUT(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const userEmail = cookieStore.get('userEmail')?.value;
-
-    if (!userEmail) {
-      return Response.json({ error: 'Not authenticated' }, { status: 401 });
-    }
-
-    const currentUser = await getUserByEmail(userEmail);
-    if (!currentUser) {
-      return Response.json({ error: 'User not found' }, { status: 404 });
-    }
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser) return Response.json({ error: 'Not authenticated' }, { status: 401 });
 
     const body = await request.json();
     const updates: Record<string, string | null> = {};
