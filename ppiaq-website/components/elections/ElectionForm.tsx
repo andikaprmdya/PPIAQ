@@ -17,28 +17,36 @@ export default function ElectionForm() {
           </h1>
           <p className="mt-4">
             {isIndonesian
-              ? 'Silakan isi formulir pemilihan di bawah ini.'
-              : 'Please complete the election form below.'}
+              ? 'Isi dan kirim formulir pemilihan langsung di halaman ini.'
+              : 'Complete and submit the election form directly on this page.'}
           </p>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed">
             {isIndonesian
-              ? 'Google Form ini memerlukan login akun Google. Jika formulir tidak tampil atau login terkendala, buka langsung melalui tombol berikut.'
-              : 'This form requires a Google Account sign-in. If the form does not appear or you have trouble signing in, open it directly using the button below.'}
+              ? 'Jawaban tersimpan di formulir asli PPIAQ. Tidak perlu login akun Google.'
+              : 'Responses are saved to PPIAQ’s original Google Form. No Google Account sign-in is required.'}
           </p>
-          <a
-            href={formUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-block rounded-xl bg-[#B64847] px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#963B3A] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B64847]"
-          >
-            {isIndonesian ? 'Buka Google Form' : 'Open Google Form'}
-          </a>
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed">
+            {isIndonesian
+              ? 'Tautan resume/CV wajib diisi untuk nominasi diri sendiri. Pastikan panitia memiliki akses untuk melihat dokumen.'
+              : 'A CV document link is required when nominating yourself. Please make sure the committee can view the document.'}
+          </p>
         </div>
         <iframe
           src={`${formUrl}?embedded=true`}
           title={isIndonesian ? 'Formulir Pemilihan PPIAQ 2026' : 'PPIAQ 2026 Election Form'}
           className="h-[80dvh] min-h-[650px] w-full rounded-2xl border border-[#E4DBCA] bg-white"
         />
+        <p className="mt-4 text-center text-sm">
+          {isIndonesian ? 'Formulir tidak tampil? ' : 'Having trouble viewing the form? '}
+          <a
+            href={formUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-[#B64847] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#B64847]"
+          >
+            {isIndonesian ? 'Buka Google Form' : 'Open Google Form'}
+          </a>
+        </p>
       </div>
     </section>
   );

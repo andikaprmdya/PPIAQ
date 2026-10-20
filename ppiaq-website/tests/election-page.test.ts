@@ -10,7 +10,7 @@ import { middleware } from '../middleware';
 const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSfLYRGehHPtTOmimjV7IFRcQuByqYq5upmIMXQI-f5HvV5K8A/viewform';
 
 for (const language of ['en', 'id'] as const) {
-  test(`2026 election embeds the supplied form with a direct sign-in fallback (${language})`, () => {
+  test(`2026 election prioritizes the original embedded form without requiring Google sign-in (${language})`, () => {
     const html = renderToStaticMarkup(createElement(
       LanguageContext.Provider,
       { value: { language, setLanguage: () => {} } },
@@ -24,6 +24,10 @@ for (const language of ['en', 'id'] as const) {
     assert.ok(html.includes(language === 'id' ? 'Pemilihan PPIAQ 2026' : 'PPIAQ 2026 Election'));
     assert.ok(html.includes(language === 'id' ? 'Buka Google Form' : 'Open Google Form'));
     assert.ok(html.includes(language === 'id' ? 'akun Google' : 'Google Account'));
+    assert.ok(html.includes(language === 'id' ? 'Tautan resume/CV' : 'CV document link'));
+    assert.ok(html.includes(language === 'id' ? 'formulir asli' : 'original Google Form'));
+    assert.ok(html.indexOf('<iframe') < html.indexOf(`href="${formUrl}"`), 'The direct link should be a fallback below the embedded form');
+    assert.ok(html.includes(language === 'id' ? 'Tidak perlu login akun Google' : 'No Google Account sign-in is required'));
   });
 }
 
