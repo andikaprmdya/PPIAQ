@@ -11,6 +11,7 @@
     "test:bandwidth": "tsx --test tests/bandwidth.test.ts",
     "images:optimize": "node scripts/optimize-home-gallery.mjs",
     "test:elections": "tsx --test tests/elections.test.ts",
+    "test:election-page": "tsx --test tests/election-page.test.ts",
     "elections:create-draft": "tsx scripts/create-election-draft.ts",
     "guides:elections": "python3 scripts/build-election-guides.py",
     "create:curator": "ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/create-curator-user.ts",

@@ -27,6 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/pesta-rakyat",
     "/meet-the-team",
     "/visi-misi",
+    "/2026election",
     "/community-board",
     "/events/pre-departure-briefing",
     "/events/qut-market-day",
